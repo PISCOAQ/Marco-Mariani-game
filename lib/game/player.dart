@@ -54,7 +54,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     // 2. HITBOX
     add(RectangleHitbox(size: Vector2(20, 10), position: Vector2(22, 50)));
 
-    priority = 100;
+    priority = 2;
   }
 
   // --- NUOVO: funzione generica per aggiungere layer ---
@@ -97,18 +97,22 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     if (_keysPressed.contains(LogicalKeyboardKey.arrowRight)) velocity.x = 1;
 
     if (velocity.length != 0) {
-      velocity.normalize();
-      lastDelta = velocity * speed * dt;
-      position += lastDelta;
+  // Muovi e aggiorna le animazioni normalmente
+  velocity.normalize();
+  lastDelta = velocity * speed * dt;
+  position += lastDelta;
 
-      // --- aggiornamento animazioni multi-layer ---
-      for (final layerName in layers.keys) {
-        if (velocity.y < 0) layers[layerName]!.animation = animations['${layerName}_back'];
-        else if (velocity.y > 0) layers[layerName]!.animation = animations['${layerName}_front'];
-        else if (velocity.x < 0) layers[layerName]!.animation = animations['${layerName}_left'];
-        else if (velocity.x > 0) layers[layerName]!.animation = animations['${layerName}_right'];
-      }
+  // Aggiorna animazioni layer
+  for (final layerName in layers.keys) {
+    if (velocity.y < 0) layers[layerName]!.animation = animations['${layerName}_back'];
+    else if (velocity.y > 0) layers[layerName]!.animation = animations['${layerName}_front'];
+    else if (velocity.x < 0) layers[layerName]!.animation = animations['${layerName}_left'];
+    else if (velocity.x > 0) layers[layerName]!.animation = animations['${layerName}_right'];
 
+    layers[layerName]!.animation!.stepTime = avatarConfig.stepTime; // assicurati che l'animazione scorra
+  }
+
+      // Aggiorna corpo principale
       animation = (velocity.y < 0)
           ? walkBackAnimation
           : (velocity.y > 0)
@@ -116,14 +120,22 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
               : (velocity.x < 0)
                   ? walkLeftAnimation
                   : walkRightAnimation;
+      animation!.stepTime = avatarConfig.stepTime;
+
     } else {
       lastDelta = Vector2.zero();
-      animation = idleAnimation;
 
+      // Quando fermo, blocco le animazioni multi-layer e corpo principale sul frame corrente
       for (final layerName in layers.keys) {
-        layers[layerName]!.animation = animations['${layerName}_idle'];
+        final anim = layers[layerName]!.animation;
+        if (anim != null) {
+          anim.stepTime = double.infinity; // ferma l'avanzamento dei frame
+        }
       }
+      if (animation != null) animation!.stepTime = double.infinity;
     }
+    
+    priority = position.y.toInt(); // Aggiorna priority in base alla posizione y
   }
 
   @override

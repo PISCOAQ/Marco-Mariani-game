@@ -54,6 +54,8 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
       }
     }
 
+    world.add(mapComponent);
+
     for (final obj in objectLayer!.objects) {
       if (obj.type == 'chest') {
         final chest = Chest(
@@ -68,7 +70,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     player = Player(avatarIndex: avatarIndex, position: Vector2(400, 900)); 
 
     // Aggiungi tutto al world
-    world.add(mapComponent); // Usa mapComponent
+     // Usa mapComponent
     world.add(player);
 
     // Collisioni

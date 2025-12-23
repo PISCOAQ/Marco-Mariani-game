@@ -27,11 +27,13 @@ class _ChestPageState extends State<ChestPage> {
     final player = widget.game.player;
     final avatarConfig = player.avatarConfig;
 
-    final layers = ['shirt', 'pants'];
+    final layers = ['shirt', 'pants', 'hair', 'shoes'];
 
     final layerOptions = {
       'shirt': avatarConfig.shirts,
       'pants': avatarConfig.pants,
+      'hair': avatarConfig.hair,
+      'shoes': avatarConfig.shoes
     };
 
     return Container(

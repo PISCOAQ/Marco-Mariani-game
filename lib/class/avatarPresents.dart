@@ -13,10 +13,20 @@ AvatarConfig defaultAvatarConfig(int avatarIndex) {
       'black': '../avatars/shirt_black.png',
     },
 
-    pants: {   // <- aggiunto obbligatorio
+    pants: {   
       'blue':  '../avatars/pants_blue.png',
       'black': '../avatars/pants_black.png',
     },
+
+    shoes: {   
+      'blue':  '../avatars/pants_blue.png',
+      'black': '../avatars/pants_black.png',
+    },
+
+    hair: {   
+      'blue':  '../avatars/pants_blue.png',
+      'black': '../avatars/pants_black.png',
+    },    
 
     rowBack: 8,
     rowLeft: 9,

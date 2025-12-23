@@ -2,6 +2,8 @@ class AvatarConfig {
   final String bodyPath;
   final Map<String, String> shirts;
   final Map<String, String> pants;
+  final Map<String, String> shoes;
+  final Map<String, String> hair;
 
 
   // Righe dello spritesheet
@@ -18,6 +20,8 @@ class AvatarConfig {
     required this.bodyPath,
     required this.shirts,
     required this.pants,
+    required this.shoes,
+    required this.hair,
 
     required this.rowBack,
     required this.rowLeft,
@@ -33,6 +37,8 @@ class AvatarConfig {
     bodyPath: json['bodyPath'],
     shirts: Map<String, String>.from(json['shirts']),
     pants: Map<String, String>.from(json['pants']), 
+    hair: Map<String, String>.from(json['hair']),
+    shoes: Map<String, String>.from(json['shows']),
 
     rowBack: json['rows']['back'],
     rowLeft: json['rows']['left'],
