@@ -1,0 +1,44 @@
+{
+  "bodyPath": "../avatars/MaleAvatar_spritesheet.png",
+
+  "shirts": {
+    "red": "../avatars/shirt_red.png",
+    "blue": "../avatars/shirt_blue.png",
+    "grey": "../avatars/shirt_grey.png",
+    "black": "../avatars/shirt_black.png"
+  },
+
+  "pants": {
+    "blue": "../avatars/pants_blue.png",
+    "black": "../avatars/pants_black.png",
+    "badge": "../avatars/pants_badge.png",
+    "purple": "../avatars/pants_purple.png"
+  },
+
+  "shows": {
+    "blue": "../avatars/shoes_brown.png",
+    "black": "../avatars/shoes_black.png",
+    "badge": "../avatars/shoes_green.png",
+    "purple": "../avatars/shoes_white.png"
+  },
+
+  "hair": {
+    "blue": "../avatars/hair_yellow.png",
+    "black": "../avatars/hair_black.png",
+    "badge": "../avatars/hair_brown.png",
+    "purple": "../avatars/hair_grey.png"
+  },
+
+  "rows": {
+    "back": 8,
+    "left": 9,
+    "front": 10,
+    "right": 11,
+    "idle": 10
+  },
+
+  "timings": {
+    "walk": 0.1,
+    "idle": 1.0
+  }
+}

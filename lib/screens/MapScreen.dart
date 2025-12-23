@@ -74,6 +74,7 @@ class _MapScreenState extends State<MapScreen> {
 
           if (_isChestPage)
           ChestPage( // Un widget diverso o lo stesso con dati diversi
+            game: _myGame,
             onExit: _CloseChestPage,
           ),
         ],
