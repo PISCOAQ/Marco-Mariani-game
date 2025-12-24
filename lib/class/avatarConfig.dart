@@ -38,7 +38,7 @@ class AvatarConfig {
     shirts: Map<String, String>.from(json['shirts']),
     pants: Map<String, String>.from(json['pants']), 
     hair: Map<String, String>.from(json['hair']),
-    shoes: Map<String, String>.from(json['shows']),
+    shoes: Map<String, String>.from(json['shoes']),
 
     rowBack: json['rows']['back'],
     rowLeft: json['rows']['left'],

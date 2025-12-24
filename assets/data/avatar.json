@@ -1,44 +1,93 @@
 {
-  "bodyPath": "../avatars/MaleAvatar_spritesheet.png",
+  "avatars": {
+    "1": {
+      "bodyPath": "../avatars/MaleAvatar_spritesheet.png",
 
-  "shirts": {
-    "red": "../avatars/shirt_red.png",
-    "blue": "../avatars/shirt_blue.png",
-    "grey": "../avatars/shirt_grey.png",
-    "black": "../avatars/shirt_black.png"
-  },
+      "shirts": {
+        "red": "../avatars/shirt_red.png",
+        "blue": "../avatars/shirt_blue.png",
+        "grey": "../avatars/shirt_grey.png",
+        "black": "../avatars/shirt_black.png"
+      },
 
-  "pants": {
-    "blue": "../avatars/pants_blue.png",
-    "black": "../avatars/pants_black.png",
-    "badge": "../avatars/pants_badge.png",
-    "purple": "../avatars/pants_purple.png"
-  },
+      "pants": {
+        "blue": "../avatars/pants_blue.png",
+        "black": "../avatars/pants_black.png",
+        "badge": "../avatars/pants_badge.png",
+        "purple": "../avatars/pants_purple.png"
+      },
 
-  "shows": {
-    "blue": "../avatars/shoes_brown.png",
-    "black": "../avatars/shoes_black.png",
-    "badge": "../avatars/shoes_green.png",
-    "purple": "../avatars/shoes_white.png"
-  },
+      "shoes": {
+        "blue": "../avatars/shoes_brown.png",
+        "black": "../avatars/shoes_black.png",
+        "badge": "../avatars/shoes_green.png",
+        "purple": "../avatars/shoes_white.png"
+      },
 
-  "hair": {
-    "blue": "../avatars/hair_yellow.png",
-    "black": "../avatars/hair_black.png",
-    "badge": "../avatars/hair_brown.png",
-    "purple": "../avatars/hair_grey.png"
-  },
+      "hair": {
+        "blue": "../avatars/hair_yellow.png",
+        "black": "../avatars/hair_black.png",
+        "badge": "../avatars/hair_brown.png",
+        "purple": "../avatars/hair_grey.png"
+      },
 
-  "rows": {
-    "back": 8,
-    "left": 9,
-    "front": 10,
-    "right": 11,
-    "idle": 10
-  },
+      "rows": {
+        "back": 8,
+        "left": 9,
+        "front": 10,
+        "right": 11,
+        "idle": 10
+      },
 
-  "timings": {
-    "walk": 0.1,
-    "idle": 1.0
+      "timings": {
+        "walk": 0.1,
+        "idle": 1.0
+      }
+    },
+
+    "2": {
+      "bodyPath": "../avatars/FemaleAvatar_spritesheet.png",
+
+      "shirts": {
+        "red": "../avatars/Fshirt_white.png",
+        "blue": "../avatars/Fshirt_blue.png",
+        "grey": "../avatars/Fshirt_pink.png",
+        "black": "../avatars/Fshirt_black.png"
+      },
+
+      "pants": {
+        "blue": "../avatars/Fpants_pink.png",
+        "black": "../avatars/Fpants_black.png",
+        "badge": "../avatars/Fpants_white.png",
+        "purple": "../avatars/Fpants_purple.png"
+      },
+
+      "shoes": {
+        "blue": "../avatars/Fshoes_brown.png",
+        "black": "../avatars/Fshoes_black.png",
+        "badge": "../avatars/Fshoes_white.png",
+        "purple": "../avatars/Fshoes_purple.png"
+      },
+
+      "hair": {
+        "blue": "../avatars/Fhair_1.png",
+        "black": "../avatars/Fhair_2.png",
+        "badge": "../avatars/Fhair_3.png",
+        "purple": "../avatars/Fhair_4.png"
+      },
+
+      "rows": {
+        "back": 8,
+        "left": 9,
+        "front": 10,
+        "right": 11,
+        "idle": 10
+      },
+
+      "timings": {
+        "walk": 0.1,
+        "idle": 1.0
+      }
+    }
   }
 }

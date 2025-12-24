@@ -38,7 +38,11 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   @override
   Future<void> onLoad() async {
     // 1. CARICAMENTO CORPO
-    avatarConfig = await loadAvatarFromJson('../data/avatar.json');
+    avatarConfig = await loadAvatarFromJson(
+      '../data/avatar.json',
+      avatarIndex,
+    );
+
 
     final image = await gameRef.images.load(avatarConfig.bodyPath);
     final spriteSheet = SpriteSheet(image: image, srcSize: Vector2(64, 64));
