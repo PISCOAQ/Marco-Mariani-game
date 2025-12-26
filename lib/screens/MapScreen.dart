@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:gioco_demo/game/MyGame.dart';
+import 'package:gioco_demo/widgets/ChestPage.dart';
+import 'package:gioco_demo/widgets/MoneyWidget.dart';
 import 'package:gioco_demo/widgets/PageOverlay.dart';
-import 'package:gioco_demo/widgets/Shop.dart';
 
 class MapScreen extends StatefulWidget {
   final int avatarIndex;
@@ -17,6 +18,9 @@ class _MapScreenState extends State<MapScreen> {
   late final MyGame _myGame; 
   bool _isPageActive = false; 
   bool _isChestPage = false;
+
+  //Variabile delle monete
+  final ValueNotifier<int> wallet = ValueNotifier<int>(500);
 
   @override
   void initState() {
@@ -65,6 +69,8 @@ class _MapScreenState extends State<MapScreen> {
       body: Stack( //Stack per sovrapporre il popup al gioco
         children: [
           GameWidget(game: _myGame),
+
+          Moneywidget(walletNotifier: wallet),
 
           //Il Widget Overlay (visibile solo se _isQuizActive è true)
           if (_isPageActive)

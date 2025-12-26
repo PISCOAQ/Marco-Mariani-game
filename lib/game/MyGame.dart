@@ -12,6 +12,8 @@ import 'wall.dart';
 typedef ShowPopupCallback = void Function();
 
 class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents {
+
+
   
   late Player player;
   late TiledComponent mapComponent; 
