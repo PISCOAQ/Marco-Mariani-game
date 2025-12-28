@@ -4,6 +4,7 @@ import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/widgets/ChestPage.dart';
+import 'package:gioco_demo/widgets/GameNotification.dart';
 import 'package:gioco_demo/widgets/MoneyWidget.dart';
 import 'package:gioco_demo/widgets/PageOverlay.dart';
 
@@ -20,6 +21,7 @@ class _MapScreenState extends State<MapScreen> {
   late final MyGame _myGame; 
   bool _isPageActive = false; 
   bool _isChestPage = false;
+  String? _messaggioNotifica;
 
   dynamic _attivitaCaricata;
 
@@ -42,87 +44,51 @@ class _MapScreenState extends State<MapScreen> {
       _myGame.pauseEngine();
     });
   }
-/* metodo precedente che non gestisce esercitazioni
-void _showPopup() async {  
-  // Mettiamo subito in pausa e attiviamo l'overlay
-  setState(() {
-    _isPageActive = true;
-    _myGame.pauseEngine();
-  });
 
-  // Carichiamo i dati "nel mentre"
+  void _showPopup(String tipo) async {
     final risultato = await ActivityLoader.carica();
-    setState(() {
-      _attivitaCaricata = risultato;
-    });
-}*/
 
+    if (risultato == null) return;
 
-// tipoRichiesto sarà 'quiz' oppure 'esercitazione' a seconda dell'oggetto toccato
-void _showPopup() async {
-  final risultato = await ActivityLoader.carica();
-  print("DEBUG $risultato");
-  if (risultato == null){
-    print("DEBUG: caricamento fallito");
-    return;
-  } 
+    // 1. CASO ESERCITAZIONE: Se il JSON mi dà un'esercitazione
+    if (risultato is Esercitazione) {
+      if (tipo == 'quiz') {
+        _mostraMessaggioAvviso("Vai a fare l'esercitazione, poi torna qui!");
+        return; 
+      } else {
+        setState(() {
+          _messaggioNotifica = null; //pulizia messaggi
+          _attivitaCaricata = risultato;
+          _isPageActive = true;
+          _myGame.pauseEngine();
+        });
+        return; 
+      }
+    }
 
-  // Se il loader carica un'esercitazione, mostriamo il messaggio e NON apriamo la pagina
-  if (risultato is Esercitazione) {
-    _mostraMessaggioAvviso("Vai ad esercitarti prima!");
-    return; 
+    // 2. CASO QUIZ: Se il JSON mi dà un quiz
+    if (risultato is Quiz) {
+      if (tipo == 'esercitazione') {
+        _mostraMessaggioAvviso("Vai a fare il quiz!");
+        return; // Blocca tutto qui
+      } else {
+        // Sono sull'oggetto giusto (prof), apro il quiz
+        setState(() {
+          _messaggioNotifica = null;
+          _attivitaCaricata = risultato;
+          _isPageActive = true;
+          _myGame.pauseEngine();
+        });
+        return; // Esco dalla funzione
+      }
+    }
   }
 
-  setState(() {
-    _attivitaCaricata = risultato;
-    _isPageActive = true;
-    _myGame.pauseEngine();
-  });
-}
-
-void _mostraMessaggioAvviso(String testo) {
-  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-  final double screenWidth = MediaQuery.of(context).size.width;
-  final double screenHeight = MediaQuery.of(context).size.height;
-
-  // Calcoliamo il margine laterale per farla larga circa 250 pixel
-  // (Larghezza Schermo - Larghezza Desiderata) / 2
-  final double sideMargin = (screenWidth - 250) / 2;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.lock, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            testo,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: Colors.orange[900],
-      behavior: SnackBarBehavior.floating,
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-        side: const BorderSide(color: Colors.white, width: 2),
-      ),
-      margin: EdgeInsets.only(
-        bottom: screenHeight - 75, // Spinge in alto
-        left: sideMargin,           // Stringe da sinistra
-        right: sideMargin,          // Stringe da destra
-      ),
-      duration: const Duration(seconds: 2),
-    ),
-  );
-}
+  void _mostraMessaggioAvviso(String testo) {
+    setState(() {
+      _messaggioNotifica = testo;
+    });
+  }
 
   void _CloseChestPage(){
     setState(() {
@@ -146,6 +112,12 @@ void _mostraMessaggioAvviso(String testo) {
       body: Stack( //Stack per sovrapporre il popup al gioco
         children: [
           GameWidget(game: _myGame),
+
+          if (_messaggioNotifica != null)
+          GameNotification(
+            key: UniqueKey(), // Serve a far ripartire il timer se mandi due messaggi di fila
+            messaggio: _messaggioNotifica!,
+          ),
 
           Moneywidget(walletNotifier: wallet),
 

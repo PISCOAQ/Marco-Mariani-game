@@ -12,6 +12,7 @@ class ActivityLoader {
     final data = json.decode(response);
 
     if (data['tipo_attivita'] == 'quiz') {
+      
       List<Domanda> listaDomande = [];
 
       for (var d in data['contenuto']) {
@@ -23,9 +24,6 @@ class ActivityLoader {
             rispostaCorrettaIndex: d['risposta_corretta'],
           ));
         }
-
-        // In futuro: else if (d['tipo'] == 'immagine') ...
-
       }
       return Quiz(id: data['id'], titolo: data['titolo'], domande: listaDomande);
 

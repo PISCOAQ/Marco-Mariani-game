@@ -190,9 +190,9 @@
 </data>
  </layer>
  <objectgroup id="5" name="interactions">
-  <object id="1" name="test" type="trigger_quiz" x="480.667" y="819.667" width="30.6667" height="76.4545"/>
-  <object id="21" name="chest_shop" type="chest" x="896.682" y="897.045" width="31.6364" height="30.5455"/>
-  <object id="63" name="Esercitazione" type="esercitazione" x="740.727" y="956.545" width="23.0909" height="63.4545"/>
+  <object id="1" name="Quiz" type="trigger_quiz" x="480.667" y="819.667" width="30.6667" height="76.4545"/>
+  <object id="21" name="Chest_Shop" type="chest" x="896.682" y="897.045" width="31.6364" height="30.5455"/>
+  <object id="63" name="Esercitazione" type="trigger_esercitazione" x="740.727" y="956.545" width="23.0909" height="63.4545"/>
  </objectgroup>
  <objectgroup id="8" name="collisioni">
   <object id="3" x="319" y="792.333" width="7" height="254.667"/>

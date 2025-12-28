@@ -1,6 +1,6 @@
 {
   "id": "livello_1_storia",
-  "tipo_attivita": "esercitazione",
+  "tipo_attivita": "quiz",
   "titolo": "Conoscenza Storica",
   "contenuto": [
     {
@@ -29,3 +29,4 @@
     }
   ]
 }
+

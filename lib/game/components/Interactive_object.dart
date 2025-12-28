@@ -4,10 +4,10 @@ import 'package:gioco_demo/game/player.dart';
 
 typedef ShowQuizCallback = void Function();
 
-class OggettoEsercitazione extends PositionComponent with CollisionCallbacks {
+class InteractiveObject extends PositionComponent with CollisionCallbacks {
   final ShowQuizCallback onTrigger;
 
-  OggettoEsercitazione(
+  InteractiveObject(
     // Riceviamo direttamente le dimensioni e la posizione
     double x,
     double y,
