@@ -1,68 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
+import 'package:gioco_demo/widgets/Quiz_View.dart';
 
 class PageOverlay extends StatelessWidget {
-  final VoidCallback onExit; 
+  final VoidCallback onExit;
+  final dynamic attivita; // Riceve l'oggetto Quiz o Esercitazione
 
-  const PageOverlay({super.key, required this.onExit});
+  const PageOverlay({super.key, required this.onExit, required this.attivita});
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
-      
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.white.withOpacity(0.95),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
       ),
-      
-      //margine intorno per non toccare i bordi dello schermo
-      margin: const EdgeInsets.all(40.0), 
-      
+      margin: const EdgeInsets.all(40.0),
       child: Stack(
         children: [
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-
-              child: Column(
-                mainAxisSize: MainAxisSize.min, 
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Benvenuto nel Minigioco!',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: Colors.blueGrey),
-                  ),
-                  const SizedBox(height: 50),
-                  
-                  Container(
-                    width: 500, 
-                    height: 250,
-                    color: Colors.grey[200],
-                    child: const Center(child: Text('Area per le opzioni...')),
-                  ),
-                  
-                ],
-              ),
-            ),
+          // CONTENUTO DINAMICO
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: _buildContent(),
           ),
           
-          //icona chiusura pagina
+          // Icona chiusura (X)
           Positioned(
-            top: 10,
-            right: 10,
+            top: 10, right: 10,
             child: GestureDetector(
-              onTap: onExit, 
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(6), 
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 24, 
-                ),
+              onTap: onExit,
+              child: const CircleAvatar(
+                backgroundColor: Colors.red,
+                radius: 15,
+                child: Icon(Icons.close, color: Colors.white, size: 20),
               ),
             ),
           ),
@@ -70,4 +41,14 @@ class PageOverlay extends StatelessWidget {
       ),
     );
   }
-}
+
+  Widget _buildContent() {
+      if (attivita is Quiz) {
+        return QuizView(quiz: attivita, onConsegna: onExit); // Chiamiamo il widget specifico per i quiz
+      } else if (attivita is Esercitazione) {
+        return Center(child: Text("Esercitazione: ${attivita.titolo}"));
+      } else {
+        return const Center(child: CircularProgressIndicator());
+      }
+    }
+  }

@@ -1,0 +1,31 @@
+{
+  "id": "livello_1_storia",
+  "tipo_attivita": "esercitazione",
+  "titolo": "Conoscenza Storica",
+  "contenuto": [
+    {
+      "tipo": "scelta_multipla",
+      "testo": "Chi scoprì l'America nel 1492?",
+      "opzioni": ["Marco Polo", "Cristoforo Colombo", "Vasco da Gama", "Magellano"],
+      "risposta_corretta": 1
+    },
+    {
+      "tipo": "scelta_multipla",
+      "testo": "In che anno è iniziata la Rivoluzione Francese?",
+      "opzioni": ["1789", "1815", "1776", "1848"],
+      "risposta_corretta": 0
+    },
+    {
+      "tipo": "scelta_multipla",
+      "testo": "Chi scoprì l'America nel 1492?",
+      "opzioni": ["Marco Polo", "Cristoforo Colombo", "Vasco da Gama", "Magellano"],
+      "risposta_corretta": 1
+    },
+        {
+      "tipo": "scelta_multipla",
+      "testo": "Chi scoprì l'America nel 1492?",
+      "opzioni": ["Marco Polo", "Cristoforo Colombo", "Vasco da Gama", "Magellano"],
+      "risposta_corretta": 1
+    }
+  ]
+}

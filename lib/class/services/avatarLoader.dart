@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flame/flame.dart';
-import 'package:gioco_demo/class/avatarConfig.dart';
+import 'package:gioco_demo/class/models/avatarConfig.dart';
 
 Future<AvatarConfig> loadAvatarFromJson(
   String path,

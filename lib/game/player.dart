@@ -2,8 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart';
-import 'package:gioco_demo/class/avatarConfig.dart';
-import 'package:gioco_demo/class/avatarLoader.dart';
+import 'package:gioco_demo/class/models/avatarConfig.dart';
+import 'package:gioco_demo/class/services/avatarLoader.dart';
 import 'package:gioco_demo/game/chest.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRef {
