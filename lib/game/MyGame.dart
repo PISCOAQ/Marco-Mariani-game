@@ -3,20 +3,20 @@ import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/game/chest.dart';
 import 'package:gioco_demo/game/components/Interactive_object.dart';
 import 'player.dart';
 import 'wall.dart'; 
 
-// Definiamo il tipo di funzione di callback (void Function())
+// Definiaxmo il tipo di funzione di callback (void Function())
 typedef ShowActivityCallback = void Function(String tipo);
 typedef ShowChestCallback = void Function();
 
 class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents {
 
-
-  
   late Player player;
+  late final PlayerState playerState = PlayerState();
   late TiledComponent mapComponent; 
   
   final int avatarIndex;
@@ -41,7 +41,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     // 2. Carica gli oggetti interattivi
     final objectLayer = mapComponent.tileMap.getLayer<ObjectGroup>('interactions');
     
-if (objectLayer != null) {
+    if (objectLayer != null) {
       for (final object in objectLayer.objects) {
         
         // 1. Gestione Quiz
@@ -79,19 +79,14 @@ if (objectLayer != null) {
 
     world.add(mapComponent);
 
-/*
-    for (final obj in objectLayer!.objects) {
-      if (obj.type == 'chest') {
-        final chest = Chest(
-          position: Vector2(obj.x, obj.y),
-          size: Vector2(obj.width, obj.height),
-          onOpen: onShowChestPopup
-        );
-        world.add(chest);
-      }
-    }*/
+    //ABBIGLIAMENTO DI DEFAULT
+    playerState.addClothesDefault('shirts', 'red');
+    playerState.addClothesDefault('pants', 'black');
+    playerState.addClothesDefault('hair', 'black');
+    playerState.addClothesDefault('shoes', 'black');
+
     
-    player = Player(avatarIndex: avatarIndex, position: Vector2(400, 900)); 
+    player = Player(avatarIndex: avatarIndex, position: Vector2(400, 900), playerState: playerState); 
 
     // Aggiungi tutto al world
      // Usa mapComponent

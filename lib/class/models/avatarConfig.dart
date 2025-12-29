@@ -1,9 +1,12 @@
+import 'package:gioco_demo/class/models/ClothingItem.dart';
+
 class AvatarConfig {
   final String bodyPath;
-  final Map<String, String> shirts;
-  final Map<String, String> pants;
-  final Map<String, String> shoes;
-  final Map<String, String> hair;
+  final Map<String, ClothingItem> shirts;
+  final Map<String, ClothingItem> pants;
+  final Map<String, ClothingItem> shoes;
+  final Map<String, ClothingItem> hair;
+
 
 
   // Righe dello spritesheet
@@ -33,22 +36,37 @@ class AvatarConfig {
   });
 
   factory AvatarConfig.fromJson(Map<String, dynamic> json) {
-  return AvatarConfig(
-    bodyPath: json['bodyPath'],
-    shirts: Map<String, String>.from(json['shirts']),
-    pants: Map<String, String>.from(json['pants']), 
-    hair: Map<String, String>.from(json['hair']),
-    shoes: Map<String, String>.from(json['shoes']),
+    return AvatarConfig(
+      bodyPath: json['bodyPath'],
 
-    rowBack: json['rows']['back'],
-    rowLeft: json['rows']['left'],
-    rowFront: json['rows']['front'],
-    rowRight: json['rows']['right'],
-    rowIdle: json['rows']['idle'],
-    stepTime: json['timings']['walk'].toDouble(),
-    idleStepTime: json['timings']['idle'].toDouble(),
-  );
-}
+      shirts: _parseCategory('shirt', json['shirts']),
+      pants: _parseCategory('pants', json['pants']),
+      shoes: _parseCategory('shoes', json['shoes']),
+      hair: _parseCategory('hair', json['hair']),
+
+      rowBack: json['rows']['back'],
+      rowLeft: json['rows']['left'],
+      rowFront: json['rows']['front'],
+      rowRight: json['rows']['right'],
+      rowIdle: json['rows']['idle'],
+      stepTime: json['timings']['walk'].toDouble(),
+      idleStepTime: json['timings']['idle'].toDouble(),
+    );
+  }
+
+
+  static Map<String, ClothingItem> _parseCategory(
+    String category,
+    Map<String, dynamic> json,
+  ) {
+    return json.map((color, data) {
+      return MapEntry(
+        color,
+        ClothingItem.fromJson(category, color, data),
+      );
+    });
+  }
+
 
 
 }

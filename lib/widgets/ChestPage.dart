@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/ClothingItem.dart';
+import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/game/MyGame.dart';
+import 'package:gioco_demo/game/player.dart';
 
 class ChestPage extends StatefulWidget {
   final VoidCallback onExit;
@@ -13,18 +16,28 @@ class ChestPage extends StatefulWidget {
 
 class _ChestPageState extends State<ChestPage> {
   final Map<String, String?> selectedColors = {};
-  String activeCategory = 'maglietta';
+  String activeCategory = 'shirts';
+  late PlayerState playerState;
+  late int _totalSelectedPrice = 0;
+
+ 
+
+  @override
+  void initState() {
+    super.initState();
+    playerState = widget.game.player.playerState; // qui posso accedere a widget
+  }
 
   @override
   Widget build(BuildContext context) {
     final player = widget.game.player;
     final avatarConfig = player.avatarConfig;
-    final layers = ['maglietta', 'pantaloni', 'capelli', 'scarpe'];
+    final layers = ['shirts', 'pants', 'hair', 'shoes'];
     final layerOptions = {
-      'maglietta': avatarConfig.shirts,
-      'pantaloni': avatarConfig.pants,
-      'capelli': avatarConfig.hair,
-      'scarpe': avatarConfig.shoes
+      'shirts': avatarConfig.shirts,
+      'pants': avatarConfig.pants,
+      'hair': avatarConfig.hair,
+      'shoes': avatarConfig.shoes
     };
 
     return Center(
@@ -114,7 +127,7 @@ class _ChestPageState extends State<ChestPage> {
     );
   }
 
-  Widget _buildSelectionSection(List<String> layers, Map<String, Map<String, String>> layerOptions) {
+  Widget _buildSelectionSection(List<String> layers, Map<String, Map<String, ClothingItem>> layerOptions) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(40, 40, 40, 20),
@@ -178,39 +191,98 @@ class _ChestPageState extends State<ChestPage> {
     );
   }
 
-  Widget _buildItemCard(String category, String colorName, bool isSelected, Map<String, Map<String, String>> layerOptions) {
-    final path = layerOptions[category]![colorName]!.replaceFirst('../', 'assets/');
+  Widget _buildItemCard( String category, String colorName, bool isSelected, Map<String, Map<String, ClothingItem>> layerOptions) {
+    final item = layerOptions[category]![colorName]!;
+    final path = item.path.replaceFirst('../', 'assets/');
     final image = AssetImage(path);
 
+    // Controllo se il capo è già posseduto
+    final owned = playerState.ownedItems[category]?.contains(colorName) ?? false;
+
     return GestureDetector(
-      onTap: () => setState(() => selectedColors[category] = colorName),
+      
+      onTap: () {
+        setState(() {
+          selectedColors[category] = colorName;
+        });
+      _updateTotalSelectedPrice(layerOptions);
+      },
+
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
           decoration: BoxDecoration(
-            color: isSelected ? Colors.green.withOpacity(0.4) : Colors.white.withOpacity(0.05),
+            color: isSelected
+                ? Colors.green.withOpacity(0.4)
+                : Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: isSelected ? Colors.green : Colors.transparent, width: 2),
-          ),
-          child: Center(
-            child: Image(
-              image: image,
-              width: 64,
-              height: 64,
-              fit: BoxFit.none,
-              alignment: const Alignment(-1.0, -0.62),
+            border: Border.all(
+              color: isSelected ? Colors.green : Colors.transparent,
+              width: 2,
             ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // CAPO
+              Image(
+                image: image,
+                width: 64,
+                height: 64,
+                fit: BoxFit.none,
+                alignment: const Alignment(-1.0, -0.62),
+              ),
+
+              const SizedBox(height: 6),
+
+              // PREZZO
+              if(!owned)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.monetization_on,
+                      size: 14,
+                      color: Colors.amber,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      item.price.toString(),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFooter(player, layers, layerOptions) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Center(
-        child: ElevatedButton(
+
+Widget _buildFooter(player, List<String> layers, Map<String, Map<String, ClothingItem>> layerOptions) {
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 30),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Mostra il totale dei capi selezionati
+        Text(
+          'Totale selezione: $_totalSelectedPrice 🪙',
+          style: const TextStyle(
+            color: Colors.amber,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 15),
+
+        // Pulsante SALVA LOOK
+        ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 20),
@@ -219,10 +291,34 @@ class _ChestPageState extends State<ChestPage> {
           onPressed: () async {
             for (final layer in layers) {
               final color = selectedColors[layer];
-              if (color != null) {
-                await player.changeLayer(layer, layerOptions[layer]!, color);
+              if (color == null) continue;
+
+              final ClothingItem item = layerOptions[layer]![color]!;
+
+              final owned = widget.game.player.playerState.ownedItems[layer]?.contains(color) ?? false;
+
+              if (!owned) {
+                // Controllo monete
+                final success = widget.game.player.playerState.spendCoins(item.price);
+                if (success) {
+                  // Aggiungo il capo a ownedItems
+                  widget.game.player.playerState.ownedItems.putIfAbsent(layer, () => <String>{});
+                  widget.game.player.playerState.ownedItems[layer]!.add(color);
+                } else {
+                  // Mostro messaggio monete insufficienti
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Monete insufficienti!")),
+                  );
+                  continue; // passo al prossimo capo senza equipaggiarlo
+                }
               }
+
+              // Equipaggio sempre (capo già posseduto o appena comprato)
+              await widget.game.player.changeLayer(layer, layerOptions[layer]!, color);
+              widget.game.player.playerState.equippedItems[layer] = color;
             }
+
+            // Chiudo il guardaroba
             widget.onExit();
           },
           child: const Text(
@@ -230,14 +326,33 @@ class _ChestPageState extends State<ChestPage> {
             style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
           ),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
-  Widget _buildLayerImage(String layer, dynamic player, dynamic options) {
+
+  void _updateTotalSelectedPrice(Map<String, Map<String, ClothingItem>> layerOptions) {
+  int total = 0;
+  selectedColors.forEach((layer, itemId) {
+    if (itemId == null) return;
+    final owned = playerState.ownedItems[layer]?.contains(itemId) ?? false;
+    if (!owned) {
+      total += layerOptions[layer]![itemId]!.price;
+    }
+  });
+
+  setState(() {
+    _totalSelectedPrice = total;
+  });
+}
+
+
+  Widget _buildLayerImage(String layer, dynamic player, Map<String, Map<String, ClothingItem>> options,) {
     final color = selectedColors[layer] ?? player.currentLayerColor[layer];
     if (color == null) return const SizedBox();
-    return _buildSpriteFrame(options[layer]![color]!);
+    final ClothingItem item = options[layer]![color]!;
+    return _buildSpriteFrame(item.path);
   }
 
   Widget _buildSpriteFrame(String path) {

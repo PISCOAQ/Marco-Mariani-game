@@ -2,8 +2,10 @@ import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart';
+import 'package:gioco_demo/class/models/ClothingItem.dart';
+import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/class/models/avatarConfig.dart';
-import 'package:gioco_demo/class/services/avatarLoader.dart';
+import 'package:gioco_demo/class/services/Avatar_loader.dart';
 import 'package:gioco_demo/game/chest.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRef {
@@ -11,6 +13,8 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   final double speed = 130;
   final Set<LogicalKeyboardKey> _keysPressed = {};
   late Vector2 lastDelta;
+
+  final PlayerState playerState;
 
   late final AvatarConfig avatarConfig;
 
@@ -32,20 +36,19 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   final Map<String, SpriteAnimation?> animations = {};
   final Map<String, String?> currentLayerColor = {};
 
-  Player({required this.avatarIndex, required Vector2 position})
+  Player({required this.avatarIndex, required Vector2 position, required this.playerState})
       : super(position: position, size: Vector2(64, 64), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
     // 1. CARICAMENTO CORPO
-    avatarConfig = await loadAvatarFromJson(
-      '../data/avatar.json',
-      avatarIndex,
-    );
+    avatarConfig = await loadAvatarFromJson('../data/avatar.json',avatarIndex);
 
 
     final image = await gameRef.images.load(avatarConfig.bodyPath);
     final spriteSheet = SpriteSheet(image: image, srcSize: Vector2(64, 64));
+
+    await _applyEquippedItems();
 
     walkBackAnimation = spriteSheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, to: 9);
     walkRightAnimation = spriteSheet.createAnimation(row: avatarConfig.rowRight, stepTime: avatarConfig.stepTime, to: 9);
@@ -62,17 +65,25 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   }
 
   // --- NUOVO: funzione generica per aggiungere layer ---
-  Future<void> loadLayer(String layerName, Map<String, String> assets, String? color) async {
-    if (color == null || !assets.containsKey(color)) return;
+  Future<void> loadLayer(String layerName, Map<String, ClothingItem> items, String? color) async {
+    if (color == null) return;
 
-    final image = await gameRef.images.load(assets[color]!);
+    final item = items[color];
+    if (item == null) return;
+
+    final image = await gameRef.images.load(item.path);
     final sheet = SpriteSheet(image: image, srcSize: Vector2(64, 64));
 
-    animations['${layerName}_back'] = sheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, to: 9);
-    animations['${layerName}_left'] = sheet.createAnimation(row: avatarConfig.rowLeft, stepTime: avatarConfig.stepTime, to: 9);
-    animations['${layerName}_front'] = sheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime, to: 9);
-    animations['${layerName}_right'] = sheet.createAnimation(row: avatarConfig.rowRight, stepTime: avatarConfig.stepTime, to: 9);
-    animations['${layerName}_idle'] = sheet.createAnimation(row: avatarConfig.rowIdle, stepTime: avatarConfig.idleStepTime, from: 0, to: 1);
+    animations['${layerName}_back'] =
+        sheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, to: 9);
+    animations['${layerName}_left'] =
+        sheet.createAnimation(row: avatarConfig.rowLeft, stepTime: avatarConfig.stepTime, to: 9);
+    animations['${layerName}_front'] =
+        sheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime, to: 9);
+    animations['${layerName}_right'] =
+        sheet.createAnimation(row: avatarConfig.rowRight, stepTime: avatarConfig.stepTime, to: 9);
+    animations['${layerName}_idle'] =
+        sheet.createAnimation(row: avatarConfig.rowIdle, stepTime: avatarConfig.idleStepTime, from: 0, to: 1);
 
     if (!layers.containsKey(layerName)) {
       final comp = SpriteAnimationComponent(size: size);
@@ -84,8 +95,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     currentLayerColor[layerName] = color;
   }
 
-  // --- NUOVO: cambia layer generico ---
-  Future<void> changeLayer(String layerName, Map<String, String> assets, String color) async {
+  Future<void> changeLayer(String layerName, Map<String, ClothingItem> assets, String color) async {
     currentLayerColor[layerName] = color;
     await loadLayer(layerName, assets, color);
   }
@@ -155,4 +165,34 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     else
       _keysPressed.remove(key);
   }
+
+  Future<void> _applyEquippedItems() async {
+    for (final entry in playerState.equippedItems.entries) {
+      final category = entry.key;
+      final color = entry.value;
+
+      if (color == null) continue;
+
+      switch (category) {
+        case 'shirts':
+          await changeLayer(category, avatarConfig.shirts, color);
+          break;
+        case 'pants':
+          await changeLayer(category, avatarConfig.pants, color);
+          break;
+        case 'hair':
+          await changeLayer(category, avatarConfig.hair, color);
+          break;
+        case 'shoes':
+          await changeLayer(category, avatarConfig.shoes, color);
+          break;
+      }
+    }
+  }
+
+  Future<void> applyState() async {
+    await _applyEquippedItems();
+  }
+
+
 }

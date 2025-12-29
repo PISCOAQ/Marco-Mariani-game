@@ -4,31 +4,31 @@
       "bodyPath": "../avatars/MaleAvatar_spritesheet.png",
 
       "shirts": {
-        "red": "../avatars/shirt_red.png",
-        "blue": "../avatars/shirt_blue.png",
-        "grey": "../avatars/shirt_grey.png",
-        "black": "../avatars/shirt_black.png"
+        "red":   { "path": "../avatars/shirt_red.png",   "price": 50 },
+        "blue":  { "path": "../avatars/shirt_blue.png",  "price": 55 },
+        "grey":  { "path": "../avatars/shirt_grey.png",  "price": 45 },
+        "black": { "path": "../avatars/shirt_black.png", "price": 60 }
       },
 
       "pants": {
-        "blue": "../avatars/pants_blue.png",
-        "black": "../avatars/pants_black.png",
-        "badge": "../avatars/pants_badge.png",
-        "purple": "../avatars/pants_purple.png"
+        "blue":   { "path": "../avatars/pants_blue.png",   "price": 70 },
+        "black":  { "path": "../avatars/pants_black.png",  "price": 75 },
+        "badge":  { "path": "../avatars/pants_badge.png",  "price": 90 },
+        "purple": { "path": "../avatars/pants_purple.png", "price": 65 }
       },
 
       "shoes": {
-        "blue": "../avatars/shoes_brown.png",
-        "black": "../avatars/shoes_black.png",
-        "badge": "../avatars/shoes_green.png",
-        "purple": "../avatars/shoes_white.png"
+        "blue":   { "path": "../avatars/shoes_brown.png", "price": 40 },
+        "black":  { "path": "../avatars/shoes_black.png", "price": 50 },
+        "badge":  { "path": "../avatars/shoes_green.png", "price": 60 },
+        "purple": { "path": "../avatars/shoes_white.png", "price": 55 }
       },
 
       "hair": {
-        "blue": "../avatars/hair_yellow.png",
-        "black": "../avatars/hair_black.png",
-        "badge": "../avatars/hair_brown.png",
-        "purple": "../avatars/hair_grey.png"
+        "blue":   { "path": "../avatars/hair_yellow.png", "price": 30 },
+        "black":  { "path": "../avatars/hair_black.png",  "price": 35 },
+        "badge":  { "path": "../avatars/hair_brown.png",  "price": 40 },
+        "purple": { "path": "../avatars/hair_grey.png",   "price": 45 }
       },
 
       "rows": {
@@ -49,31 +49,31 @@
       "bodyPath": "../avatars/FemaleAvatar_spritesheet.png",
 
       "shirts": {
-        "red": "../avatars/Fshirt_white.png",
-        "blue": "../avatars/Fshirt_blue.png",
-        "grey": "../avatars/Fshirt_pink.png",
-        "black": "../avatars/Fshirt_black.png"
+        "red":   { "path": "../avatars/Fshirt_white.png", "price": 50 },
+        "blue":  { "path": "../avatars/Fshirt_blue.png",  "price": 55 },
+        "grey":  { "path": "../avatars/Fshirt_pink.png",  "price": 45 },
+        "black": { "path": "../avatars/Fshirt_black.png", "price": 60 }
       },
 
       "pants": {
-        "blue": "../avatars/Fpants_pink.png",
-        "black": "../avatars/Fpants_black.png",
-        "badge": "../avatars/Fpants_white.png",
-        "purple": "../avatars/Fpants_purple.png"
+        "blue":   { "path": "../avatars/Fpants_pink.png",   "price": 70 },
+        "black":  { "path": "../avatars/Fpants_black.png",  "price": 75 },
+        "badge":  { "path": "../avatars/Fpants_white.png",  "price": 90 },
+        "purple": { "path": "../avatars/Fpants_purple.png", "price": 65 }
       },
 
       "shoes": {
-        "blue": "../avatars/Fshoes_brown.png",
-        "black": "../avatars/Fshoes_black.png",
-        "badge": "../avatars/Fshoes_white.png",
-        "purple": "../avatars/Fshoes_purple.png"
+        "blue":   { "path": "../avatars/Fshoes_brown.png", "price": 40 },
+        "black":  { "path": "../avatars/Fshoes_black.png", "price": 50 },
+        "badge":  { "path": "../avatars/Fshoes_white.png", "price": 60 },
+        "purple": { "path": "../avatars/Fshoes_purple.png", "price": 55 }
       },
 
       "hair": {
-        "blue": "../avatars/Fhair_1.png",
-        "black": "../avatars/Fhair_2.png",
-        "badge": "../avatars/Fhair_3.png",
-        "purple": "../avatars/Fhair_4.png"
+        "blue":   { "path": "../avatars/Fhair_1.png", "price": 30 },
+        "black":  { "path": "../avatars/Fhair_2.png", "price": 35 },
+        "badge":  { "path": "../avatars/Fhair_3.png", "price": 40 },
+        "purple": { "path": "../avatars/Fhair_4.png", "price": 45 }
       },
 
       "rows": {

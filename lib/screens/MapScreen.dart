@@ -25,9 +25,6 @@ class _MapScreenState extends State<MapScreen> {
 
   dynamic _attivitaCaricata;
 
-  //Variabile delle monete
-  final ValueNotifier<int> wallet = ValueNotifier<int>(500);
-
   @override
   void initState() {
     super.initState();
@@ -40,10 +37,12 @@ class _MapScreenState extends State<MapScreen> {
 
   void _showChestPage(){
     setState(() {
+      _messaggioNotifica = null;
       _isChestPage = true;
       _myGame.pauseEngine();
     });
   }
+
 
   void _showPopup(String tipo) async {
     final risultato = await ActivityLoader.carica();
@@ -101,7 +100,6 @@ class _MapScreenState extends State<MapScreen> {
   void _closePage() {
     setState(() {
       _isPageActive = false;
-      // Riprendi il gioco per permettere all'avatar di muoversi
       _myGame.resumeEngine(); 
     });
   }
@@ -119,7 +117,7 @@ class _MapScreenState extends State<MapScreen> {
             messaggio: _messaggioNotifica!,
           ),
 
-          Moneywidget(walletNotifier: wallet),
+          Moneywidget(walletNotifier: _myGame.playerState.coins),
 
           //Il Widget Overlay (visibile solo se _isQuizActive è true)
           if (_isPageActive)
