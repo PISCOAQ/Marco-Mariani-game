@@ -18,17 +18,17 @@
       },
 
       "shoes": {
-        "blue":   { "path": "../avatars/shoes_brown.png", "price": 40 },
+        "brown":   { "path": "../avatars/shoes_brown.png", "price": 40 },
         "black":  { "path": "../avatars/shoes_black.png", "price": 50 },
-        "badge":  { "path": "../avatars/shoes_green.png", "price": 60 },
-        "purple": { "path": "../avatars/shoes_white.png", "price": 55 }
+        "green":  { "path": "../avatars/shoes_green.png", "price": 60 },
+        "white": { "path": "../avatars/shoes_white.png", "price": 55 }
       },
 
       "hair": {
-        "blue":   { "path": "../avatars/hair_yellow.png", "price": 30 },
+        "yellow":   { "path": "../avatars/hair_yellow.png", "price": 30 },
         "black":  { "path": "../avatars/hair_black.png",  "price": 35 },
-        "badge":  { "path": "../avatars/hair_brown.png",  "price": 40 },
-        "purple": { "path": "../avatars/hair_grey.png",   "price": 45 }
+        "brown":  { "path": "../avatars/hair_brown.png",  "price": 40 },
+        "grey": { "path": "../avatars/hair_grey.png",   "price": 45 }
       },
 
       "rows": {

@@ -51,6 +51,7 @@ class AvatarConfig {
       rowIdle: json['rows']['idle'],
       stepTime: json['timings']['walk'].toDouble(),
       idleStepTime: json['timings']['idle'].toDouble(),
+      
     );
   }
 

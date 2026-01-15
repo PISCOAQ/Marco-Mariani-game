@@ -23,13 +23,17 @@ class ActivityLoader {
             opzioni: List<String>.from(d['opzioni']),
             rispostaCorrettaIndex: d['risposta_corretta'],
           ));
+        } else if(d['tipo'] == 'attribuzione_emozioni'){
+          listaDomande.add(AttribuzioneEmozioni(
+            testo: d['testo'], 
+            risposteCorrette: List<String>.from(d['risposte_corrette'])
+          ));
         }
       }
       return Quiz(id: data['id'], titolo: data['titolo'], domande: listaDomande);
 
     } else if(data['tipo_attivita'] == 'esercitazione'){
       return Esercitazione(id: data['id'], titolo: data['titolo'], descrizione: data['descrizione']);
-
     }
   }
 }

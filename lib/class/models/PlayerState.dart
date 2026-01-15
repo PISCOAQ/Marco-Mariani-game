@@ -6,7 +6,7 @@ class PlayerState {
   final Map<String, Set<String>> ownedItems;
   final Map<String, String?> equippedItems;
 
-  PlayerState({ int initialCoins = 10, //per ora poi va modificato quando usiamo db
+  PlayerState({ int initialCoins = 200, //per ora poi va modificato quando usiamo db
 
     Map<String, Set<String>>? ownedItems,
     Map<String, String?>? equippedItems,

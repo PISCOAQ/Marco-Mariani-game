@@ -1,5 +1,7 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart'; // Importante per MoveEffect
+import 'package:flutter/animation.dart'; // Per Curves
 import 'package:flutter/cupertino.dart';
 import 'package:gioco_demo/game/player.dart';
 
@@ -9,6 +11,7 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
   final VoidCallback onOpen;
 
   late SpriteComponent _topPart;
+  late SpriteComponent indicator; // Il nuovo indicatore visivo
 
   Chest({required Vector2 position, required Vector2 size, required this.onOpen}) 
       : super(position: position, size: size, priority: position.y.toInt());
@@ -29,6 +32,32 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
       priority: 1, 
     );
 
+    // --- AGGIUNTA INDICATORE ---
+    // Carichiamo l'icona (usa lo stesso spritePath dell'InteractiveObject o uno diverso)
+    final indicatorSprite = await Sprite.load('shop.png'); 
+    indicator = SpriteComponent(
+      sprite: indicatorSprite,
+      size: Vector2(20, 20), // Leggermente più piccola per il baule
+      anchor: Anchor.center,
+      position: Vector2(size.x / 2, -10), // Posizionata sopra il baule
+    );
+
+    // Effetto di galleggiamento
+    indicator.add(
+      MoveEffect.by(
+        Vector2(0, -5),
+        EffectController(
+          duration: 1.0,
+          reverseDuration: 1.0,
+          infinite: true,
+          curve: Curves.easeInOut,
+        ),
+      ),
+    );
+
+    add(indicator); // Aggiungiamo l'indicatore all'avvio
+    // ---------------------------
+
     current = false;
     add(RectangleHitbox());
   }
@@ -37,16 +66,15 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
     if (_canTrigger) {
       _canTrigger = false; 
 
-      // 1. Apriamo graficamente se è chiuso
       if (!isOpen) {
         isOpen = true;
         current = true;
         add(_topPart);
+        
+        // Nascondiamo l'indicatore quando il baule è aperto
+        indicator.opacity = 0; 
       }
 
-      // 2. Lanciamo la schermata. 
-      // Rimuoviamo il delay eccessivo o gestiamo il trigger in modo che onOpen 
-      // venga chiamato anche se isOpen è già true.
       Future.delayed(const Duration(milliseconds: 150), () {
         onOpen();
       });
@@ -57,13 +85,15 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
   void onCollisionEnd(PositionComponent other) {
     super.onCollisionEnd(other);
     if (other is Player) {
-      // Quando il player si allontana, resettiamo TUTTO.
-      // Così al prossimo contatto potrà riaprirsi.
       _canTrigger = true; 
       
       if (isOpen) {
         isOpen = false;
         current = false;
+        
+        // Riportiamo l'opacità a 1 quando il player si allontana e il baule si chiude
+        indicator.opacity = 1;
+
         if (contains(_topPart)) {
           remove(_topPart);
         }

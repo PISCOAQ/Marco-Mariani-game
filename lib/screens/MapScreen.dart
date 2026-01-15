@@ -10,7 +10,6 @@ import 'package:gioco_demo/widgets/PageOverlay.dart';
 
 class MapScreen extends StatefulWidget {
   final int avatarIndex;
-
   const MapScreen({super.key, required this.avatarIndex});
 
   @override
@@ -22,8 +21,10 @@ class _MapScreenState extends State<MapScreen> {
   bool _isPageActive = false; 
   bool _isChestPage = false;
   String? _messaggioNotifica;
-
   dynamic _attivitaCaricata;
+
+  // 1. Creiamo il FocusNode dedicato al gioco
+  final FocusNode _gameFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -35,6 +36,13 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  @override
+  void dispose() {
+    // 2. Liberiamo la memoria
+    _gameFocusNode.dispose();
+    super.dispose();
+  }
+
   void _showChestPage(){
     setState(() {
       _messaggioNotifica = null;
@@ -43,20 +51,17 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-
   void _showPopup(String tipo) async {
     final risultato = await ActivityLoader.carica();
-
     if (risultato == null) return;
 
-    // 1. CASO ESERCITAZIONE: Se il JSON mi dà un'esercitazione
     if (risultato is Esercitazione) {
       if (tipo == 'quiz') {
-        _mostraMessaggioAvviso("Vai a fare l'esercitazione, poi torna qui!");
+        _mostraMessaggioAvviso("Fai l'esercitazione, poi torna qui!");
         return; 
       } else {
         setState(() {
-          _messaggioNotifica = null; //pulizia messaggi
+          _messaggioNotifica = null;
           _attivitaCaricata = risultato;
           _isPageActive = true;
           _myGame.pauseEngine();
@@ -65,20 +70,18 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
 
-    // 2. CASO QUIZ: Se il JSON mi dà un quiz
     if (risultato is Quiz) {
       if (tipo == 'esercitazione') {
-        _mostraMessaggioAvviso("Vai a fare il quiz!");
-        return; // Blocca tutto qui
+        _mostraMessaggioAvviso("Esegui il quiz!");
+        return;
       } else {
-        // Sono sull'oggetto giusto (prof), apro il quiz
         setState(() {
           _messaggioNotifica = null;
           _attivitaCaricata = risultato;
           _isPageActive = true;
           _myGame.pauseEngine();
         });
-        return; // Esco dalla funzione
+        return;
       }
     }
   }
@@ -89,49 +92,58 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  // 3. Funzioni di chiusura: riprendiamo il focus
   void _CloseChestPage(){
     setState(() {
       _isChestPage = false;
       _myGame.resumeEngine();
     });
+    _gameFocusNode.requestFocus(); // Torna al gioco
   }
 
-  // Funzione chiamata dal pulsante 'X' del popup per chiuderlo
   void _closePage() {
     setState(() {
       _isPageActive = false;
       _myGame.resumeEngine(); 
+    });
+    
+    // Usiamo addPostFrameCallback per essere sicuri che la UI sia chiusa
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _gameFocusNode.requestFocus();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack( //Stack per sovrapporre il popup al gioco
+      body: Stack(
         children: [
-          GameWidget(game: _myGame),
+          // 4. GameWidget con focusNode assegnato
+          GameWidget(
+            game: _myGame,
+            focusNode: _gameFocusNode,
+            autofocus: true, 
+          ),
 
           if (_messaggioNotifica != null)
-          GameNotification(
-            key: UniqueKey(), // Serve a far ripartire il timer se mandi due messaggi di fila
-            messaggio: _messaggioNotifica!,
-          ),
+            GameNotification(
+              key: UniqueKey(),
+              messaggio: _messaggioNotifica!,
+            ),
 
           Moneywidget(walletNotifier: _myGame.playerState.coins),
 
-          //Il Widget Overlay (visibile solo se _isQuizActive è true)
           if (_isPageActive)
             PageOverlay( 
               onExit: _closePage,
-              // Passiamo l'oggetto caricato così PageOverlay sa cosa mostrare
               attivita: _attivitaCaricata, 
             ),
 
           if (_isChestPage)
-          ChestPage( // Un widget diverso o lo stesso con dati diversi
-            game: _myGame,
-            onExit: _CloseChestPage,
-          ),
+            ChestPage(
+              game: _myGame,
+              onExit: _CloseChestPage,
+            ),
         ],
       ),
     );

@@ -17,4 +17,14 @@ class DomandaSceltaMultipla extends Domanda {
   }) : super(tipo: 'scelta_multipla');
 }
 
+
+class AttribuzioneEmozioni extends Domanda {
+  final List<String> risposteCorrette;
+
+  AttribuzioneEmozioni({
+    required super.testo,
+    required this.risposteCorrette
+  }) : super(tipo: 'attribuzione_emozioni');
+}
+
 //Altri tipi di domande(classi) -> vengono selezionati da Activity_loader

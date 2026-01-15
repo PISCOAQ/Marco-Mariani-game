@@ -1,9 +1,53 @@
-
 {
-  "id": "ripasso_01",
-  "tipo_attivita": "esercitazione",
-  "titolo": "Manuale dello Storico",
-  "descrizione": "Benvenuto al banco di ripasso. Prima di affrontare il quiz del Professore, ricorda: l'America è stata scoperta nel 1492 da Cristoforo Colombo. Leggi attentamente i libri sulla scrivania per superare l'esame!"
+  "id": "quiz_01",
+  "tipo_attivita": "quiz",
+  "titolo": "Attribuzione delle emozioni",
+
+  "contenuto": [
+    {
+      "tipo": "attribuzione_emozioni",
+      "testo": "I quadri di Simone sono arrivati ultimi ad un concorso. \n Come si sentirà Simone in questa situazione?",
+      "risposte_corrette": [
+        "Triste",
+        "Tristezza",
+        "Dolore",
+        "Addolorato",
+        "Deluso",
+        "Delusione",
+        "Disperato",
+        "Disperazione"
+      ]
+    },
+    {
+      "tipo": "attribuzione_emozioni",
+      "testo": "Elisabetta sta guidando lungo una strada quando una donna le compare improvvisamente davanti a lei e la travolge in pieno.\n Cosa proverà Elisabetta in questa situazione?",
+      "risposte_corrette": [
+        "Paura",
+        "Impaurita",
+        "Terrore",
+        "Terrorizzata",
+        "Pietrificata",
+        "Spavento",
+        "Spaventata",
+        "Spaventoso"
+      ]
+    },
+    {
+      "tipo": "attribuzione_emozioni",
+      "testo": "Maria deve fare un discorso al lavoro. È in piedi nella stanza di fronte a tutti. Non ricorda cosa deve dire. Tutti la fissano. \n Come si sentirà Maria in questa situazione?",
+      "risposte_corrette": [
+        "Imbarazzo",
+        "Imbarazzata",
+        "Umiliata",
+        "Ridicola",
+        "Ridicolizzata"
+      ]
+    }
+  ]
 }
+
+
+
+
 
 
