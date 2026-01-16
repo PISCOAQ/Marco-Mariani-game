@@ -1,47 +1,32 @@
 {
-  "id": "quiz_01",
+  "id": "quiz_05",
   "tipo_attivita": "quiz",
-  "titolo": "Attribuzione delle emozioni",
+  "titolo": "Passo Falso",
 
   "contenuto": [
     {
-      "tipo": "attribuzione_emozioni",
-      "testo": "I quadri di Simone sono arrivati ultimi ad un concorso. \n Come si sentirà Simone in questa situazione?",
-      "risposte_corrette": [
-        "Triste",
-        "Tristezza",
-        "Dolore",
-        "Addolorato",
-        "Deluso",
-        "Delusione",
-        "Disperato",
-        "Disperazione"
-      ]
+      "tipo": "passo_falso",
+      "testo": "Giulia era a una festa a casa del suo amico Antonio. Stava parlando con Antonio quando un’altra donna si avvicinò a loro. Era una delle vicine di casa di Antonio. La donna disse “Ciao,” quindi rivolgendosi a Giulia aggiunse: “Non credo che ci siamo mai incontrate. Sono Maria, e tu come ti chiami?” “Giulia.” “Gradite qualcosa da bere?” chiese Antonio.",
+      "question1": "Qualcuno ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni1": ["Si", "No"],
+      "question2": "Se sì, chi ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni2": ["Giulia", "Antonio", "Maria", "Non lo so"]
     },
-    {
-      "tipo": "attribuzione_emozioni",
-      "testo": "Elisabetta sta guidando lungo una strada quando una donna le compare improvvisamente davanti a lei e la travolge in pieno.\n Cosa proverà Elisabetta in questa situazione?",
-      "risposte_corrette": [
-        "Paura",
-        "Impaurita",
-        "Terrore",
-        "Terrorizzata",
-        "Pietrificata",
-        "Spavento",
-        "Spaventata",
-        "Spaventoso"
-      ]
+     {
+      "tipo": "passo_falso",
+      "testo": "Il marito di Elena le stava organizzando una festa di compleanno a sorpresa. Il marito invitò Sara, un’amica di Elena e le disse: “Non parlarne con nessuno, soprattutto con Elena.” Il giorno prima della festa, Elena si trovava a casa di Sara quando rovesciò un po’ di caffè sul vestito nuovo appoggiato sulla sedia. “Oh!” esclamò Sara, “Volevo indossarlo per la tua festa!” “Quale festa?” domandò Elena. “Forza” disse Sara, “vediamo se riusciamo a lavare via la macchia.”",
+      "question1": "Qualcuno ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni1": ["Si", "No"],
+      "question2": "Se sì, chi ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni2": ["Marito di Elena", "Elena", "Sara", "Non lo so"]
     },
-    {
-      "tipo": "attribuzione_emozioni",
-      "testo": "Maria deve fare un discorso al lavoro. È in piedi nella stanza di fronte a tutti. Non ricorda cosa deve dire. Tutti la fissano. \n Come si sentirà Maria in questa situazione?",
-      "risposte_corrette": [
-        "Imbarazzo",
-        "Imbarazzata",
-        "Umiliata",
-        "Ridicola",
-        "Ridicolizzata"
-      ]
+     {  
+      "tipo": "passo_falso",
+      "testo": "Giuseppe, tornando a casa, si fermò dal benzinaio per rifornire la sua automobile. Diede alla cassiera la sua carta di credito . La cassiera fece scorrere la carta di credito all'interno del lettore elettronico vicino alla cassa. “Mi spiace,” disse “la sua carta di credito non viene accettata.” “Hmm, peccato,” disse Giuseppe, “non importa, pagherò in contanti. Diede alla cassiera 20 euro e aggiunse mi sono rifornito di benzina senza piombo.",
+      "question1": "Qualcuno ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni1": ["Si", "No"],
+      "question2": "Se sì, chi ha detto qualcosa che non avrebbe dovuto dire, o comunque qualcuno ha detto qualcosa di sconveniente?",
+      "opzioni2": ["Giuseppe", "Cassiera", "Non lo so"]
     }
   ]
 }

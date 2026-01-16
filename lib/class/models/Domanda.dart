@@ -20,11 +20,49 @@ class DomandaSceltaMultipla extends Domanda {
 
 class AttribuzioneEmozioni extends Domanda {
   final List<String> risposteCorrette;
+  final String question;
 
   AttribuzioneEmozioni({
     required super.testo,
+    required this.question,
     required this.risposteCorrette
   }) : super(tipo: 'attribuzione_emozioni');
 }
+
+
+
+class TeoriaDellaMente extends Domanda {
+  final String question1;
+  final List<String> opzioni1; 
+  final String? question2;
+  final List<String>? opzioni2; 
+  final String question3;
+
+  TeoriaDellaMente({
+    required super.testo,
+    required this.question1,
+    required this.opzioni1,
+    required this.question2,
+    required this.opzioni2,
+    required this.question3,
+  }) : super(tipo: 'teoria_mente');
+}
+
+
+class PassoFalso extends Domanda {
+  final String question1;
+  final List<String> opzioni1; 
+  final String question2;
+  final List<String> opzioni2; 
+
+  PassoFalso({
+    required super.testo,
+    required this.question1,
+    required this.opzioni1,
+    required this.question2,
+    required this.opzioni2,
+  }) : super(tipo: 'passo_falso');
+}
+
 
 //Altri tipi di domande(classi) -> vengono selezionati da Activity_loader

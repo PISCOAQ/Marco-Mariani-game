@@ -15,40 +15,81 @@ class AttribuzioneEmozioniView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return SizedBox(
+      // Forza la larghezza massima per permettere al Column interno di centrare
+      width: double.infinity, 
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 10),
-          SizedBox(
-            width: 260,
-            child: TextField(
-              key: ValueKey(domanda.testo), // 6. Mantiene lo stato corretto
-              maxLines: 1,
+          // DISTACCO DAL BORDO SUPERIORE (Immagine 2)
+          const SizedBox(height: 100),
+
+          // TESTO SCENARIO
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Text(
+              domanda.testo,
               textAlign: TextAlign.center,
-              textCapitalization: TextCapitalization.sentences,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              
-              // 7. Configurazione controller sicura per il focus
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // TESTO DOMANDA (Question)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Text(
+              domanda.question ?? "",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+
+          // SPAZIO PRIMA DELLA BARRA (Per centrarla verticalmente o quasi)
+          const SizedBox(height: 150),
+
+          // BARRA DI SCRITTURA (Larghezza 500)
+          SizedBox(
+            width: 500,
+            child: TextField(
+              key: ValueKey(domanda.testo),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
               controller: TextEditingController.fromValue(
                 TextEditingValue(
                   text: rispostaUtente ?? "",
                   selection: TextSelection.collapsed(offset: (rispostaUtente ?? "").length),
                 ),
               ),
-              
               decoration: InputDecoration(
                 hintText: "Scrivi l'emozione",
                 filled: true,
                 fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 20),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.black12),
                 ),
               ),
               onChanged: onChanged,
             ),
           ),
-          const SizedBox(height: 12),
+
+          const SizedBox(height: 15),
+
           Text(
             "Una parola è sufficiente",
             style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
+import 'package:gioco_demo/widgets/passo_falso_view.dart';
+import 'package:gioco_demo/widgets/teoria_della_mente_view.dart';
 import 'domanda_scelta_multipla_view.dart';
 import 'attribuzione_emozioni_view.dart';
 
@@ -56,34 +58,37 @@ class _QuizViewState extends State<QuizView> {
 
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  // Rimuoviamo il padding verticale dal container per farlo gestire allo scroll
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey[300]!, width: 2),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            domanda.testo,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                  child: LayoutBuilder( // Usiamo LayoutBuilder per conoscere l'altezza disponibile
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            // Forza il contenuto ad essere alto almeno quanto il riquadro grigio
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
+                              // MainAxisSize.max assicura che la colonna provi a espandersi
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildDomandaWidget(domanda),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      /// ⬇️ QUI AVVIENE LA MAGIA
-                      _buildDomandaWidget(domanda),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -98,28 +103,37 @@ class _QuizViewState extends State<QuizView> {
           ),
         ),
 
+
         const SizedBox(height: 15),
-        if (isLast)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green[600],
-              padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            onPressed: () => _mostraConfermaConsegna(context),
-            child: const Text(
-              "CONSEGNA QUIZ",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )
-        else
-          const SizedBox(height: 50),
+
+        // 2. Contenitore "parcheggio" con altezza bloccata
+        SizedBox(
+          height: 40, // Altezza fissa che contiene comodamente il pulsante
+          width: double.infinity, // Occupa tutta la larghezza per centrare
+          child: Center(
+            child: isLast 
+              ? ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[600],
+                    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () => _mostraConfermaConsegna(context),
+                  child: const Text(
+                    "CONSEGNA QUIZ",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : const SizedBox(), // Se non è l'ultimo, il box resta vuoto ma ALTO hight
+          ),
+        ),
+
       ],
     );
   }
@@ -143,6 +157,30 @@ class _QuizViewState extends State<QuizView> {
       return AttribuzioneEmozioniView(
         domanda: domanda,
         rispostaUtente: _risposteQuiz[_currentIndex],
+        onChanged: (value) {
+          setState(() {
+            _risposteQuiz[_currentIndex] = value;
+          });
+        },
+      );
+    }
+
+    if (domanda is TeoriaDellaMente){
+      return TeoriaMenteView(
+        domanda: domanda, 
+        rispostaUtente: _risposteQuiz[_currentIndex], 
+        onChanged: (value) {
+          setState(() {
+            _risposteQuiz[_currentIndex] = value;
+          });
+        },
+      );
+    }
+
+    if (domanda is PassoFalso){
+      return PassoFalsoView(
+        domanda: domanda, 
+        rispostaUtente: _risposteQuiz[_currentIndex], 
         onChanged: (value) {
           setState(() {
             _risposteQuiz[_currentIndex] = value;

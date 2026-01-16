@@ -23,10 +23,34 @@ class ActivityLoader {
             opzioni: List<String>.from(d['opzioni']),
             rispostaCorrettaIndex: d['risposta_corretta'],
           ));
+
+
         } else if(d['tipo'] == 'attribuzione_emozioni'){
           listaDomande.add(AttribuzioneEmozioni(
             testo: d['testo'], 
+            question: d['question'],
             risposteCorrette: List<String>.from(d['risposte_corrette'])
+          ));
+
+
+        } else if(d['tipo'] == 'teoria_mente'){
+          listaDomande.add(TeoriaDellaMente(
+            testo: d['testo'], 
+            question1: d['question1'],
+            opzioni1: List<String>.from(d['opzioni1']), 
+            question2: d['question2'], //ritorna null se non è presente
+            opzioni2: d['opzioni2'] != null ? List<String>.from(d['opzioni2']) : null, 
+            question3: d['question3']
+          ));
+
+
+        }else if(d['tipo'] == 'passo_falso'){
+          listaDomande.add(PassoFalso(
+            testo: d['testo'], 
+            question1: d['question1'],
+            opzioni1: List<String>.from(d['opzioni1']), 
+            question2: d['question2'],
+            opzioni2: List<String>.from(d['opzioni2']), 
           ));
         }
       }

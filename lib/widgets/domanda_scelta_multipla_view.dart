@@ -17,6 +17,23 @@ class DomandaSceltaMultiplaView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+    
+        const SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Text(
+            domanda.testo,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 150),
+        
         Row(
           children: [
             _buildOption(domanda.opzioni[0], 0),
