@@ -1,7 +1,7 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart'; // Importante per MoveEffect
-import 'package:flutter/animation.dart'; // Per Curves
+import 'package:flame/effects.dart'; 
+import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gioco_demo/game/player.dart';
 
@@ -56,7 +56,6 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
     );
 
     add(indicator); // Aggiungiamo l'indicatore all'avvio
-    // ---------------------------
 
     current = false;
     add(RectangleHitbox());

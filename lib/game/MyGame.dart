@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:gioco_demo/class/models/Levelmanager.dart';
 import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/class/models/gateComponent.dart';
 import 'package:gioco_demo/game/chest.dart';
@@ -13,6 +14,7 @@ import 'wall.dart';
 // Definizione callback
 typedef ShowActivityCallback = void Function(String tipo);
 typedef ShowChestCallback = void Function();
+typedef LevelUnlockedCallback = void Function();
 
 
 class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents {
@@ -24,12 +26,15 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   final ShowActivityCallback onShowPopup;
   final ShowChestCallback onShowChestPopup;
 
+  final LevelUnlockedCallback onLevelUnlocked;
+
   final List<GateComponent> _activeGates = [];
 
   MyGame({
     required this.avatarIndex,
     required this.onShowPopup,
     required this.onShowChestPopup,
+    required this.onLevelUnlocked,
   });
 
   @override
@@ -78,7 +83,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
       }
     }
 
-    // 3️. PLAYER
+    // 3️. PLAYER -> default clothes
     playerState.addClothesDefault('shirts', 'red');
     playerState.addClothesDefault('pants', 'blue');
     playerState.addClothesDefault('hair', 'black');
@@ -137,11 +142,22 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
 
   // Metodo unlockLevel ora correttamente dentro la classe MyGame
   void unlockLevel(String levelId) {
-    final toRemove = _activeGates.where((g) => g.gateId == levelId).toList();
-    for (var gate in toRemove) {
-      gate.removeFromParent();
-      _activeGates.remove(gate);
+    print("Chiamato unlockLevel per: $levelId");
+    if (LevelManager.unlock(levelId)) {
+      print("Sblocco nel Manager riuscito!");
+      
+      _activeGates.removeWhere((gate) {
+        if (gate.gateId == levelId) {
+          gate.removeFromParent();
+          return true;
+        }
+        return false;
+      });
+
+      print("Sto per chiamare onLevelUnlocked...");
+      onLevelUnlocked();
+    } else {
+      print("Livello già sbloccato precedentemente.");
     }
-    print("Livello $levelId sbloccato!");
   }
 }

@@ -19,7 +19,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   late final AvatarConfig avatarConfig;
 
   // Animazioni Corpo
-  late SpriteAnimation walkRightAnimation, walkLeftAnimation, walkBackAnimation, walkAnimation, idleAnimation;
+  late SpriteAnimation walkRightAnimation, walkLeftAnimation, walkBackAnimation, walkAnimation, idleAnimation, walk;
 
   final int avatarIndex;
 
@@ -42,7 +42,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   @override
   Future<void> onLoad() async {
     // 1. CARICAMENTO CORPO
-    avatarConfig = await loadAvatarFromJson('../data/avatar.json',avatarIndex);
+    avatarConfig = await loadAvatarFromJson('../data/avatar.json', avatarIndex);
 
 
     final image = await gameRef.images.load(avatarConfig.bodyPath);
@@ -50,10 +50,10 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
 
     await _applyEquippedItems();
 
-    walkBackAnimation = spriteSheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, to: 9);
+    walkBackAnimation = spriteSheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, from: 1, to: 9);
     walkRightAnimation = spriteSheet.createAnimation(row: avatarConfig.rowRight, stepTime: avatarConfig.stepTime, to: 9);
     walkLeftAnimation = spriteSheet.createAnimation(row: avatarConfig.rowLeft, stepTime: avatarConfig.stepTime, to: 9);
-    walkAnimation = spriteSheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime, to: 9);
+    walkAnimation = spriteSheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime,from:1, to: 9);
     idleAnimation = spriteSheet.createAnimation(row: avatarConfig.rowIdle, stepTime: avatarConfig.idleStepTime, from: 0, to: 1);
 
     animation = idleAnimation;
@@ -64,7 +64,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     priority = 2;
   }
 
-  // --- NUOVO: funzione generica per aggiungere layer ---
+  // funzione generica per aggiungere layer ---
   Future<void> loadLayer(String layerName, Map<String, ClothingItem> items, String? color) async {
     if (color == null) return;
 
@@ -75,11 +75,11 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     final sheet = SpriteSheet(image: image, srcSize: Vector2(64, 64));
 
     animations['${layerName}_back'] =
-        sheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, to: 9);
+        sheet.createAnimation(row: avatarConfig.rowBack, stepTime: avatarConfig.stepTime, from:1, to: 9);
     animations['${layerName}_left'] =
         sheet.createAnimation(row: avatarConfig.rowLeft, stepTime: avatarConfig.stepTime, to: 9);
     animations['${layerName}_front'] =
-        sheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime, to: 9);
+        sheet.createAnimation(row: avatarConfig.rowFront, stepTime: avatarConfig.stepTime, from: 1, to: 9);
     animations['${layerName}_right'] =
         sheet.createAnimation(row: avatarConfig.rowRight, stepTime: avatarConfig.stepTime, to: 9);
     animations['${layerName}_idle'] =
@@ -100,6 +100,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     await loadLayer(layerName, assets, color);
   }
 
+
   @override
   void update(double dt) {
     super.update(dt);
@@ -111,45 +112,55 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     if (_keysPressed.contains(LogicalKeyboardKey.arrowRight)) velocity.x = 1;
 
     if (velocity.length != 0) {
-  // Muovi e aggiorna le animazioni normalmente
-  velocity.normalize();
-  lastDelta = velocity * speed * dt;
-  position += lastDelta;
+      velocity.normalize();
+      lastDelta = velocity * speed * dt;
+      position += lastDelta;
 
-  // Aggiorna animazioni layer
-  for (final layerName in layers.keys) {
-    if (velocity.y < 0) layers[layerName]!.animation = animations['${layerName}_back'];
-    else if (velocity.y > 0) layers[layerName]!.animation = animations['${layerName}_front'];
-    else if (velocity.x < 0) layers[layerName]!.animation = animations['${layerName}_left'];
-    else if (velocity.x > 0) layers[layerName]!.animation = animations['${layerName}_right'];
+      // --- LOGICA DIAGONALE: Priorità asse X ---
+      // Se premo sinistra+su o sinistra+giù, vince 'left'
+      // Se premo destra+su o destra+giù, vince 'right'
+      
+      String suffix;
+      SpriteAnimation? bodyAnim;
 
-    layers[layerName]!.animation!.stepTime = avatarConfig.stepTime; // assicurati che l'animazione scorra
-  }
+      if (velocity.x < 0) {
+        suffix = 'left';
+        bodyAnim = walkLeftAnimation;
+      } else if (velocity.x > 0) {
+        suffix = 'right';
+        bodyAnim = walkRightAnimation;
+      } else if (velocity.y < 0) {
+        suffix = 'back';
+        bodyAnim = walkBackAnimation;
+      } else {
+        suffix = 'front';
+        bodyAnim = walkAnimation;
+      }
 
       // Aggiorna corpo principale
-      animation = (velocity.y < 0)
-          ? walkBackAnimation
-          : (velocity.y > 0)
-              ? walkAnimation
-              : (velocity.x < 0)
-                  ? walkLeftAnimation
-                  : walkRightAnimation;
+      animation = bodyAnim;
       animation!.stepTime = avatarConfig.stepTime;
+
+      // Aggiorna tutti i layer vestiti
+      for (final layerName in layers.keys) {
+        layers[layerName]!.animation = animations['${layerName}_$suffix'];
+        if (layers[layerName]!.animation != null) {
+          layers[layerName]!.animation!.stepTime = avatarConfig.stepTime;
+        }
+      }
 
     } else {
       lastDelta = Vector2.zero();
 
-      // Quando fermo, blocco le animazioni multi-layer e corpo principale sul frame corrente
+      // Stato Idle: fermiamo l'avanzamento dei frame
       for (final layerName in layers.keys) {
         final anim = layers[layerName]!.animation;
-        if (anim != null) {
-          anim.stepTime = double.infinity; // ferma l'avanzamento dei frame
-        }
+        if (anim != null) anim.stepTime = double.infinity;
       }
       if (animation != null) animation!.stepTime = double.infinity;
     }
     
-    priority = position.y.toInt(); // Aggiorna priority in base alla posizione y
+    priority = position.y.toInt();
   }
 
   @override

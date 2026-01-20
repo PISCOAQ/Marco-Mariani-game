@@ -3,7 +3,7 @@ class ClothingItem {
   final String category;  // shirt, pants, hair, shoes
   final String color;     // red, blue...
   final String path;      // asset path
-  final int price;        // prezzo (non usato ancora)
+  final int price;        // prezzo
 
   ClothingItem({
     required this.id,

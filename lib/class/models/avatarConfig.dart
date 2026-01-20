@@ -7,8 +7,6 @@ class AvatarConfig {
   final Map<String, ClothingItem> shoes;
   final Map<String, ClothingItem> hair;
 
-
-
   // Righe dello spritesheet
   final int rowIdle;
   final int rowBack;

@@ -348,9 +348,14 @@ Widget _buildFooter(player, List<String> layers, Map<String, Map<String, Clothin
 }
 
 
-  Widget _buildLayerImage(String layer, dynamic player, Map<String, Map<String, ClothingItem>> options,) {
+  Widget _buildLayerImage(String layer, dynamic player, Map<String, Map<String, ClothingItem>> options) {
     final color = selectedColors[layer] ?? player.currentLayerColor[layer];
-    if (color == null) return const SizedBox();
+    
+    // Se il colore è null o NON esiste nelle opzioni di questo specifico avatar
+    if (color == null || options[layer] == null || options[layer]![color] == null) {
+      return const SizedBox(); 
+    }
+
     final ClothingItem item = options[layer]![color]!;
     return _buildSpriteFrame(item.path);
   }
