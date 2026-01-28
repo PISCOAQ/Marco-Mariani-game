@@ -14,7 +14,7 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
   late SpriteComponent indicator; // Il nuovo indicatore visivo
 
   Chest({required Vector2 position, required Vector2 size, required this.onOpen}) 
-      : super(position: position, size: size, priority: position.y.toInt());
+      : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {

@@ -5,6 +5,7 @@ import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/widgets/ChestPage.dart';
 import 'package:gioco_demo/widgets/GameNotification.dart';
+import 'package:gioco_demo/widgets/Gameloading_screen.dart';
 import 'package:gioco_demo/widgets/MoneyWidget.dart';
 import 'package:gioco_demo/widgets/PageOverlay.dart';
 import 'package:gioco_demo/widgets/levelNotification.dart';
@@ -31,6 +32,9 @@ class _MapScreenState extends State<MapScreen> {
   // 1. Creiamo il FocusNode dedicato al gioco
   final FocusNode _gameFocusNode = FocusNode();
 
+  double _loadingProgress = 0.0;
+  bool _isLoadingVisible = true;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +49,21 @@ class _MapScreenState extends State<MapScreen> {
           _levelUpNotifier.value = false;
         });
       },
+      onProgress: (progress) {
+        // Questo dice a Flutter: "Appena hai finito di disegnare, esegui questo"
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) { // Controllo di sicurezza: lo schermo è ancora attivo?
+            setState(() {
+              _loadingProgress = progress;
+              if (progress >= 1.0) {
+                Future.delayed(const Duration(milliseconds: 800), () {
+                  if (mounted) setState(() => _isLoadingVisible = false);
+                });
+              }
+            });
+          }
+        });
+        },
     );  
   }
 
@@ -176,6 +195,19 @@ Widget build(BuildContext context) {
               child: LevelUpOverlay(game: _myGame),
             );
           },
+        ),
+
+
+
+        // 7. SCHERMATA DI CARICAMENTO (Sopra a tutto finché non finisce)
+        IgnorePointer(
+          ignoring: !_isLoadingVisible, // Lascia passare i click quando sparisce
+          child: AnimatedOpacity(
+            opacity: _isLoadingVisible ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 1000), // Dissolvenza fluida
+            curve: Curves.easeOut,
+            child: GameLoadingScreen(progress: _loadingProgress),
+          ),
         ),
       ],
     ),

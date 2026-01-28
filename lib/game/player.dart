@@ -4,15 +4,19 @@ import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart';
 import 'package:gioco_demo/class/models/ClothingItem.dart';
 import 'package:gioco_demo/class/models/PlayerState.dart';
+import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/avatarConfig.dart';
 import 'package:gioco_demo/class/services/Avatar_loader.dart';
+import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/game/chest.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRef {
   Vector2 velocity = Vector2.zero();
-  final double speed = 130;
+  final double speed = 110;
   final Set<LogicalKeyboardKey> _keysPressed = {};
   late Vector2 lastDelta;
+
+  int currentFloor = 1; // Di default iniziamo a terra
 
   final PlayerState playerState;
 
@@ -160,13 +164,31 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
       if (animation != null) animation!.stepTime = double.infinity;
     }
     
-    priority = position.y.toInt();
+    priority = (currentFloor * 1000) + position.y.toInt();
+    
+    // Cerchiamo quello che si chiama livello_2
+  if (currentFloor == 3 ) {
+    // SEI SOTTO (Livello 3): 5 è più basso di 15 (ponte).
+    // Risultato: sei sopra l'erba ma il ponte ti copre.
+    priority = 5; 
+  } else if (currentFloor == 2) {
+    // SEI SOPRA (Livello 2): 25 è più alto di 15 (ponte).
+    // Risultato: cammini sopra il ponte.
+    priority = 25;
+  }else if (currentFloor == 4) {
+    // SUL LIVELLO 4: Sei sopra a tutto
+    priority = 5; 
+  }
+
   }
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other is Chest) other.open();
-    if (other is! Player) position -= lastDelta;
+    //se l'oggetto è un FloorSensor, NON resettare la posizione.
+    if (other is! Player && other is! FloorSensor) {
+      position -= lastDelta; // Questo blocca il movimento
+    }
     super.onCollision(intersectionPoints, other);
   }
 
@@ -204,6 +226,16 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   Future<void> applyState() async {
     await _applyEquippedItems();
   }
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+  super.onCollisionStart(intersectionPoints, other);
+
+  if (other is FloorSensor) {
+    currentFloor = other.floorValue;
+    print("Passaggio al livello: $currentFloor");
+  }
+}
 
 
 }
