@@ -2,13 +2,16 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Levelmanager.dart';
 import 'package:gioco_demo/game/player.dart';
 
 typedef ShowQuizCallback = void Function();
 
 class InteractiveObject extends PositionComponent with CollisionCallbacks {
   final ShowQuizCallback onTrigger;
-  final String spritePath; // Nome del file immagine
+  final String spritePath; // Nome del file icona
+  final int levelId;
+
   late SpriteComponent indicator;
   bool _canTrigger = true;
 
@@ -19,6 +22,7 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
     double height,
     this.onTrigger, {
     required this.spritePath,
+    required this.levelId,
   }) : super(
           position: Vector2(x, y),
           size: Vector2(width, height),
@@ -41,6 +45,7 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
       // Posizionata a metà larghezza dell'oggetto e 12 pixel sopra
       position: Vector2(size.x / 2, -12), 
     );
+    
 
     // 3. EFFETTO MOVIMENTO
     indicator.add(
@@ -55,15 +60,40 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
       ),
     );
 
+    if (LevelManager.currentLevel > levelId) {
+    indicator.opacity = 0.0;
+  } else if (LevelManager.currentLevel == levelId) {
+    indicator.opacity = 1.0;
+  }
+
     add(indicator);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // LOGICA: Nascondi SOLO se il livello è passato
+  if (LevelManager.currentLevel > levelId) {
+    // Il giocatore ha superato questo livello -> Nascondi l'icona
+    if (indicator.opacity != 0.0) indicator.opacity = 0.0;
+  } else {
+    // Il giocatore è a questo livello o deve ancora arrivarci -> Mostra l'icona
+    if (indicator.opacity != 1.0) indicator.opacity = 1.0;
+  }
   }
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Player && _canTrigger) {
-      _canTrigger = false;
-      onTrigger();
+      //if(LevelManager.currentLevel == levelId){
+        _canTrigger = false;
+        onTrigger();
+       // print('okay puoi accedere alle interazioni');
+      //} else{
+        //print('NON puoi accedere alle interazioni');
+      //}
     }
   }
 

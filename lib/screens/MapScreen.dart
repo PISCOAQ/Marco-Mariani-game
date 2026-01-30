@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
+import 'package:gioco_demo/class/models/Levelmanager.dart';
 import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/game/MyGame.dart';
@@ -8,6 +9,7 @@ import 'package:gioco_demo/widgets/GameNotification.dart';
 import 'package:gioco_demo/widgets/Gameloading_screen.dart';
 import 'package:gioco_demo/widgets/MoneyWidget.dart';
 import 'package:gioco_demo/widgets/PageOverlay.dart';
+import 'package:gioco_demo/widgets/infoPopUp.dart';
 import 'package:gioco_demo/widgets/levelNotification.dart';
 
 class MapScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isChestPage = false;
   String? _messaggioNotifica;
   dynamic _attivitaCaricata;
+  bool _isGuideOpen = false;
 
   final ValueNotifier<bool> _levelUpNotifier = ValueNotifier<bool>(false);
 
@@ -43,9 +46,8 @@ class _MapScreenState extends State<MapScreen> {
       onShowPopup: _showPopup, 
       onShowChestPopup: _showChestPage,
       onLevelUnlocked: () {
-        print("CALLBACK RICEVUTA IN MAPSCREEN!"); // Verifica se leggi questo in console
         _levelUpNotifier.value = true;
-        Future.delayed(const Duration(seconds: 5), () {
+        Future.delayed(const Duration(seconds: 3), () {   //Durata levelNotification
           _levelUpNotifier.value = false;
         });
       },
@@ -82,40 +84,51 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _showPopup(String tipo) async {
+  void _toggleGuide() {
+    setState(() {
+      _isGuideOpen = !_isGuideOpen;
+      if (_isGuideOpen) {
+        _myGame.pauseEngine();
+      } else {
+        _myGame.resumeEngine();
+        // Ridiamo il focus al gioco dopo la chiusura
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _gameFocusNode.requestFocus();
+        });
+      }
+    });
+  }
+
+  void _showPopup(String tipo, int levelId) async {
     final risultato = await ActivityLoader.carica();
     if (risultato == null) return;
 
-    if (risultato is Esercitazione) {
-      if (tipo == 'quiz') {
-        _mostraMessaggioAvviso("Fai l'esercitazione, poi torna qui!");
-        return; 
-      } else {
-        setState(() {
-          _messaggioNotifica = null;
-          _attivitaCaricata = risultato;
-          _isPageActive = true;
-          _myGame.pauseEngine();
-        });
-        return; 
-      }
+    if (LevelManager.currentLevel > levelId) {
+      _mostraMessaggioAvviso("Sfida già completata!");
+      return;
     }
 
-    if (risultato is Quiz) {
-      if (tipo == 'esercitazione') {
-        _mostraMessaggioAvviso("Esegui il quiz!");
-        return;
-      } else {
-        setState(() {
-          _messaggioNotifica = null;
-          _attivitaCaricata = risultato;
-          _isPageActive = true;
-          _myGame.pauseEngine();
-        });
-        return;
-      }
+    if (risultato is Esercitazione && tipo == "quiz") {
+        _mostraMessaggioAvviso("Fai l'esercitazione, poi torna qui!");
+        return; 
     }
+    if (risultato is Quiz && tipo == "esercitazione") {
+      _mostraMessaggioAvviso("Esegui il quiz!");
+      return;
+    }
+
+    setState(() {
+      _messaggioNotifica = null;
+      _attivitaCaricata = risultato;
+      _isPageActive = true;
+      _myGame.pauseEngine();
+    });
+
+    //PROVVISORIO -> DOPO SBLOCCO QUANDO PASSO IL QUIZ
+    _myGame.unlockLevel((levelId + 1).toString());
+
   }
+    
 
   void _mostraMessaggioAvviso(String testo) {
     setState(() {
@@ -155,12 +168,56 @@ Widget build(BuildContext context) {
           focusNode: _gameFocusNode,
           autofocus: true,
           overlayBuilderMap: {
-            'LevelUp': (context, MyGame game) => LevelUpOverlay(game: game),
+            'LevelUp': (context, MyGame game) => LevelNotification(game: game),
           },
         ),
 
-        // 2. Widget delle monete
-        Moneywidget(walletNotifier: _myGame.playerState.coins),
+
+        Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min, // La riga occupa solo lo spazio necessario
+              crossAxisAlignment: CrossAxisAlignment.center, // Allineamento verticale perfetto
+              children: [
+                // PRIMA IL PULSANTE GUIDA
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _toggleGuide,
+                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      height: 45,
+                      width: 45,
+                      padding: const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white24, width: 2),
+                      ),
+                      child: const Icon(Icons.help_outline, color: Colors.white, size: 24),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 12), // Spazio preciso tra pulsante e monete
+
+                // POI IL WIDGET MONETE
+                Moneywidget(walletNotifier: _myGame.playerState.coins),
+              ],
+            ),
+          ),
+        ),
+
+        if (_isGuideOpen) InfoPopup(onExit: _toggleGuide), 
+
+        // 5. NOTIFICHE DI SISTEMA (Messaggi avviso)
+        if (_messaggioNotifica != null)
+          GameNotification(
+            key: UniqueKey(),
+            messaggio: _messaggioNotifica!,
+          ),
 
         // 3. Notifiche di sistema
         if (_messaggioNotifica != null)
@@ -192,7 +249,7 @@ Widget build(BuildContext context) {
             // Usiamo IgnorePointer così se l'utente clicca mentre c'è l'animazione, 
             // il click passa al quiz o al gioco sottostante
             return IgnorePointer(
-              child: LevelUpOverlay(game: _myGame),
+              child: LevelNotification(game: _myGame),
             );
           },
         ),
@@ -213,5 +270,6 @@ Widget build(BuildContext context) {
     ),
   );
 }
+  
   
 }

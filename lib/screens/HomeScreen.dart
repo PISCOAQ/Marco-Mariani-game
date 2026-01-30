@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // 1. Sfondo Immobile
           Positioned.fill(
             child: Image.asset(
-              '/images/casa.jpg',
+              '/images/home.png',
               fit: BoxFit.cover,
             ),
           ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/ClothingItem.dart';
 import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/game/MyGame.dart';
-import 'package:gioco_demo/game/player.dart';
 
 class ChestPage extends StatefulWidget {
   final VoidCallback onExit;

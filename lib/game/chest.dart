@@ -12,13 +12,21 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
 
   late SpriteComponent _topPart;
   late SpriteComponent indicator; // Il nuovo indicatore visivo
+  final int level;
 
-  Chest({required Vector2 position, required Vector2 size, required this.onOpen}) 
+  Chest({required Vector2 position, required Vector2 size, required this.onOpen, required this.level}) 
       : super(position: position, size: size);
 
   @override
   Future<void> onLoad() async {
     final image = await gameRef.images.load("TX Props.png");
+
+    // ASSEGNAZIONE PRIORITÀ IN BASE AL PIANO
+    if (level == 2) {
+      priority = 20; // Sopra il ponte (che è 15)
+    } else {
+      priority = 5;  // Piano terra (sopra l'erba ma sotto il ponte)
+    }
 
     sprites = {
       false: Sprite(image, srcPosition: Vector2(96, 32), srcSize: Vector2(32, 32)),
@@ -33,7 +41,7 @@ class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameR
     );
 
     // --- AGGIUNTA INDICATORE ---
-    // Carichiamo l'icona (usa lo stesso spritePath dell'InteractiveObject o uno diverso)
+    // Carichiamo l'icona 
     final indicatorSprite = await Sprite.load('shop.png'); 
     indicator = SpriteComponent(
       sprite: indicatorSprite,

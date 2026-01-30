@@ -7,7 +7,6 @@ import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/avatarConfig.dart';
 import 'package:gioco_demo/class/services/Avatar_loader.dart';
-import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/game/chest.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRef {
@@ -169,11 +168,9 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     // Cerchiamo quello che si chiama livello_2
   if (currentFloor == 3 ) {
     // SEI SOTTO (Livello 3): 5 è più basso di 15 (ponte).
-    // Risultato: sei sopra l'erba ma il ponte ti copre.
     priority = 5; 
   } else if (currentFloor == 2) {
     // SEI SOPRA (Livello 2): 25 è più alto di 15 (ponte).
-    // Risultato: cammini sopra il ponte.
     priority = 25;
   }else if (currentFloor == 4) {
     // SUL LIVELLO 4: Sei sopra a tutto

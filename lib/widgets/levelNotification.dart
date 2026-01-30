@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class LevelUpOverlay extends StatelessWidget {
+class LevelNotification extends StatelessWidget {
   final dynamic game;
-  const LevelUpOverlay({super.key, required this.game});
+  const LevelNotification({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {

@@ -18,7 +18,7 @@ class _GamePageState extends State<GamePage> {
     super.initState();
     _game = MyGame(
       avatarIndex: 1, // o il tuo indice
-      onShowPopup: (tipo) => print("Popup: $tipo"),
+      onShowPopup: (tipo, levelId) => print("Popup: $tipo per il livello: $levelId"),
       onShowChestPopup: () => print("Chest!"),
       onLevelUnlocked: () => print("Level Unlocked"),
       // Aggiungiamo una callback per il progresso (la definiamo dopo nel MyGame)
