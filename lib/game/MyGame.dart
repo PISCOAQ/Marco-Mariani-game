@@ -37,6 +37,8 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
 
   final ProgressCallback onProgress;
 
+  bool _sentieriVisibili = true;
+
   MyGame({
     required this.avatarIndex,
     required this.onShowPopup,
@@ -130,14 +132,14 @@ Future<void> onLoad() async {
       // Convertiamo la lista di Point in una lista di Vector2
       List<Vector2>? vertici;
       if (object.isPolygon && object.polygon != null) {
-        vertici = object.polygon!.map((p) => Vector2(p.x, p.y)).toList();
+        vertici = object.polygon.map((p) => Vector2(p.x, p.y)).toList();
       }
 
       world.add(BaglioreCartello(
         position: Vector2(object.x, object.y),
         size: Vector2(object.width, object.height),
         levelId: levelId,
-        punti: vertici, // Ora il tipo è corretto!
+        punti: vertici,
       )..priority = 100);
     }
 
@@ -256,24 +258,29 @@ Iterable<tiled.TiledObject> _searchInLayer(tiled.Layer layer, String name) {
     }
   }
 
-void aggiornaPercorsi(int livelloAttuale) {
-  for (int i = 1; i <= 5; i++) {
-    String nomeLayer = 'percorso_$i';
-    bool deveEssereVisibile = (livelloAttuale == i);
+  void aggiornaPercorsi(int livelloAttuale, {bool? mostrare}) {
+    // Se 'mostrare' viene passato (dal popup), aggiorniamo lo stato interno.
+    // Se è null (chiamata da unlockLevel), usiamo lo stato memorizzato.
+    if (mostrare != null) {
+      _sentieriVisibili = mostrare;
+    }
 
-    // Impostiamo l'opacità a 0.5 per il percorso attivo, 0.0 per gli altri
-    double opacitaTarget = deveEssereVisibile ? 0.5 : 0.0;
+    for (int i = 1; i <= 5; i++) {
+      String nomeLayer = 'percorso_$i';
+      
+      bool deveEssereVisibile = (livelloAttuale == i) && _sentieriVisibili;
 
-    for (var comp in [mapComponent, ponteComponent]) {
-      final layer = comp.tileMap.getLayer<tiled.Layer>(nomeLayer);
-      if (layer != null) {
-        layer.opacity = opacitaTarget;
-        // Spegniamo il rendering se l'opacità è zero per risparmiare risorse
-        layer.visible = deveEssereVisibile;
+      double opacitaTarget = deveEssereVisibile ? 0.5 : 0.0;
+
+      for (var comp in [mapComponent, ponteComponent]) {
+        final layer = comp.tileMap.getLayer<tiled.Layer>(nomeLayer);
+        if (layer != null) {
+          layer.opacity = opacitaTarget;
+          layer.visible = deveEssereVisibile;
+        }
       }
     }
   }
-}
 
 }
 

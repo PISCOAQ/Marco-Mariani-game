@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 
 class InfoPopup extends StatelessWidget {
   final VoidCallback onExit;
+  final bool sentieriAttivi;
+  final Function(bool) onToggleSentieri;
 
-  const InfoPopup({super.key, required this.onExit});
+  const InfoPopup({
+    super.key,
+    required this.onExit,
+    required this.sentieriAttivi,
+    required this.onToggleSentieri,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,12 +23,12 @@ class InfoPopup extends StatelessWidget {
             onTap: onExit,
             child: Container(color: Colors.black.withOpacity(0.7)),
           ),
-          
+
           Center(
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.9, // Più largo per le due colonne
+              width: MediaQuery.of(context).size.width * 0.9,
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8, // Più alto e scorrevole
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E1E1E).withOpacity(0.95),
@@ -61,27 +68,30 @@ class InfoPopup extends StatelessWidget {
                               _buildGuideRow(
                                 '/images/statua_quiz.png',
                                 'QUIZ',
-                                'Avvicinati alla statua, qui puoi svolgere i quiz per guadagnare monete e sbloccare nuove aree della mappa. Ogni livello richiede una prova diversa!',
+                                'Avvicinati alla statua, qui puoi svolgere i quiz per guadagnare monete e sbloccare nuove aree della mappa.',
                               ),
                               _buildGuideRow(
                                 '/images/colonna.png',
                                 'ESERCITAZIONI',
-                                'Non farti cogliere impreparato! Avvicinati alla statua per affinare le tue abilità e allenare la mente, in modo che i quiz saranno una passeggiata',
+                                'Non farti cogliere impreparato! Avvicinati alla statua esercitazioni per affinare le tue abilità: i quiz saranno una passeggiata!',
                               ),
                               _buildGuideRow(
                                 '/images/chest_preview.png',
                                 'GUARDAROBA',
-                                'Avvicinati al forziere, dove in qualunque momento portai accedere allo shop per acquistare quello che vuoi!',
+                                'Avvicinati al forziere per accedere allo shop e personalizzare il tuo avatar!',
                               ),
                               _buildGuideRow(
                                 '/images/cartello_preview.png',
                                 'CARTELLI',
-                                'Lungo il cammino troverai numerosi cartelli: quando iniziano a brillare, significa che è il momento di seguirli. La loro luce ti guiderà dritto verso il tuo prossimo obiettivo.',
+                                'Quando i cartelli iniziano a brillare, seguili! Ti indicano la direzione del prossimo obiettivo.',
                               ),
+
+                              // RIGA SPECIALE CON LO SWITCH PER LE LUCI
                               _buildGuideRow(
                                 '/images/percorso_preview.png',
                                 'SCIE DI LUCE',
-                                'Il mondo è vasto e sei libero di esplorare ogni angolo, ma non sarai mai solo. Una scia luminosa apparirà sul terreno per suggerirti la rotta ideale: un piccolo aiuto per non smarrire la strada mentre insegui la vittoria.',
+                                'Sei libero di esplorare ogni angolo della mappa, ma se ti senti smarrito cerca i riflessi sul terreno. Questi sentieri luminosi ti suggeriscono la rotta ideale per proseguire la tua avventura senza intoppi. Se preferisci una sfida più difficile e vuoi esplorare la mappa in totale autonomia, puoi disattivarle dal pulsante qui al lato.',
+                                showSwitch: true, // Attiviamo lo switch solo qui
                               ),
                             ],
                           ),
@@ -125,14 +135,13 @@ class InfoPopup extends StatelessWidget {
     );
   }
 
-  // Costruttore della riga a due colonne
-  Widget _buildGuideRow(String imagePath, String title, String description) {
+  Widget _buildGuideRow(String imagePath, String title, String description, {bool showSwitch = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40), // Spazio tra una riga e l'altra
+      padding: const EdgeInsets.only(bottom: 40),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // COLONNA SINISTRA: Immagine/Anteprima
+          // COLONNA SINISTRA: Immagine
           Container(
             width: 120,
             height: 120,
@@ -152,21 +161,34 @@ class InfoPopup extends StatelessWidget {
             ),
           ),
           
-          const SizedBox(width: 30), // Spazio tra immagine e testo
+          const SizedBox(width: 30),
 
-          // COLONNA DESTRA: Testo
+          // COLONNA DESTRA: Testo (+ eventuale Switch)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    // Inseriamo lo Switch se richiesto
+                    if (showSwitch)
+                      Switch(
+                        value: sentieriAttivi,
+                        onChanged: onToggleSentieri,
+                        activeColor: Colors.green,
+                        activeTrackColor: Colors.green.withOpacity(0.3),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -174,7 +196,7 @@ class InfoPopup extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 15,
-                    height: 1.5,
+                    height: 1.4,
                   ),
                 ),
               ],

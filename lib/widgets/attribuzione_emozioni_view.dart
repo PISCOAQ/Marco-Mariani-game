@@ -44,7 +44,7 @@ class AttribuzioneEmozioniView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
-              domanda.question ?? "",
+              domanda.question,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 18,

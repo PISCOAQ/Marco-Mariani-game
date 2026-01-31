@@ -28,6 +28,7 @@ class _MapScreenState extends State<MapScreen> {
   String? _messaggioNotifica;
   dynamic _attivitaCaricata;
   bool _isGuideOpen = false;
+  bool _mostraSentieri = true;
 
   final ValueNotifier<bool> _levelUpNotifier = ValueNotifier<bool>(false);
 
@@ -182,24 +183,44 @@ Widget build(BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.center, // Allineamento verticale perfetto
               children: [
                 // PRIMA IL PULSANTE GUIDA
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _toggleGuide,
-                    borderRadius: BorderRadius.circular(25),
-                    child: Container(
-                      height: 45,
-                      width: 45,
-                      padding: const EdgeInsets.all(0),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white24, width: 2),
-                      ),
-                      child: const Icon(Icons.help_outline, color: Colors.white, size: 24),
-                    ),
-                  ),
-                ),
+Material(
+  color: Colors.transparent,
+  child: InkWell(
+    onTap: _toggleGuide,
+    borderRadius: BorderRadius.circular(25),
+    child: Container(
+      height: 45,
+      // Togliamo width: 45 per permettere al tasto di allargarsi in base al testo
+      padding: const EdgeInsets.symmetric(horizontal: 16), // Spazio interno laterale
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        // Cambiamo da BoxShape.circle a una forma rettangolare arrotondata
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.white24, width: 2),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min, // Il contenitore stringe intorno al contenuto
+        children: [
+          Icon(
+            Icons.help_outline, 
+            color: Colors.white, 
+            size: 20
+          ),
+          SizedBox(width: 8), // Spazio tra icona e scritta
+          Text(
+            'AIUTO',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5, // Un tocco di stile gaming
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
                 
                 const SizedBox(width: 12), // Spazio preciso tra pulsante e monete
 
@@ -210,7 +231,18 @@ Widget build(BuildContext context) {
           ),
         ),
 
-        if (_isGuideOpen) InfoPopup(onExit: _toggleGuide), 
+        if (_isGuideOpen)
+          InfoPopup(
+            sentieriAttivi: _mostraSentieri,
+            onToggleSentieri: (nuovoStato) {
+              setState(() {
+                _mostraSentieri = nuovoStato;
+              });
+              // Comunichiamo al gioco di aggiornare la visibilità dei layer
+              _myGame.aggiornaPercorsi(LevelManager.currentLevel, mostrare: nuovoStato);
+            },
+            onExit: _toggleGuide,
+          ), 
 
         // 5. NOTIFICHE DI SISTEMA (Messaggi avviso)
         if (_messaggioNotifica != null)
