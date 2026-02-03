@@ -224,6 +224,11 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
     await _applyEquippedItems();
   }
 
+  void resetMovement() {
+  _keysPressed.clear(); 
+  velocity.setZero();
+}
+
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
   super.onCollisionStart(intersectionPoints, other);

@@ -3,111 +3,108 @@ import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 
 class EyesTaskView extends StatelessWidget {
-  final EyesTask pagina; // Usiamo la classe specifica EyesTask
-  final String? rispostaUtente;
-  final ValueChanged<String> onChanged;
+  final EyesTask pagina;
+  // 1. Passiamo la lista delle risposte
+  final List<String> risposteDate; 
+  final ValueChanged<List<String>> onChanged;
 
   const EyesTaskView({
     super.key,
     required this.pagina,
-    required this.rispostaUtente,
+    required this.risposteDate,
     required this.onChanged,
   });
 
+  // Helper per aggiornare la risposta (indice 0 perché EyesTask ha una domanda per pagina)
+  void _selezionaRisposta(int optIndex) {
+    List<String> nuovaLista = List.from(risposteDate);
+    if (nuovaLista.isEmpty) {
+      nuovaLista.add(optIndex.toString());
+    } else {
+      nuovaLista[0] = optIndex.toString();
+    }
+    onChanged(nuovaLista);
+  }
+
   @override
-@override
-Widget build(BuildContext context) {
-  final Domanda domanda = pagina.lista_domande[0];
+  Widget build(BuildContext context) {
+    final Domanda domanda = pagina.lista_domande[0];
+    // La risposta salvata per questa domanda (indice 0)
+    final String rispostaCorrente = risposteDate.isNotEmpty ? risposteDate[0] : "";
 
-  return Column(
-    children: [
-      const SizedBox(height: 40),
-      
-      // L'immagine (che caricherà il placeholder se il path è "")
-      _buildImmagine(pagina.imagePath),
+    return Column(
+      children: [
+        const SizedBox(height: 40),
+        
+        _buildImmagine(pagina.imagePath),
 
-      const SizedBox(height: 30),
+        const SizedBox(height: 30),
 
-      // Il testo della domanda (quello che abbiamo impostato di default nel loader)
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Text(
-          domanda.testo,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            domanda.testo,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          ),
         ),
-      ),
 
-      const SizedBox(height: 30),
+        const SizedBox(height: 30),
 
-      // LE RISPOSTE (Bottoni invece di TextField)
-      Wrap(
-        spacing: 15,
-        runSpacing: 15,
-        alignment: WrapAlignment.center,
-        children: domanda.opzioni.map((opt) {
-          final bool isSelected = rispostaUtente == opt;
-          return _buildOptionBtn(opt, isSelected, () => onChanged(opt));
-        }).toList(),
-      ),
-    ],
-  );
-}
-  // Widget helper per l'immagine
+        // LE RISPOSTE
+        Wrap(
+          spacing: 15,
+          runSpacing: 15,
+          alignment: WrapAlignment.center,
+          children: domanda.opzioni.asMap().entries.map((entry) {
+            int idx = entry.key;
+            String testoOpzione = entry.value;
+
+            // Il confronto ora avviene sull'indice (trasformato in stringa)
+            final bool isSelected = rispostaCorrente == idx.toString();
+            
+            return _buildOptionBtn(testoOpzione, isSelected, () => _selezionaRisposta(idx));
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // --- I widget helper _buildImmagine e _buildOptionBtn rimangono quasi identici ---
+  // Unica nota: _buildOptionBtn e _buildImmagine vanno messi dentro la classe o come metodi privati.
+  
   Widget _buildImmagine(String path) {
     return Container(
-      width: 450, // Leggermente più grande per vedere bene i dettagli
+      width: 450,
       height: 200,
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.grey[400]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
-        child: path.contains("placeholder") || path.isEmpty
-            ? const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.visibility, size: 50, color: Colors.grey),
-                  SizedBox(height: 10),
-                  Text("Immagine non disponibile", style: TextStyle(color: Colors.grey)),
-                ],
-              )
-            : Image.asset(
-                path,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(child: Text("Errore caricamento immagine"));
-                },
-              ),
+        child: path.isEmpty || path.contains("placeholder")
+            ? const Center(child: Icon(Icons.visibility, size: 50, color: Colors.grey))
+            : Image.asset(path, fit: BoxFit.cover),
       ),
     );
   }
-}
-
 
   Widget _buildOptionBtn(String testo, bool isSelected, VoidCallback onTap) {
     return SizedBox(
-      width: 250, // Larghezza fissa per mantenere l'ordine
+      width: 250,
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: isSelected ? Colors.blue[700] : Colors.white,
           foregroundColor: isSelected ? Colors.white : Colors.black87,
-          elevation: isSelected ? 2 : 0,
-          side: BorderSide(color: isSelected ? Colors.blue[900]! : Colors.grey[300]!),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: BorderSide(color: isSelected ? Colors.blue[900]! : Colors.grey[300]!),
         ),
         onPressed: onTap,
         child: Text(testo, textAlign: TextAlign.center),
       ),
     );
   }
+}

@@ -4,13 +4,13 @@ import 'package:gioco_demo/class/models/Domanda.dart';
 
 class AttribuzioneEmozioniView extends StatelessWidget {
   final AttribuzioneEmozioni pagina;
-  final String? rispostaUtente;
-  final ValueChanged<String> onChanged;
+  final List<String> risposteDate;
+  final ValueChanged<List<String>> onChanged;
 
   const AttribuzioneEmozioniView({
     super.key,
     required this.pagina,
-    required this.rispostaUtente,
+    required this.risposteDate,
     required this.onChanged,
   });
 
@@ -18,6 +18,10 @@ class AttribuzioneEmozioniView extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final Domanda domanda = pagina.lista_domande[0];
+
+    // Recuperiamo la risposta specifica per questa domanda (indice 0)
+    // Se la lista è vuota o l'indice non esiste (non dovrebbe accadere), usiamo stringa vuota
+    final String testoRisposta = risposteDate.isNotEmpty ? risposteDate[0] : "";
 
     return SizedBox(
       // Forza la larghezza massima per permettere al Column interno di centrare
@@ -70,8 +74,8 @@ class AttribuzioneEmozioniView extends StatelessWidget {
               style: const TextStyle(fontSize: 18),
               controller: TextEditingController.fromValue(
                 TextEditingValue(
-                  text: rispostaUtente ?? "",
-                  selection: TextSelection.collapsed(offset: (rispostaUtente ?? "").length),
+                  text: testoRisposta ?? "",
+                  selection: TextSelection.collapsed(offset: testoRisposta.length),
                 ),
               ),
               decoration: InputDecoration(
@@ -88,7 +92,17 @@ class AttribuzioneEmozioniView extends StatelessWidget {
                   borderSide: const BorderSide(color: Colors.black12),
                 ),
               ),
-              onChanged: onChanged,
+              
+              // 3. Quando il testo cambia, aggiorniamo solo il primo elemento della lista
+              onChanged: (nuovoTesto) {
+                List<String> aggiornata = List.from(risposteDate);
+                if (aggiornata.isEmpty) {
+                  aggiornata.add(nuovoTesto);
+                } else {
+                  aggiornata[0] = nuovoTesto;
+                }
+                onChanged(aggiornata);
+              },
             ),
           ),
 

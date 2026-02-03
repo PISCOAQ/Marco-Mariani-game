@@ -3,11 +3,21 @@
         "questions": [
             {
                 "qid": "c48cdf49-db52-4b4c-bd41-041a4f3c9ae3",
-                "narration": "aaaa",
+                "narration": "Marco com'è?",
                 "question": "cccc",
                 "correctAnswers": [
-                    "aaaa",
-                    "dddd"
+                    "Felice",
+                    "Triste"
+                ],
+                "_id": "697e5c33e21b7b3afc2c98a8"
+            },
+            {
+                "qid": "c48cdf49-db52-4b4c-bd41-041a4f3c9ae3",
+                "narration": "Andrea com'è?",
+                "question": "cccc",
+                "correctAnswers": [
+                    "Felice",
+                    "Triste"
                 ],
                 "_id": "697e5c33e21b7b3afc2c98a8"
             }
@@ -30,6 +40,6 @@
         "selected": true,
         "dragging": false
     },
-    "title": "Ciaoo",
+    "title": "Attribuzione Delle Emozioni",
     "code": ""
 }

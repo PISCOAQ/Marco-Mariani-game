@@ -4,40 +4,36 @@ import 'package:gioco_demo/class/models/Domanda.dart';
 
 class PassoFalsoView extends StatelessWidget {
   final PassoFalso pagina;
-  final String? rispostaUtente; // Stringa nel formato "index1|index2"
-  final ValueChanged<String> onChanged;
+  final List<String> risposteDate; 
+  final ValueChanged<List<String>> onChanged;
 
   const PassoFalsoView({
     super.key,
     required this.pagina,
-    required this.rispostaUtente,
+    required this.risposteDate,
     required this.onChanged,
   });
 
-  // Aggiorna solo una delle due parti della stringa
+  // Molto più semplice: aggiorniamo l'indice della lista e via
   void _updatePart(int questionIndex, int optionIndex) {
-    // Inizializziamo una lista di stringhe vuote lunga quanto il numero di domande
-    List<String> parti = rispostaUtente?.split('|') ?? List.filled(pagina.lista_domande.length, "-1");
+    List<String> nuovaLista = List.from(risposteDate);
     
-    // Sicurezza: allunghiamo se necessario
-    while (parti.length < pagina.lista_domande.length) {
-      parti.add("-1");
+    // Se la lista non è ancora stata inizializzata per questa pagina, la prepariamo
+    while (nuovaLista.length < pagina.lista_domande.length) {
+      nuovaLista.add("");
     }
 
-    parti[questionIndex] = optionIndex.toString();
-    onChanged(parti.join('|'));
+    nuovaLista[questionIndex] = optionIndex.toString();
+    onChanged(nuovaLista);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Decodifichiamo la stringa per sapere quali bottoni colorare
-    final List<String> parti = rispostaUtente?.split('|') ?? ["-1", "-1"];
-
     return Column(
       children: [
         const SizedBox(height: 30),
 
-        // 1. TESTO DELLO SCENARIO (Uguale a Teoria della Mente)
+        // 1. TESTO DELLO SCENARIO
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Text(
@@ -49,20 +45,20 @@ class PassoFalsoView extends StatelessWidget {
 
         const SizedBox(height: 40),
 
-        // 2. CICLO DINAMICO SULLE DOMANDE (Question 1, Question 2, ecc.)
+        // 2. CICLO DINAMICO SULLE DOMANDE
         ...pagina.lista_domande.asMap().entries.map((entry) {
           int idx = entry.key;
           Domanda domandaSingola = entry.value;
           
-          // Recuperiamo quale indice è stato selezionato per questa domanda
-          int scelto = (parti.length > idx) ? (int.tryParse(parti[idx]) ?? -1) : -1;
+          // Recuperiamo la risposta direttamente dalla lista
+          String rispostaCorrente = (risposteDate.length > idx) ? risposteDate[idx] : "";
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 40.0),
             child: _buildSezione(
               domandaSingola.testo,
               domandaSingola.opzioni,
-              scelto,
+              rispostaCorrente,
               (optIdx) => _updatePart(idx, optIdx),
             ),
           );
@@ -71,8 +67,7 @@ class PassoFalsoView extends StatelessWidget {
     );
   }
 
-  // Crea il titolo della domanda e la fila/griglia di bottoni
-  Widget _buildSezione(String titolo, List<String> opzioni, int scelto, Function(int) onTap) {
+  Widget _buildSezione(String titolo, List<String> opzioni, String scelto, Function(int) onTap) {
     return Column(
       children: [
         Text(
@@ -86,23 +81,22 @@ class PassoFalsoView extends StatelessWidget {
           runSpacing: 12,
           alignment: WrapAlignment.center,
           children: List.generate(opzioni.length, (i) {
-            return _buildOptionBtn(opzioni[i], i == scelto, () => onTap(i));
+            // Confrontiamo la stringa salvata ("0", "1") con l'indice attuale del bottone
+            return _buildOptionBtn(opzioni[i], i.toString() == scelto, () => onTap(i));
           }),
         ),
       ],
     );
   }
 
-  // Bottone stilizzato (Stesso stile delle altre view)
   Widget _buildOptionBtn(String testo, bool isSelected, VoidCallback onTap) {
     return SizedBox(
-      width: 250, // Larghezza fissa per mantenere l'ordine
+      width: 250,
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: isSelected ? Colors.blue[700] : Colors.white,
           foregroundColor: isSelected ? Colors.white : Colors.black87,
-          elevation: isSelected ? 2 : 0,
           side: BorderSide(color: isSelected ? Colors.blue[900]! : Colors.grey[300]!),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),

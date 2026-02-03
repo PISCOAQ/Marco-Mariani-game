@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
+import 'package:gioco_demo/class/models/Quiz_Manager.dart';
 import 'package:gioco_demo/widgets/eyes_task_view.dart';
 import 'package:gioco_demo/widgets/passo_falso_view.dart';
 import 'package:gioco_demo/widgets/situazioni_sociali_view.dart';
@@ -10,7 +11,7 @@ import 'attribuzione_emozioni_view.dart';
 
 class QuizView extends StatefulWidget {
   final dynamic quiz;
-  final VoidCallback onConsegna;
+  final Function(bool superato) onConsegna;
 
   const QuizView({
     super.key,
@@ -20,13 +21,24 @@ class QuizView extends StatefulWidget {
 
   @override
   State<QuizView> createState() => _QuizViewState();
+  
 }
 
 class _QuizViewState extends State<QuizView> {
   int _currentIndex = 0;
 
   /// Risposte chiuse (scelta multipla)
-  final Map<int, dynamic> _risposteQuiz = {};
+  final Map<int, List<String>> _risposteQuiz = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Prepariamo i "cassetti" per le risposte
+    for (int i = 0; i < widget.quiz.pagine.length; i++) {
+      // Ogni pagina ha una lista di stringhe vuote lunga quanto le sue domande
+      _risposteQuiz[i] = List.filled(widget.quiz.pagine[i].lista_domande.length, "");
+    }
+  }
 
   /// Risposte aperte (attribuzione emozioni)
   //final Map<int, String?> _risposteAperte = {};
@@ -144,14 +156,18 @@ class _QuizViewState extends State<QuizView> {
 
   // 🔀 SWITCH DELLA UI IN BASE AL TIPO DI PAGINA
   Widget _buildPaginaWidget(Pagina pagina) {
+    // Recuperiamo la lista di risposte per la pagina corrente. 
+    // Se per qualche motivo è null, passiamo una lista vuota per evitare crash.
+    final List<String> risposteCorrenti = _risposteQuiz[_currentIndex] ?? [];
 
     if (pagina is AttribuzioneEmozioni) {
       return AttribuzioneEmozioniView(
         pagina: pagina,
-        rispostaUtente: _risposteQuiz[_currentIndex],
-        onChanged: (value) {
-          setState(() {
-            _risposteQuiz[_currentIndex] = value;
+        risposteDate: risposteCorrenti, // Nuovo nome parametro
+        onChanged: (nuovaLista) {
+          // Questo impedisce al TextField di triggerare un build mentre Flutter sta già buildando
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
           });
         },
       );
@@ -160,21 +176,19 @@ class _QuizViewState extends State<QuizView> {
     if (pagina is EyesTask) {
       return EyesTaskView(
         pagina: pagina,
-        rispostaUtente: _risposteQuiz[_currentIndex],
-        onChanged: (value) {
-          setState(() => _risposteQuiz[_currentIndex] = value);
+        risposteDate: risposteCorrenti,
+        onChanged: (nuovaLista) {
+          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
         },
       );
     }
 
-    if (pagina is TeoriaDellaMente){
+    if (pagina is TeoriaDellaMente) {
       return TeoriaMenteView(
-        pagina: pagina, //Passiamo la pagina con la lista delle domande
-        rispostaUtente: _risposteQuiz[_currentIndex], 
-        onChanged: (value) {
-          setState(() {
-            _risposteQuiz[_currentIndex] = value;
-          });
+        pagina: pagina,
+        risposteDate: risposteCorrenti,
+        onChanged: (nuovaLista) {
+          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
         },
       );
     }
@@ -182,85 +196,84 @@ class _QuizViewState extends State<QuizView> {
     if (pagina is SituazioniSociali) {
       return SituazioniSocialiView(
         pagina: pagina,
-        rispostaUtente: _risposteQuiz[_currentIndex],
-        onChanged: (value) => setState(() => _risposteQuiz[_currentIndex] = value),
+        risposteDate: risposteCorrenti,
+        onChanged: (nuovaLista) => setState(() => _risposteQuiz[_currentIndex] = nuovaLista),
       );
     }
 
-    if (pagina is PassoFalso){
+    if (pagina is PassoFalso) {
       return PassoFalsoView(
-        pagina: pagina, 
-        rispostaUtente: _risposteQuiz[_currentIndex], 
-        onChanged: (value) {
-          setState(() {
-            _risposteQuiz[_currentIndex] = value;
-          });
+        pagina: pagina,
+        risposteDate: risposteCorrenti,
+        onChanged: (nuovaLista) {
+          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
         },
       );
     }
-
     return const Text("Tipo di domanda non supportato");
   }
 
 
   // 📤 DIALOG CONFERMA CONSEGNA
-  void _mostraConfermaConsegna(BuildContext context) {
-    final int totalePagine = widget.quiz.pagine.length;
-    final int risposteDate = _risposteQuiz.length;
+ void _mostraConfermaConsegna(BuildContext context) {
+  final int totalePagine = widget.quiz.pagine.length;
 
-    if(risposteDate < totalePagine){
-      // Avvisiamo l'utente che non ha risposto ad x domande
-      showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text("Quiz incompleto"),
-                content: Text("Hai risposto a $risposteDate domande su $totalePagine. "
-                    "Devi rispondere a tutte le domande prima di consegnare!"),
-                actions: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("HO CAPITO", style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              );
-            },
-      );
-      return;
-    }
+  // LOGICA NUOVA: Controlliamo se c'è qualche stringa vuota nelle liste
+  // .any((lista) => lista.contains("")) è il modo più veloce per farlo
+  bool incompleto = _risposteQuiz.values.any((lista) => lista.contains(""));
 
-    //Se la condizione passa (NO return) mostra il dialog di consegna quiz
+  if (incompleto) {
+    // --- IL TUO DIALOG ORIGINALE "INCOMPLETO" ---
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Conferma Consegna"),
-          content: const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
+          title: const Text("Quiz incompleto"),
+          content: const Text("Devi rispondere a tutte le domande prima di consegnare!"), // Testo originale
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Chiude solo il dialog
-              child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
-            ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              onPressed: () {
-                Navigator.pop(context); // Chiude il dialog
-                
-                // --- Logica tecnica per sbloccare l'avatar
-                FocusScope.of(context).unfocus(); 
-                widget.onConsegna(); // Chiude l'overlay tramite MapScreen
-                
-                //print delle risposte
-                print("Quiz consegnato con risposte: $_risposteQuiz");
-              },
-              child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("HO CAPITO", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
       },
     );
+    return;
   }
+
+  // --- IL TUO DIALOG ORIGINALE "CONFERMA" ---
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Conferma Consegna"),
+        content: const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            onPressed: () {
+              // 1. Chiamiamo il manager e otteniamo l'esito
+              bool superato = QuizManager.valutaQuiz(widget.quiz, _risposteQuiz);
+              
+              Navigator.pop(context);
+              FocusScope.of(context).unfocus();
+              
+              // 2. Passiamo l'esito al callback (devi aggiornare la firma della funzione)
+              widget.onConsegna(superato);
+            },
+            child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 
   Widget _buildNavArrow({

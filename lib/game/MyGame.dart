@@ -234,6 +234,10 @@ Iterable<tiled.TiledObject> _searchInLayer(tiled.Layer layer, String name) {
     return super.onKeyEvent(event, pressedKeys);
   }
 
+  void resetInput() {
+    player.resetMovement();
+  }
+
   void unlockLevel(String levelId) {
     print("Chiamato unlockLevel per: $levelId");
     if (LevelManager.unlock(levelId)) {
@@ -250,8 +254,8 @@ Iterable<tiled.TiledObject> _searchInLayer(tiled.Layer layer, String name) {
         return false;
       });
 
-      print("Sto per chiamare onLevelUnlocked...");
       onLevelUnlocked();
+      
     } else {
       print("Livello già sbloccato precedentemente.");
     }

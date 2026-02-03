@@ -11,6 +11,7 @@ import 'package:gioco_demo/widgets/MoneyWidget.dart';
 import 'package:gioco_demo/widgets/PageOverlay.dart';
 import 'package:gioco_demo/widgets/infoPopUp.dart';
 import 'package:gioco_demo/widgets/levelNotification.dart';
+import 'package:gioco_demo/widgets/quizNotification.dart';
 
 class MapScreen extends StatefulWidget {
   final int avatarIndex;
@@ -29,6 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   dynamic _attivitaCaricata;
   bool _isGuideOpen = false;
   bool _mostraSentieri = true;
+  int? _levelInCorso;
 
   final ValueNotifier<bool> _levelUpNotifier = ValueNotifier<bool>(false);
 
@@ -118,18 +120,44 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
+    if(risultato is Quiz) {
+      _myGame.pauseEngine();
+
+      showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Quiznotification(
+        onCancel: () {
+          Navigator.pop(context); // Chiude il dialog
+            _myGame.resetInput();// 1. Reset fisico e degli input
+            // 2. Facciamo ripartire il motore
+            _myGame.resumeEngine();// 2. Facciamo ripartire il motore
+            // 3. IMPORTANTISSIMO: Ridiamo il focus alla tastiera
+            _gameFocusNode.requestFocus();
+        },
+        onConfirm: () {
+          Navigator.pop(context); // Chiude il dialog
+          _effettuaApertura(risultato, levelId); // Apre il quiz vero e proprio
+        },
+      ),
+    );
+    }else {
+      // Se è Esercitazione, apriamo senza conferma
+      _effettuaApertura(risultato, levelId);
+    }
+  }
+
+  
+  void _effettuaApertura(dynamic risultato, int levelId) {
     setState(() {
+      _levelInCorso = levelId;
       _messaggioNotifica = null;
       _attivitaCaricata = risultato;
       _isPageActive = true;
       _myGame.pauseEngine();
     });
-
-    //PROVVISORIO -> DOPO SBLOCCO QUANDO PASSO IL QUIZ
-    _myGame.unlockLevel((levelId + 1).toString());
-
   }
-    
+
 
   void _mostraMessaggioAvviso(String testo) {
     setState(() {
@@ -146,17 +174,25 @@ class _MapScreenState extends State<MapScreen> {
     _gameFocusNode.requestFocus(); // Torna al gioco
   }
 
-  void _closePage() {
-    setState(() {
-      _isPageActive = false;
-      _myGame.resumeEngine(); 
-    });
+void _closePage(bool superato) {
+  setState(() {
+    _isPageActive = false;
+    _myGame.resumeEngine(); // Questo sblocca l'avatar
+  });
+
+  // IMPORTANTE: Riporta il focus al gioco
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _gameFocusNode.requestFocus();
+  });
+
+  if (superato && _levelInCorso != null) {
+    int livelloDaSbloccare = _levelInCorso! + 1;
+    // Usiamo il numero salvato per sbloccare il livello nel gioco
+    _myGame.unlockLevel(livelloDaSbloccare.toString());
     
-    // Usiamo addPostFrameCallback per essere sicuri che la UI sia chiusa
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _gameFocusNode.requestFocus();
-    });
+    _levelInCorso = null; // Puliamo il post-it
   }
+}
 
   @override
 Widget build(BuildContext context) {
@@ -183,44 +219,44 @@ Widget build(BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.center, // Allineamento verticale perfetto
               children: [
                 // PRIMA IL PULSANTE GUIDA
-Material(
-  color: Colors.transparent,
-  child: InkWell(
-    onTap: _toggleGuide,
-    borderRadius: BorderRadius.circular(25),
-    child: Container(
-      height: 45,
-      // Togliamo width: 45 per permettere al tasto di allargarsi in base al testo
-      padding: const EdgeInsets.symmetric(horizontal: 16), // Spazio interno laterale
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        // Cambiamo da BoxShape.circle a una forma rettangolare arrotondata
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white24, width: 2),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min, // Il contenitore stringe intorno al contenuto
-        children: [
-          Icon(
-            Icons.help_outline, 
-            color: Colors.white, 
-            size: 20
-          ),
-          SizedBox(width: 8), // Spazio tra icona e scritta
-          Text(
-            'AIUTO',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.5, // Un tocco di stile gaming
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _toggleGuide,
+                    borderRadius: BorderRadius.circular(25),
+                    child: Container(
+                      height: 45,
+                      // Togliamo width: 45 per permettere al tasto di allargarsi in base al testo
+                      padding: const EdgeInsets.symmetric(horizontal: 16), // Spazio interno laterale
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        // Cambiamo da BoxShape.circle a una forma rettangolare arrotondata
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(color: Colors.white24, width: 2),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min, // Il contenitore stringe intorno al contenuto
+                        children: [
+                          Icon(
+                            Icons.help_outline, 
+                            color: Colors.white, 
+                            size: 20
+                          ),
+                          SizedBox(width: 8), // Spazio tra icona e scritta
+                          Text(
+                            'AIUTO',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5, // Un tocco di stile gaming
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 
                 const SizedBox(width: 12), // Spazio preciso tra pulsante e monete
 

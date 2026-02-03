@@ -4,31 +4,30 @@ import 'package:gioco_demo/class/models/Domanda.dart';
 
 class TeoriaMenteView extends StatelessWidget {
   final TeoriaDellaMente pagina;
-  final String? rispostaUtente;
-  final ValueChanged<String> onChanged;
+  final List<String> risposteDate;
+  final ValueChanged<List<String>> onChanged;
 
   const TeoriaMenteView({
     super.key,
     required this.pagina,
-    required this.rispostaUtente,
+    required this.risposteDate,
     required this.onChanged,
   });
 
   void _updatePart(int index, String newValue) {
-    // Creiamo una lista basata sul numero reale di domande nella pagina
-    List<String> parti = rispostaUtente?.split('|') ?? List.filled(pagina.lista_domande.length, "");
-    // Sicurezza: se la lista è più corta del previsto, la allunghiamo
-    while (parti.length < pagina.lista_domande.length) {
-      parti.add("");
-    } 
-    parti[index] = newValue;
-    onChanged(parti.join('|'));
-  }
+      List<String> nuovaLista = List.from(risposteDate);
+      
+      // Safety check: allunghiamo se necessario
+      while (nuovaLista.length <= index) {
+        nuovaLista.add("");
+      }
+      
+      nuovaLista[index] = newValue;
+      onChanged(nuovaLista);
+    }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> parti = rispostaUtente?.split('|') ?? ["", "", ""];
-
     return Column(
       children: [
         const SizedBox(height: 30),
@@ -47,13 +46,12 @@ class TeoriaMenteView extends StatelessWidget {
 
 
         // 2. CICLO DINAMICO SULLE DOMANDE
-        // Usiamo .asMap().entries per avere sia l'indice che la domanda
         ...pagina.lista_domande.asMap().entries.map((entry) {
           int idx = entry.key;
           Domanda domandaSingola = entry.value;
 
-          // Recuperiamo la risposta data per questa specifica sottodomanda
-          String rispostaCorrente = parti.length > idx ? parti[idx] : "";
+          // Recuperiamo la risposta direttamente dall'indice della lista
+          String rispostaCorrente = risposteDate.length > idx ? risposteDate[idx] : "";
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 40.0),
@@ -71,17 +69,21 @@ class TeoriaMenteView extends StatelessWidget {
 
   // Widget per le domande a scelta multipla
   Widget _buildOpzioniChiuse(int idx, List<String> opzioni, String selezionata) {
-    return Wrap( // Wrap è meglio di Row se le opzioni sono lunghe o tante
+    return Wrap(
       alignment: WrapAlignment.center,
       spacing: 15,
       runSpacing: 10,
-      children: opzioni.map((opt) {
-        return _buildBtn(opt, selezionata == opt, () => _updatePart(idx, opt));
+      children: opzioni.asMap().entries.map((entry) {
+        int optIdx = entry.key;
+        String optTesto = entry.value;
+        
+        // Salviamo l'indice come stringa per coerenza con il loader degli indici
+        return _buildBtn(optTesto, selezionata == optIdx.toString(), () => _updatePart(idx, optIdx.toString()));
       }).toList(),
     );
   }
 
-  // Widget per le domande a risposta aperta (se previste nel JSON)
+  // Widget per le domande a risposta aperta
   Widget _buildCampoAperto(int idx, String testo) {
     return SizedBox(
       width: 500,

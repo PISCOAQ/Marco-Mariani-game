@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="72" nextobjectid="506">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="72" nextobjectid="509">
  <tileset firstgid="1" name="TX Tileset Grass" tilewidth="32" tileheight="32" tilecount="64" columns="8">
   <image source="../images/TX Tileset Grass.png" width="256" height="256"/>
  </tileset>
@@ -1501,6 +1501,21 @@
   <object id="66" name="LevelsGate 2" x="800.848" y="881" width="61.75" height="6.58333">
    <properties>
     <property name="valore" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="506" name="LevelsGate 5" x="353.792" y="401.375" width="61.75" height="6.58333">
+   <properties>
+    <property name="valore" type="int" value="5"/>
+   </properties>
+  </object>
+  <object id="507" name="LevelsGate 3" x="865.458" y="421.042" width="61.75" height="6.58333">
+   <properties>
+    <property name="valore" type="int" value="3"/>
+   </properties>
+  </object>
+  <object id="508" name="LevelsGate 4" x="705.458" y="435.042" width="61.75" height="6.58333">
+   <properties>
+    <property name="valore" type="int" value="4"/>
    </properties>
   </object>
  </objectgroup>
