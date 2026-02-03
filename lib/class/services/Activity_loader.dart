@@ -7,57 +7,146 @@ import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 class ActivityLoader {
   static const String _path = '/data/data.json';
 
-  static Future<dynamic> carica() async {
+  static Future<Quiz> carica() async {
     final String response = await rootBundle.loadString(_path);
-    final data = json.decode(response);
+    final Map<String, dynamic> data = json.decode(response);
 
-    if (data['tipo_attivita'] == 'quiz') {
+    // Chiamiamo direttamente il costruttore del quiz
+    return _costruisciQuiz(data);
+  }
+
+  static Quiz _costruisciQuiz(Map<String, dynamic> data) {
+    final String type = data["type"] ?? "";
+    final String id = data["_id"] ?? "";
+    final String titolo = data["title"] ?? "Quiz";
+    
+    List<Pagina> listaPagine = [];
+
+    switch (type) {
+      case 'EmotionAttributionTestNode':
       
-      List<Domanda> listaDomande = [];
+        final List<dynamic> questionsRaw = data['data']['questions'] ?? [];
+        
+        for (var q in questionsRaw) {
+          // Creiamo la singola domanda tecnica
+          Domanda quesitoTecnico = Domanda(
+            testo: q['question'] ?? "",
+            opzioni: [], 
+            risposte_corrette: List<String>.from(q['correctAnswers'] ?? []),
+            correct_index: null,
+          );
 
-      for (var d in data['contenuto']) {
-        // DECISIONE TIPO DOMANDA
-        if (d['tipo'] == 'scelta_multipla') {
-          listaDomande.add(DomandaSceltaMultipla(
-            testo: d['testo'],
-            opzioni: List<String>.from(d['opzioni']),
-            rispostaCorrettaIndex: d['risposta_corretta'],
-          ));
-
-
-        } else if(d['tipo'] == 'attribuzione_emozioni'){
-          listaDomande.add(AttribuzioneEmozioni(
-            testo: d['testo'], 
-            question: d['question'],
-            risposteCorrette: List<String>.from(d['risposte_corrette'])
-          ));
-
-
-        } else if(d['tipo'] == 'teoria_mente'){
-          listaDomande.add(TeoriaDellaMente(
-            testo: d['testo'], 
-            question1: d['question1'],
-            opzioni1: List<String>.from(d['opzioni1']), 
-            question2: d['question2'], //ritorna null se non è presente
-            opzioni2: d['opzioni2'] != null ? List<String>.from(d['opzioni2']) : null, 
-            question3: d['question3']
-          ));
-
-
-        }else if(d['tipo'] == 'passo_falso'){
-          listaDomande.add(PassoFalso(
-            testo: d['testo'], 
-            question1: d['question1'],
-            opzioni1: List<String>.from(d['opzioni1']), 
-            question2: d['question2'],
-            opzioni2: List<String>.from(d['opzioni2']), 
+          // Creiamo la Pagina (una per ogni elemento della lista questions)
+          listaPagine.add(AttribuzioneEmozioni(
+            narrazione: q['narration'] ?? "",
+            lista_domande: [quesitoTecnico],
           ));
         }
-      }
-      return Quiz(id: data['id'], titolo: data['titolo'], domande: listaDomande);
+        break;
 
-    } else if(data['tipo_attivita'] == 'esercitazione'){
-      return Esercitazione(id: data['id'], titolo: data['titolo'], descrizione: data['descrizione']);
+
+      case 'EyesTaskTestNode':
+        final List<dynamic> questionsRaw = data['data']['questions'] ?? [];
+        for (var q in questionsRaw) {
+          List<String> opzioni = List<String>.from(q['answers'] ?? []);
+          int? cIndex = q['correctIndex'];
+
+          // Creiamo una pagina per ogni domanda presente nel JSON
+          listaPagine.add(EyesTask(
+            imagePath: q['image'] ?? "", // Se manca, la View mostrerà il placeholder
+            lista_domande: [
+              Domanda(
+                // SE q['question'] MANCA, USIAMO IL TESTO DI DEFAULT
+                testo: q['question'] ?? "Quale emozione esprimono questi occhi?",
+                opzioni: opzioni,
+                correct_index: cIndex != null ? [cIndex] : null,
+                risposte_corrette: null,
+              )
+            ],
+          ));
+        }
+        break;
+
+
+      case 'TeoriaDellaMenteNode':
+        final List<dynamic> quizRaw = data['data']['quiz'] ?? [];
+        
+        for (var scenario in quizRaw) {
+          List<Domanda> domandeDelloScenario = [];
+          final List<dynamic> questionsRaw = scenario['questions'] ?? [];
+
+          for (var q in questionsRaw) {
+            List<String> opzioni = List<String>.from(q['answers'] ?? []);
+            int? cIndex = q['correctIndex'];
+            
+            domandeDelloScenario.add(Domanda(
+              testo: q['question'] ?? "",
+              opzioni: opzioni,
+              correct_index: cIndex != null ? [cIndex] : null,
+            ));
+          }
+
+          listaPagine.add(TeoriaDellaMente(
+            narrazione: scenario['narration'] ?? "",
+            lista_domande: domandeDelloScenario,
+          ));
+        }
+        break;
+      
+
+      case 'socialSituationsNode':
+        final List<dynamic> items = data['data']['items'] ?? [];
+        for (var item in items) {
+          final List<dynamic> sections = item['sections'] ?? [];
+          for (var s in sections) {
+            listaPagine.add(SituazioniSociali(
+              narrazione_before: s['before'],
+              bold: s['bold'] ?? "",
+              narrazione_after: s['after'],
+              lista_domande: [
+                Domanda(
+                  testo: "Scegli l'opzione corretta:",
+                  opzioni: List<String>.from(s['answers'] ?? []),
+                  correct_index: List<int>.from(s['correctIndexes'] ?? []), // Logica indici (lista)
+                  risposte_corrette: null,
+                )
+              ],
+            ));
+          }
+        }
+        break;
+
+
+      case 'FauxPasNode':
+        final List<dynamic> quizRaw = data['data']['quiz'] ?? [];
+        for (var scenario in quizRaw) {
+          List<Domanda> domandeDelloScenario = [];
+          final List<dynamic> questionsRaw = scenario['questions'] ?? [];
+
+          for (var q in questionsRaw) {
+            List<String> opzioni = List<String>.from(q['answers'] ?? []);
+            int? cIndex = q['correctIndex'];
+
+            domandeDelloScenario.add(Domanda(
+              testo: q['question'] ?? "",
+              opzioni: opzioni,
+              correct_index: cIndex != null ? [cIndex] : null,
+            ));
+          }
+          listaPagine.add(PassoFalso(
+            narrazione: scenario['narration'] ?? "",
+            lista_domande: domandeDelloScenario,
+          ));
+        }
+        break;
+        
     }
+
+    // Restituiamo l'oggetto Quiz completo
+    return Quiz(
+      id: id,
+      titolo: titolo,
+      pagine: listaPagine,
+    );
   }
 }

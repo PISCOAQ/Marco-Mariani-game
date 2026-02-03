@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 
 class PassoFalsoView extends StatelessWidget {
-  final PassoFalso domanda;
+  final PassoFalso pagina;
   final String? rispostaUtente; // Stringa nel formato "index1|index2"
   final ValueChanged<String> onChanged;
 
   const PassoFalsoView({
     super.key,
-    required this.domanda,
+    required this.pagina,
     required this.rispostaUtente,
     required this.onChanged,
   });
 
   // Aggiorna solo una delle due parti della stringa
   void _updatePart(int questionIndex, int optionIndex) {
-    // Se nullo, inizializziamo a "-1|-1" (nessuna selezione)
-    List<String> parti = rispostaUtente?.split('|') ?? ["-1", "-1"];
+    // Inizializziamo una lista di stringhe vuote lunga quanto il numero di domande
+    List<String> parti = rispostaUtente?.split('|') ?? List.filled(pagina.lista_domande.length, "-1");
     
-    // Sicurezza: assicuriamoci di avere almeno 2 elementi
-    if (parti.length < 2) parti = ["-1", "-1"];
+    // Sicurezza: allunghiamo se necessario
+    while (parti.length < pagina.lista_domande.length) {
+      parti.add("-1");
+    }
 
     parti[questionIndex] = optionIndex.toString();
     onChanged(parti.join('|'));
@@ -29,8 +32,6 @@ class PassoFalsoView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Decodifichiamo la stringa per sapere quali bottoni colorare
     final List<String> parti = rispostaUtente?.split('|') ?? ["-1", "-1"];
-    final int sel1 = int.tryParse(parti[0]) ?? -1;
-    final int sel2 = parti.length > 1 ? (int.tryParse(parti[1]) ?? -1) : -1;
 
     return Column(
       children: [
@@ -40,7 +41,7 @@ class PassoFalsoView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Text(
-            domanda.testo,
+            pagina.narrazione,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
           ),
@@ -48,25 +49,24 @@ class PassoFalsoView extends StatelessWidget {
 
         const SizedBox(height: 40),
 
-        // 2. PRIMA DOMANDA (Dinamica)
-        _buildSezione(
-          domanda.question1,
-          domanda.opzioni1,
-          sel1,
-          (idx) => _updatePart(0, idx),
-        ),
+        // 2. CICLO DINAMICO SULLE DOMANDE (Question 1, Question 2, ecc.)
+        ...pagina.lista_domande.asMap().entries.map((entry) {
+          int idx = entry.key;
+          Domanda domandaSingola = entry.value;
+          
+          // Recuperiamo quale indice è stato selezionato per questa domanda
+          int scelto = (parti.length > idx) ? (int.tryParse(parti[idx]) ?? -1) : -1;
 
-        const SizedBox(height: 40),
-
-        // 3. SECONDA DOMANDA (Dinamica - Sempre presente)
-        _buildSezione(
-          domanda.question2,
-          domanda.opzioni2,
-          sel2,
-          (idx) => _updatePart(1, idx),
-        ),
-
-        const SizedBox(height: 30),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 40.0),
+            child: _buildSezione(
+              domandaSingola.testo,
+              domandaSingola.opzioni,
+              scelto,
+              (optIdx) => _updatePart(idx, optIdx),
+            ),
+          );
+        }).toList(),
       ],
     );
   }

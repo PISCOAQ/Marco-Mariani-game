@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
+import 'package:gioco_demo/widgets/eyes_task_view.dart';
 import 'package:gioco_demo/widgets/passo_falso_view.dart';
+import 'package:gioco_demo/widgets/situazioni_sociali_view.dart';
 import 'package:gioco_demo/widgets/teoria_della_mente_view.dart';
 import 'domanda_scelta_multipla_view.dart';
 import 'attribuzione_emozioni_view.dart';
@@ -30,8 +33,8 @@ class _QuizViewState extends State<QuizView> {
 
   @override
   Widget build(BuildContext context) {
-    final domanda = widget.quiz.domande[_currentIndex];
-    final bool isLast = _currentIndex == widget.quiz.domande.length - 1;
+    final pagina = widget.quiz.pagine[_currentIndex];
+    final bool isLast = _currentIndex == widget.quiz.pagine.length - 1;
 
     return Column(
       children: [
@@ -43,7 +46,7 @@ class _QuizViewState extends State<QuizView> {
             color: Colors.blueGrey,
           ),
         ),
-        Text("Domanda ${_currentIndex + 1} di ${widget.quiz.domande.length}"),
+        Text("Pagina ${_currentIndex + 1} di ${widget.quiz.pagine.length}"),
         const SizedBox(height: 10),
 
         Expanded(
@@ -82,7 +85,7 @@ class _QuizViewState extends State<QuizView> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                _buildDomandaWidget(domanda),
+                                _buildPaginaWidget(pagina),
                               ],
                             ),
                           ),
@@ -139,23 +142,12 @@ class _QuizViewState extends State<QuizView> {
   }
 
 
-  // 🔀 SWITCH DELLA UI IN BASE AL TIPO DI DOMANDA
-  Widget _buildDomandaWidget(Domanda domanda) {
-    if (domanda is DomandaSceltaMultipla) {
-      return DomandaSceltaMultiplaView(
-        domanda: domanda,
-        rispostaSelezionata: _risposteQuiz[_currentIndex],
-        onRisposta: (index) {
-          setState(() {
-            _risposteQuiz[_currentIndex] = index;
-          });
-        },
-      );
-    }
+  // 🔀 SWITCH DELLA UI IN BASE AL TIPO DI PAGINA
+  Widget _buildPaginaWidget(Pagina pagina) {
 
-    if (domanda is AttribuzioneEmozioni) {
+    if (pagina is AttribuzioneEmozioni) {
       return AttribuzioneEmozioniView(
-        domanda: domanda,
+        pagina: pagina,
         rispostaUtente: _risposteQuiz[_currentIndex],
         onChanged: (value) {
           setState(() {
@@ -165,9 +157,19 @@ class _QuizViewState extends State<QuizView> {
       );
     }
 
-    if (domanda is TeoriaDellaMente){
+    if (pagina is EyesTask) {
+      return EyesTaskView(
+        pagina: pagina,
+        rispostaUtente: _risposteQuiz[_currentIndex],
+        onChanged: (value) {
+          setState(() => _risposteQuiz[_currentIndex] = value);
+        },
+      );
+    }
+
+    if (pagina is TeoriaDellaMente){
       return TeoriaMenteView(
-        domanda: domanda, 
+        pagina: pagina, //Passiamo la pagina con la lista delle domande
         rispostaUtente: _risposteQuiz[_currentIndex], 
         onChanged: (value) {
           setState(() {
@@ -177,9 +179,17 @@ class _QuizViewState extends State<QuizView> {
       );
     }
 
-    if (domanda is PassoFalso){
+    if (pagina is SituazioniSociali) {
+      return SituazioniSocialiView(
+        pagina: pagina,
+        rispostaUtente: _risposteQuiz[_currentIndex],
+        onChanged: (value) => setState(() => _risposteQuiz[_currentIndex] = value),
+      );
+    }
+
+    if (pagina is PassoFalso){
       return PassoFalsoView(
-        domanda: domanda, 
+        pagina: pagina, 
         rispostaUtente: _risposteQuiz[_currentIndex], 
         onChanged: (value) {
           setState(() {
@@ -194,19 +204,18 @@ class _QuizViewState extends State<QuizView> {
 
 
   // 📤 DIALOG CONFERMA CONSEGNA
-// 📤 DIALOG CONFERMA CONSEGNA (Ripristinato identico all'originale)
   void _mostraConfermaConsegna(BuildContext context) {
-    final int totaleDomande = widget.quiz.domande.length;
+    final int totalePagine = widget.quiz.pagine.length;
     final int risposteDate = _risposteQuiz.length;
 
-    if(risposteDate < totaleDomande){
+    if(risposteDate < totalePagine){
       // Avvisiamo l'utente che non ha risposto ad x domande
       showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text("Quiz incompleto"),
-                content: Text("Hai risposto a $risposteDate domande su $totaleDomande. "
+                content: Text("Hai risposto a $risposteDate domande su $totalePagine. "
                     "Devi rispondere a tutte le domande prima di consegnare!"),
                 actions: [
                   ElevatedButton(

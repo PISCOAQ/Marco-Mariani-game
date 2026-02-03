@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 
 class AttribuzioneEmozioniView extends StatelessWidget {
-  final AttribuzioneEmozioni domanda;
+  final AttribuzioneEmozioni pagina;
   final String? rispostaUtente;
   final ValueChanged<String> onChanged;
 
   const AttribuzioneEmozioniView({
     super.key,
-    required this.domanda,
+    required this.pagina,
     required this.rispostaUtente,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+
+    final Domanda domanda = pagina.lista_domande[0];
+
     return SizedBox(
       // Forza la larghezza massima per permettere al Column interno di centrare
       width: double.infinity, 
@@ -28,7 +32,7 @@ class AttribuzioneEmozioniView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
-              domanda.testo,
+              pagina.narrazione,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 20,
@@ -44,7 +48,7 @@ class AttribuzioneEmozioniView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
-              domanda.question,
+              domanda.testo,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 18,

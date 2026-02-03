@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
@@ -51,12 +52,11 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
 Future<void> onLoad() async {
   onProgress(0.1);
   await super.onLoad();
-
+  
   // 1. Carica la mappa BASE (Terreno e Livello 3)
   mapComponent = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
   mapComponent.priority = 0; // Sta sul fondo
   world.add(mapComponent);
-  onProgress(0.4);
   
 
   // 2. Carica la mappa PONTE (Solo il Livello 2)
@@ -64,7 +64,6 @@ Future<void> onLoad() async {
   ponteComponent = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
   ponteComponent.priority = 15; // Il ponte sta "a metà" altezza
   world.add(ponteComponent);
-  onProgress(0.5);
 
   // 3. LOGICA DEI FILTRI:
   // A. Nella mappa BASE (Terreno)
@@ -131,7 +130,7 @@ Future<void> onLoad() async {
 
       // Convertiamo la lista di Point in una lista di Vector2
       List<Vector2>? vertici;
-      if (object.isPolygon && object.polygon != null) {
+      if (object.isPolygon) {
         vertici = object.polygon.map((p) => Vector2(p.x, p.y)).toList();
       }
 

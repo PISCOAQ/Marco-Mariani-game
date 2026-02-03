@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 
 class DomandaSceltaMultiplaView extends StatelessWidget {
@@ -85,4 +85,4 @@ class DomandaSceltaMultiplaView extends StatelessWidget {
       ),
     );
   }
-}
+}*/

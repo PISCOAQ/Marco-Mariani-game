@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 
 class TeoriaMenteView extends StatelessWidget {
-  final TeoriaDellaMente domanda;
+  final TeoriaDellaMente pagina;
   final String? rispostaUtente;
   final ValueChanged<String> onChanged;
 
   const TeoriaMenteView({
     super.key,
-    required this.domanda,
+    required this.pagina,
     required this.rispostaUtente,
     required this.onChanged,
   });
 
   void _updatePart(int index, String newValue) {
-    List<String> parti = rispostaUtente?.split('|') ?? ["", "", ""];
-    while (parti.length < 3) parti.add("");
+    // Creiamo una lista basata sul numero reale di domande nella pagina
+    List<String> parti = rispostaUtente?.split('|') ?? List.filled(pagina.lista_domande.length, "");
+    // Sicurezza: se la lista è più corta del previsto, la allunghiamo
+    while (parti.length < pagina.lista_domande.length) {
+      parti.add("");
+    } 
     parti[index] = newValue;
     onChanged(parti.join('|'));
   }
@@ -23,9 +28,6 @@ class TeoriaMenteView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> parti = rispostaUtente?.split('|') ?? ["", "", ""];
-    final String r1 = parti.isNotEmpty ? parti[0] : "";
-    final String r2 = parti.length > 1 ? parti[1] : "";
-    final String r3 = parti.length > 2 ? parti[2] : "";
 
     return Column(
       children: [
@@ -35,7 +37,7 @@ class TeoriaMenteView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Text(
-            domanda.testo,
+            pagina.narrazione,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
           ),
@@ -43,66 +45,63 @@ class TeoriaMenteView extends StatelessWidget {
 
         const SizedBox(height: 30),
 
-        // 2. QUESTION 1 (Dinamica da opzioni1)
-        _buildSezione(
-          domanda.question1,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: domanda.opzioni1.map((opt) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildBtn(opt, r1 == opt, () => _updatePart(0, opt)),
-              );
-            }).toList(),
-          ),
-        ),
 
-        const SizedBox(height: 30),
+        // 2. CICLO DINAMICO SULLE DOMANDE
+        // Usiamo .asMap().entries per avere sia l'indice che la domanda
+        ...pagina.lista_domande.asMap().entries.map((entry) {
+          int idx = entry.key;
+          Domanda domandaSingola = entry.value;
 
-        // 3. QUESTION 2 (Dinamica da opzioni2 - Se presente)
-        if (domanda.question2 != null && domanda.opzioni2 != null)
-          _buildSezione(
-            domanda.question2!,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: domanda.opzioni2!.map((opt) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: _buildBtn(opt, r2 == opt, () => _updatePart(1, opt)),
-                );
-              }).toList(),
+          // Recuperiamo la risposta data per questa specifica sottodomanda
+          String rispostaCorrente = parti.length > idx ? parti[idx] : "";
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 40.0),
+            child: _buildSezione(
+              domandaSingola.testo,
+              domandaSingola.opzioni.isEmpty 
+                ? _buildCampoAperto(idx, rispostaCorrente) // Se non ha opzioni, è aperta
+                : _buildOpzioniChiuse(idx, domandaSingola.opzioni, rispostaCorrente),
             ),
-          ),
-
-        const SizedBox(height: 30),
-
-        // 4. QUESTION 3 (Risposta Aperta)
-        _buildSezione(
-          domanda.question3,
-          SizedBox(
-            width: 500,
-            child: TextField(
-              key: ValueKey(domanda.testo + "q3"),
-              textAlign: TextAlign.center,
-              controller: TextEditingController.fromValue(
-                TextEditingValue(
-                  text: r3,
-                  selection: TextSelection.collapsed(offset: r3.length),
-                ),
-              ),
-              decoration: InputDecoration(
-                hintText: "Scrivi qui...",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Colors.black12)),
-              ),
-              onChanged: (val) => _updatePart(2, val),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
+          );
+        }).toList(),
       ],
+    );
+  }
+
+  // Widget per le domande a scelta multipla
+  Widget _buildOpzioniChiuse(int idx, List<String> opzioni, String selezionata) {
+    return Wrap( // Wrap è meglio di Row se le opzioni sono lunghe o tante
+      alignment: WrapAlignment.center,
+      spacing: 15,
+      runSpacing: 10,
+      children: opzioni.map((opt) {
+        return _buildBtn(opt, selezionata == opt, () => _updatePart(idx, opt));
+      }).toList(),
+    );
+  }
+
+  // Widget per le domande a risposta aperta (se previste nel JSON)
+  Widget _buildCampoAperto(int idx, String testo) {
+    return SizedBox(
+      width: 500,
+      child: TextField(
+        key: ValueKey("${pagina.narrazione}_$idx"),
+        textAlign: TextAlign.center,
+        controller: TextEditingController.fromValue(
+          TextEditingValue(
+            text: testo,
+            selection: TextSelection.collapsed(offset: testo.length),
+          ),
+        ),
+        decoration: InputDecoration(
+          hintText: "Scrivi qui...",
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        onChanged: (val) => _updatePart(idx, val),
+      ),
     );
   }
 

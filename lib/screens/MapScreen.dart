@@ -108,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
       _mostraMessaggioAvviso("Sfida già completata!");
       return;
     }
-
+    
     if (risultato is Esercitazione && tipo == "quiz") {
         _mostraMessaggioAvviso("Fai l'esercitazione, poi torna qui!");
         return; 
