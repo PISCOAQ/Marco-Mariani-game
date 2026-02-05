@@ -195,6 +195,7 @@ Future<void> onLoad() async {
   await Future.delayed(const Duration(milliseconds: 100));
   onProgress(1.0);
 }
+//------FINE CARICAMENTO MONDO------
 
 
 List<tiled.TiledObject> _getObjects(String layerName) {
@@ -240,52 +241,59 @@ Iterable<tiled.TiledObject> _searchInLayer(tiled.Layer layer, String name) {
 
   void unlockLevel(String levelId) {
     print("Chiamato unlockLevel per: $levelId");
-    if (LevelManager.unlock(levelId)) {
-      print("Sblocco nel Manager riuscito!");
 
-      // 1. Aggiorna i percorsi: spegne il vecchio e accende il nuovo
-      aggiornaPercorsi(LevelManager.currentLevel);
-      
+    if (LevelManager.unlock(levelId)) {
+      // RIMOZIONE CANCELLI (A cascata)
       _activeGates.removeWhere((gate) {
-        if (gate.gateId == levelId) {
+        int idCancello = int.tryParse(gate.gateId) ?? 0;
+        int idTarget = int.tryParse(levelId) ?? 0;
+
+        if (idCancello <= idTarget) {
           gate.removeFromParent();
           return true;
         }
         return false;
       });
 
+      // AGGIORNAMENTO PERCORSI (Semplice e lineare)
+      aggiornaPercorsi(LevelManager.currentLevel);
+
       onLevelUnlocked();
-      
-    } else {
-      print("Livello già sbloccato precedentemente.");
     }
   }
 
   void aggiornaPercorsi(int livelloAttuale, {bool? mostrare}) {
-    // Se 'mostrare' viene passato (dal popup), aggiorniamo lo stato interno.
-    // Se è null (chiamata da unlockLevel), usiamo lo stato memorizzato.
     if (mostrare != null) {
       _sentieriVisibili = mostrare;
     }
-
+    
+    // La logica corretta è: 
+    // Se sono al livello 1, vedo il percorso_1 (che porta al 2).
+    // Se sblocco il livello 2, vedo il percorso_2 (che porta al 3).
     for (int i = 1; i <= 5; i++) {
       String nomeLayer = 'percorso_$i';
       
+      // Il percorso i-esimo deve essere visibile SOLO se il livello attuale è i
+      // e se l'utente non ha spento i sentieri dal menu aiuto.
       bool deveEssereVisibile = (livelloAttuale == i) && _sentieriVisibili;
+      
+      _impostaVisibilitaLayer(nomeLayer, deveEssereVisibile);
+    }
+  }
 
-      double opacitaTarget = deveEssereVisibile ? 0.5 : 0.0;
+  void _impostaVisibilitaLayer(String nomeLayer, bool visibile) {
+    // Usiamo l'opacità a 0.5 per l'effetto "trasparente" che avevi prima
+    double opacitaTarget = visibile ? 0.5 : 0.0;
 
-      for (var comp in [mapComponent, ponteComponent]) {
+    for (var comp in [mapComponent, ponteComponent]) {
+      if (comp != null) {
         final layer = comp.tileMap.getLayer<tiled.Layer>(nomeLayer);
         if (layer != null) {
           layer.opacity = opacitaTarget;
-          layer.visible = deveEssereVisibile;
+          layer.visible = visibile;
         }
       }
     }
   }
 
 }
-
-
-

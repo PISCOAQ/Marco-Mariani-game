@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="72" nextobjectid="509">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="73" nextobjectid="514">
  <tileset firstgid="1" name="TX Tileset Grass" tilewidth="32" tileheight="32" tilecount="64" columns="8">
   <image source="../images/TX Tileset Grass.png" width="256" height="256"/>
  </tileset>
@@ -1436,13 +1436,7 @@
   <object id="484" x="540" y="71.6667" width="94.6667" height="50.3333"/>
   <object id="487" x="676" y="71" width="98.6667" height="23.6667"/>
   <object id="488" x="676.667" y="94.6667" width="78" height="25.6667"/>
-  <object id="493" name="Cartello1" type="cartello_guida" x="703.023" y="712.278">
-   <properties>
-    <property name="levelId" type="int" value="1"/>
-   </properties>
-   <polygon points="-0.8125,0 6.0625,-6.125 12.125,-6.1875 12.125,-9.0625 20,-9.125 20.0625,-6 28.727,-5.99675 28.8125,7.75 20,7.6875 20,24.3125 12.0625,24.3125 12.0625,7.875 5.5625,7.875"/>
-  </object>
-  <object id="496" name="Cartello1" type="cartello_guida" x="770.25" y="880.183">
+  <object id="496" name="Cartello1" type="cartello_guida" x="770.625" y="879.933">
    <properties>
     <property name="levelId" type="int" value="1"/>
    </properties>
@@ -1490,7 +1484,13 @@
    </properties>
    <polygon points="-0.25,0.0625 8.625,0.0615926 8.5625,16.63 16.625,16.63 16.5625,0.184778 22.75,0.123185 29.5625,-6.89837 22.75,-13.9815 16.5625,-13.9815 16.5625,-17.3075 8.6875,-17.3075 8.6875,-14.1047 -0.1875,-14.1038"/>
   </object>
-  <object id="505" name="Cartello4" type="cartello_guida" x="272.75" y="232.25">
+  <object id="510" name="Cartello2" type="cartello_guida" x="703.75" y="712.25">
+   <properties>
+    <property name="levelId" type="int" value="1"/>
+   </properties>
+   <polygon points="-0.8125,0 6.0625,-6.125 12.125,-6.1875 12.125,-9.0625 20,-9.125 20.0625,-6 28.727,-5.99675 28.8125,7.75 20,7.6875 20,24.3125 12.0625,24.3125 12.0625,7.875 5.5625,7.875"/>
+  </object>
+  <object id="512" name="Cartello4" type="cartello_guida" x="272.667" y="231.667">
    <properties>
     <property name="levelId" type="int" value="4"/>
    </properties>

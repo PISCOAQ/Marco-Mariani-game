@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
+import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/widgets/Quiz_View.dart';
 
 class PageOverlay extends StatelessWidget {
-  final Function(bool superato) onExit;
+  final Function(dynamic esitoQuiz) onExit;
   final dynamic attivita; // Riceve l'oggetto Quiz o Esercitazione
+  final int tentativoAttuale;
 
-  const PageOverlay({super.key, required this.onExit, required this.attivita});
+  const PageOverlay({super.key, 
+    required this.onExit, 
+    required this.attivita,
+    required this.tentativoAttuale,
+    });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,6 @@ class PageOverlay extends StatelessWidget {
                 Positioned(
                   top: 10, right: 10,
                   child: GestureDetector(
-                    // CORREZIONE: Aggiungi () => per renderla una funzione richiamabile al click
                     onTap: () => onExit(false), 
                     child: const CircleAvatar(
                       backgroundColor: Colors.red,
@@ -56,18 +61,26 @@ class PageOverlay extends StatelessWidget {
       // 2. Passiamo l'esito ricevuto da QuizView verso onExit
       return QuizView(
         quiz: attivita, 
-        onConsegna: (esito) => onExit(esito), 
+        tentativoQuiz: tentativoAttuale, 
+        onConsegna: (QuizResult esito){
+          onExit(esito);
+        }
       );
     } else if (attivita is Esercitazione) {
       // Per le esercitazioni, potresti decidere che chiuderle equivale a superarle
       // o gestire una logica diversa. Per ora facciamo tornare true al click.
       return Center(
         child: Column(
-          children: [
-            Text("Esercitazione: ${attivita.titolo}"),
-            ElevatedButton(onPressed: () => onExit(true), child: const Text("Fine"))
-          ],
-        )
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Esercitazione: ${attivita.titolo}", style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => onExit(true), // Le esercitazioni per ora restituiscono solo un bool
+            child: const Text("Fine"),
+          )
+        ],
+      ) 
       );
     } else {
       return const Center(child: CircularProgressIndicator());

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:gioco_demo/class/models/Levelmanager.dart';
+import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/game/MyGame.dart';
@@ -12,6 +13,7 @@ import 'package:gioco_demo/widgets/PageOverlay.dart';
 import 'package:gioco_demo/widgets/infoPopUp.dart';
 import 'package:gioco_demo/widgets/levelNotification.dart';
 import 'package:gioco_demo/widgets/quizNotification.dart';
+import 'package:gioco_demo/widgets/riepilogoNotification.dart';
 
 class MapScreen extends StatefulWidget {
   final int avatarIndex;
@@ -31,6 +33,10 @@ class _MapScreenState extends State<MapScreen> {
   bool _isGuideOpen = false;
   bool _mostraSentieri = true;
   int? _levelInCorso;
+  final Map<String, int> _tentativiQuiz = {};
+
+  bool _isResultPopupActive = false;
+  QuizResult? _ultimoRisultato;
 
   final ValueNotifier<bool> _levelUpNotifier = ValueNotifier<bool>(false);
 
@@ -90,6 +96,7 @@ class _MapScreenState extends State<MapScreen> {
   void _toggleGuide() {
     setState(() {
       _isGuideOpen = !_isGuideOpen;
+      _messaggioNotifica = null;
       if (_isGuideOpen) {
         _myGame.pauseEngine();
       } else {
@@ -155,6 +162,11 @@ class _MapScreenState extends State<MapScreen> {
       _attivitaCaricata = risultato;
       _isPageActive = true;
       _myGame.pauseEngine();
+
+      //Incrementiamo il tentativo se è un quiz
+      if (risultato is Quiz) {
+        _tentativiQuiz[risultato.titolo] = (_tentativiQuiz[risultato.titolo] ?? 0) + 1;
+      } 
     });
   }
 
@@ -174,25 +186,44 @@ class _MapScreenState extends State<MapScreen> {
     _gameFocusNode.requestFocus(); // Torna al gioco
   }
 
-void _closePage(bool superato) {
-  setState(() {
-    _isPageActive = false;
-    _myGame.resumeEngine(); // Questo sblocca l'avatar
-  });
+  void _closePage(dynamic esito) { 
+    setState(() {
+      _isPageActive = false;
+      _myGame.resetInput(); 
+      _myGame.resumeEngine();
 
-  // IMPORTANTE: Riporta il focus al gioco
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _gameFocusNode.requestFocus();
-  });
+      if (esito is QuizResult) {
+        _ultimoRisultato = esito;
+        _isResultPopupActive = true; 
 
-  if (superato && _levelInCorso != null) {
-    int livelloDaSbloccare = _levelInCorso! + 1;
-    // Usiamo il numero salvato per sbloccare il livello nel gioco
-    _myGame.unlockLevel(livelloDaSbloccare.toString());
-    
-    _levelInCorso = null; // Puliamo il post-it
+        if (esito.superato) {
+          _myGame.playerState.addCoins(esito.moneteGuadagnate);
+          
+          // --- LOGICA LINEARE PULITA ---
+          if (_levelInCorso != null) {
+            // Sblocca semplicemente il livello successivo a quello appena fatto
+            int livelloDaSbloccare = _levelInCorso! + 1;
+            _myGame.unlockLevel(livelloDaSbloccare.toString());
+          }
+        }
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _gameFocusNode.requestFocus();
+    });
+    _levelInCorso = null;
   }
+
+
+void _handleResultContinue() {
+  setState(() {
+    _isResultPopupActive = false;
+    _ultimoRisultato = null;
+  });
 }
+
+
 
   @override
 Widget build(BuildContext context) {
@@ -280,13 +311,6 @@ Widget build(BuildContext context) {
             onExit: _toggleGuide,
           ), 
 
-        // 5. NOTIFICHE DI SISTEMA (Messaggi avviso)
-        if (_messaggioNotifica != null)
-          GameNotification(
-            key: UniqueKey(),
-            messaggio: _messaggioNotifica!,
-          ),
-
         // 3. Notifiche di sistema
         if (_messaggioNotifica != null)
           GameNotification(
@@ -299,6 +323,17 @@ Widget build(BuildContext context) {
           PageOverlay(
             onExit: _closePage,
             attivita: _attivitaCaricata,
+            tentativoAttuale: _tentativiQuiz[_attivitaCaricata.titolo] ?? 1,
+          ),
+        
+        if (_isResultPopupActive && _ultimoRisultato != null)
+          Container(
+            color: Colors.black45, // Oscuriamo leggermente lo sfondo per focalizzare l'attenzione
+            child: RiepilogoNotification(
+              superato: _ultimoRisultato!.superato,
+              monete: _ultimoRisultato!.moneteGuadagnate,
+              onContinue: _handleResultContinue,
+            ),
           ),
 
         // 5. Pagina dello Scrigno

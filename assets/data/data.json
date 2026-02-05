@@ -1,45 +1,63 @@
 {
+    "_id": "e3215bd0-c55c-46de-b633-9e66b72d4c62",
+    "type": "socialSituationsNode",
+    "title": "Situazioni sociali",
+    "description": "aaaaa",
+    "difficulty": 1,
+    "platform": "WebApp",
     "data": {
-        "questions": [
+        "items": [
             {
-                "qid": "c48cdf49-db52-4b4c-bd41-041a4f3c9ae3",
-                "narration": "Marco com'è?",
-                "question": "cccc",
-                "correctAnswers": [
-                    "Felice",
-                    "Triste"
-                ],
-                "_id": "697e5c33e21b7b3afc2c98a8"
+                "sid": "73845420-25d4-45bf-b529-00e741639a9c",
+                "sections": [
+                    {
+                        "before": "aaaa",
+                        "bold": "Che ne pensi di questo A",
+                        "after": "aaaaa",
+                        "answers": [
+                            "A",
+                            "B",
+                            "C",
+                            "D"
+                        ],
+                        "correctIndexes": [
+                            0
+                        ]
+                    }
+                ]
             },
             {
-                "qid": "c48cdf49-db52-4b4c-bd41-041a4f3c9ae3",
-                "narration": "Andrea com'è?",
-                "question": "cccc",
-                "correctAnswers": [
-                    "Felice",
-                    "Triste"
-                ],
-                "_id": "697e5c33e21b7b3afc2c98a8"
+                "sid": "73845420-25d4-45bf-b529-00e741639a9c",
+                "sections": [
+                    {
+                        "before": "aaaa",
+                        "bold": "Che ne pensi di questo B",
+                        "after": "aaaaa",
+                        "answers": [
+                            "A",
+                            "B",
+                            "C",
+                            "D"
+                        ],
+                        "correctIndexes": [
+                            1, 2, 3
+                        ]
+                    }
+                ]
             }
         ]
     },
-    "_id": "735ec7aa-ad56-4aac-8f1b-bd539fb5ffc9",
-    "type": "EmotionAttributionTestNode",
-    "description": "boooo",
-    "difficulty": 1,
-    "platform": "WebApp",
     "reactFlow": {
-        "id": "735ec7aa-ad56-4aac-8f1b-bd539fb5ffc9",
-        "type": "EmotionAttributionTestNode",
+        "id": "e3215bd0-c55c-46de-b633-9e66b72d4c62",
+        "type": "socialSituationsNode",
         "position": {
-            "x": 675,
-            "y": 345
+            "x": 915,
+            "y": 225
         },
-        "width": 93,
+        "width": 129,
         "height": 46,
         "selected": true,
         "dragging": false
     },
-    "title": "Attribuzione Delle Emozioni",
     "code": ""
 }

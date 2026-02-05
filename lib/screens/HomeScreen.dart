@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/screens/MapScreen.dart';
 import 'package:gioco_demo/widgets/AvatarSelector.dart';
-import 'package:gioco_demo/widgets/StartButton.dart'; 
+import 'package:gioco_demo/widgets/StartButton.dart';
+import 'package:gioco_demo/widgets/codeSelector.dart'; 
 
 
 class HomeScreen extends StatefulWidget {
@@ -12,16 +13,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
-  // Stato per controllare la visibilità dell'overlay
   bool showAvatarSelector = false;
-  // Stato per l'avatar selezionato
-  int? selectedAvatar; 
+  int? selectedAvatar; // Stato per l'avatar selezionato
+  bool showCodeInput = false;
+  String userCode = ""; //qui viene salvato il CODICE GIOCATORE
+
 
   // LOGICA: Mostra l'overlay quando si preme Start
   void _onStartPressed() {
     setState(() {
-      showAvatarSelector = true;
+      showCodeInput = true;
+    });
+  }
+
+  void _onCodeConfirmed(String code) {
+    setState(() {
+      userCode = code;
+      showCodeInput = false;
+      showAvatarSelector = true; 
     });
   }
 
@@ -69,13 +78,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // 2. Pulsante Start (Visibile solo se AvatarSelector NON è mostrato)
-          if (!showAvatarSelector)
-            Center(
-              // Il pulsante chiama la logica per mostrare l'overlay
-              child: StartButton(onPressed: _onStartPressed), 
+          if (!showCodeInput && !showAvatarSelector)
+            Center(child: StartButton(onPressed: _onStartPressed)),
+
+          // Inserimento Codice
+          if (showCodeInput)
+            CodeSelector(
+              onConfirm: _onCodeConfirmed,
+              onBack: () => setState(() => showCodeInput = false),
             ),
 
-          // 3. Overlay di Selezione Avatar (Visibile solo se showAvatarSelector è TRUE)
+          // Overlay di Selezione Avatar (Visibile solo se showAvatarSelector è TRUE)
           if (showAvatarSelector)
             Avatarselector(
               selectedAvatar: selectedAvatar,

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
-import 'package:gioco_demo/class/models/Domanda.dart';
 import 'package:gioco_demo/class/models/Quiz_Manager.dart';
+import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/widgets/eyes_task_view.dart';
 import 'package:gioco_demo/widgets/passo_falso_view.dart';
 import 'package:gioco_demo/widgets/situazioni_sociali_view.dart';
 import 'package:gioco_demo/widgets/teoria_della_mente_view.dart';
-import 'domanda_scelta_multipla_view.dart';
 import 'attribuzione_emozioni_view.dart';
 
 class QuizView extends StatefulWidget {
   final dynamic quiz;
-  final Function(bool superato) onConsegna;
+  final int tentativoQuiz;
+  final Function(QuizResult esitoQuiz) onConsegna;
 
   const QuizView({
     super.key,
     required this.quiz,
+    required this.tentativoQuiz,
     required this.onConsegna,
   });
 
@@ -213,67 +214,68 @@ class _QuizViewState extends State<QuizView> {
     return const Text("Tipo di domanda non supportato");
   }
 
+  //DIALOG CONFERMA CONSEGNA
+  void _mostraConfermaConsegna(BuildContext context) {
+    // 1. Controlliamo se c'è qualche risposta mancante
+    bool incompleto = _risposteQuiz.values.any((lista) => lista.contains(""));
 
-  // 📤 DIALOG CONFERMA CONSEGNA
- void _mostraConfermaConsegna(BuildContext context) {
-  final int totalePagine = widget.quiz.pagine.length;
+    if (incompleto) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Quiz incompleto"),
+            content: const Text("Devi rispondere a tutte le domande prima di consegnare!"),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
+                onPressed: () {
+                  Navigator.pop(context); // Chiude solo il dialog di avviso
+                  // NON chiamiamo onConsegna qui, così l'utente può finire il quiz
+                },
+                child: const Text("HO CAPITO", style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      );
+      return; // Blocca l'esecuzione: non arriva al dialog di conferma
+    }
 
-  // LOGICA NUOVA: Controlliamo se c'è qualche stringa vuota nelle liste
-  // .any((lista) => lista.contains("")) è il modo più veloce per farlo
-  bool incompleto = _risposteQuiz.values.any((lista) => lista.contains(""));
-
-  if (incompleto) {
-    // --- IL TUO DIALOG ORIGINALE "INCOMPLETO" ---
+    // 2. Se è completo, mostriamo il dialog di conferma reale
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Quiz incompleto"),
-          content: const Text("Devi rispondere a tutte le domande prima di consegnare!"), // Testo originale
+          title: const Text("Conferma Consegna"),
+          content: const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
           actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
+            ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              onPressed: () => Navigator.pop(context),
-              child: const Text("HO CAPITO", style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                // Chiamiamo il manager per valutare i dati
+                QuizResult risultato = await QuizManager.valutaQuiz(
+                  widget.quiz, 
+                  _risposteQuiz, 
+                );
+
+                Navigator.pop(context); // Chiude il dialog
+                FocusScope.of(context).unfocus(); // Chiude tastiera
+                
+                // Invia il risultato al MapScreen (che ora sbloccherà il livello +1)
+                widget.onConsegna(risultato);
+              },
+              child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
       },
     );
-    return;
   }
-
-  // --- IL TUO DIALOG ORIGINALE "CONFERMA" ---
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text("Conferma Consegna"),
-        content: const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            onPressed: () {
-              // 1. Chiamiamo il manager e otteniamo l'esito
-              bool superato = QuizManager.valutaQuiz(widget.quiz, _risposteQuiz);
-              
-              Navigator.pop(context);
-              FocusScope.of(context).unfocus();
-              
-              // 2. Passiamo l'esito al callback (devi aggiornare la firma della funzione)
-              widget.onConsegna(superato);
-            },
-            child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      );
-    },
-  );
-}
 
 
   Widget _buildNavArrow({

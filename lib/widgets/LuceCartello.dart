@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:gioco_demo/class/models/Levelmanager.dart';
 
-
 class BaglioreCartello extends PositionComponent with HasGameRef {
   final int levelId;
   final List<Vector2>? punti;
@@ -23,6 +22,7 @@ class BaglioreCartello extends PositionComponent with HasGameRef {
 
   @override
   void render(Canvas canvas) {
+    // Ritorno alla logica lineare standard
     if (levelId != LevelManager.currentLevel - 1) return;
 
     double t = DateTime.now().millisecondsSinceEpoch / 1000; 
@@ -41,7 +41,6 @@ class BaglioreCartello extends PositionComponent with HasGameRef {
 
     if (punti != null && punti!.isNotEmpty) {
       final path = Path();
-      // Usiamo i Vector2 che abbiamo convertito durante il caricamento
       path.moveTo(punti![0].x, punti![0].y);
       for (var i = 1; i < punti!.length; i++) {
         path.lineTo(punti![i].x, punti![i].y);
