@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/logic/mouse_tracker.dart';
+import 'package:gioco_demo/class/logic/valutazione_quiz/tempo_reazione.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Manager.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
@@ -12,165 +14,163 @@ class QuizView extends StatefulWidget {
   final dynamic quiz;
   final int tentativoQuiz;
   final Function(QuizResult esitoQuiz) onConsegna;
+  final Function(bool isComplete)? onStatusChanged;
+  final VoidCallback? onPageChanged; 
 
   const QuizView({
     super.key,
     required this.quiz,
     required this.tentativoQuiz,
     required this.onConsegna,
+    this.onStatusChanged,
+    this.onPageChanged, 
   });
 
   @override
-  State<QuizView> createState() => _QuizViewState();
-  
+  State<QuizView> createState() => QuizViewState();
 }
 
-class _QuizViewState extends State<QuizView> {
+class QuizViewState extends State<QuizView> {
   int _currentIndex = 0;
 
-  /// Risposte chiuse (scelta multipla)
-  final Map<int, List<String>> _risposteQuiz = {};
+  final ReactionTimer _timer = ReactionTimer();
+  final MouseTracker _mouseTracker = MouseTracker();
+
+  final Map<int, List<Map<String, dynamic>>> _risposteQuiz = {};
+  
 
   @override
   void initState() {
     super.initState();
-    // Prepariamo i "cassetti" per le risposte
+    _timer.start(); // Start per la prima pagina
+    _mouseTracker.start();
+
+    // Inizializziamo la mappa con valori vuoti e tempo 0
     for (int i = 0; i < widget.quiz.pagine.length; i++) {
-      // Ogni pagina ha una lista di stringhe vuote lunga quanto le sue domande
-      _risposteQuiz[i] = List.filled(widget.quiz.pagine[i].lista_domande.length, "");
+      _risposteQuiz[i] = List.generate(
+        widget.quiz.pagine[i].lista_domande.length,
+        (_) => {"risposta": "", "tempo_reazione": 0},
+      );
     }
   }
 
-  /// Risposte aperte (attribuzione emozioni)
-  //final Map<int, String?> _risposteAperte = {};
+  bool get isUltimaPagina => _currentIndex == widget.quiz.pagine.length - 1;
+  bool get isPrimaPagina => _currentIndex == 0;
 
-  @override
-  Widget build(BuildContext context) {
-    final pagina = widget.quiz.pagine[_currentIndex];
-    final bool isLast = _currentIndex == widget.quiz.pagine.length - 1;
-
-    return Column(
-      children: [
-        Text(
-          widget.quiz.titolo,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.blueGrey,
-          ),
-        ),
-        Text("Pagina ${_currentIndex + 1} di ${widget.quiz.pagine.length}"),
-        const SizedBox(height: 10),
-
-        Expanded(
-          child: Row(
-            children: [
-              _buildNavArrow(
-                icon: Icons.arrow_back_ios_new,
-                onPressed: _currentIndex > 0
-                    ? () => setState(() => _currentIndex--)
-                    : null,
-              ),
-
-              Expanded(
-                child: Container(
-                  // Rimuoviamo il padding verticale dal container per farlo gestire allo scroll
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey[300]!, width: 2),
-                  ),
-                  child: LayoutBuilder( // Usiamo LayoutBuilder per conoscere l'altezza disponibile
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            // Forza il contenuto ad essere alto almeno quanto il riquadro grigio
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Column(
-                              // MainAxisSize.max assicura che la colonna provi a espandersi
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _buildPaginaWidget(pagina),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-              _buildNavArrow(
-                icon: Icons.arrow_forward_ios,
-                onPressed: !isLast
-                    ? () => setState(() => _currentIndex++)
-                    : null,
-              ),
-            ],
-          ),
-        ),
-
-
-        const SizedBox(height: 15),
-
-        // 2. Contenitore "parcheggio" con altezza bloccata
-        SizedBox(
-          height: 40, // Altezza fissa che contiene comodamente il pulsante
-          width: double.infinity, // Occupa tutta la larghezza per centrare
-          child: Center(
-            child: isLast 
-              ? ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[600],
-                    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () => _mostraConfermaConsegna(context),
-                  child: const Text(
-                    "CONSEGNA QUIZ",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              : const SizedBox(), // Se non è l'ultimo, il box resta vuoto ma ALTO hight
-          ),
-        ),
-
-      ],
-    );
+  void prossimaPagina() {
+    if (isUltimaPagina) {
+      _mostraConfermaConsegna(context);
+    } else {
+      setState(() {
+        _currentIndex++;
+      });
+      _timer.start();
+      _mouseTracker.start();
+      _notificaStatoPagina();
+      widget.onPageChanged?.call();
+    }
   }
 
+  void paginaPrecedente() {
+    if (!isPrimaPagina) {
+      setState(() {
+        _currentIndex--;
+      });
+      _notificaStatoPagina();
+      widget.onPageChanged?.call();
+    }
+  }
+
+  void _notificaStatoPagina() {
+    final risposteCorrenti = _risposteQuiz[_currentIndex] ?? [];
+    // Controlliamo se tutte le risposte della pagina sono state date
+    bool isComplete = risposteCorrenti.isNotEmpty && 
+                     !risposteCorrenti.any((r) => r["risposta"] == "");
+    
+    widget.onStatusChanged?.call(isComplete);
+  }
+
+@override
+Widget build(BuildContext context) {
+  final pagina = widget.quiz.pagine[_currentIndex];
+
+  return Column(
+    children: [
+      Text(
+        widget.quiz.titolo,
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+      ),
+      Text("Pagina ${_currentIndex + 1} di ${widget.quiz.pagine.length}"),
+      const SizedBox(height: 10),
+
+      
+      MouseRegion(
+        onHover: (event) {
+          _mouseTracker.recordMovement(event.localPosition);
+        },
+        child: Container(
+          width: double.infinity, 
+          height: 460, 
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey[300]!, width: 2),
+          ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+              child: _buildPaginaWidget(pagina),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
 
   // 🔀 SWITCH DELLA UI IN BASE AL TIPO DI PAGINA
   Widget _buildPaginaWidget(Pagina pagina) {
-    // Recuperiamo la lista di risposte per la pagina corrente. 
-    // Se per qualche motivo è null, passiamo una lista vuota per evitare crash.
-    final List<String> risposteCorrenti = _risposteQuiz[_currentIndex] ?? [];
+    // Estraiamo solo i testi delle risposte per non rompere le tue View figlie
+    final List<Map<String, dynamic>> datiPagina = _risposteQuiz[_currentIndex] ?? [];
+    final List<String> risposteCorrenti = datiPagina.map((e) => e["risposta"].toString()).toList();
+
+    void updateAnswers(List<String> nuovaLista) {
+      // 1. Controlliamo se la risposta per questa pagina è già stata salvata definitivamente
+      // Verifichiamo se il tempo di reazione è già diverso da 0
+      final bool giaRisposto = _risposteQuiz[_currentIndex] != null && 
+                              _risposteQuiz[_currentIndex]!.any((r) => r["tempo_reazione"] > 0);
+
+      if (giaRisposto) {
+        // Se ha già risposto la prima volta, aggiorniamo solo il TESTO della risposta
+        // ma NON tocchiamo tempo e distanza.
+        setState(() {
+          for (int i = 0; i < nuovaLista.length; i++) {
+            _risposteQuiz[_currentIndex]![i]["risposta"] = nuovaLista[i];
+          }
+        });
+      } else {
+        // 2. È LA PRIMA VOLTA: Registriamo tutto (Tempo + Distanza + Risposta)
+        final int tempoOttenuto = _timer.stop();
+        final double distanzaMouse = _mouseTracker.stop();
+
+        setState(() {
+          _risposteQuiz[_currentIndex] = nuovaLista.map((testo) => {
+            "risposta": testo,
+            "tempo_reazione": tempoOttenuto,
+            "distanza_mouse": distanzaMouse,
+          }).toList();
+        });
+      }
+
+      _notificaStatoPagina();
+    }
 
     if (pagina is AttribuzioneEmozioni) {
       return AttribuzioneEmozioniView(
         pagina: pagina,
-        risposteDate: risposteCorrenti, // Nuovo nome parametro
-        onChanged: (nuovaLista) {
-          // Questo impedisce al TextField di triggerare un build mentre Flutter sta già buildando
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
-          });
-        },
+        risposteDate: risposteCorrenti,
+        onChanged: updateAnswers,
       );
     }
 
@@ -178,9 +178,7 @@ class _QuizViewState extends State<QuizView> {
       return EyesTaskView(
         pagina: pagina,
         risposteDate: risposteCorrenti,
-        onChanged: (nuovaLista) {
-          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
-        },
+        onChanged: updateAnswers,
       );
     }
 
@@ -188,9 +186,7 @@ class _QuizViewState extends State<QuizView> {
       return TeoriaMenteView(
         pagina: pagina,
         risposteDate: risposteCorrenti,
-        onChanged: (nuovaLista) {
-          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
-        },
+        onChanged: updateAnswers,
       );
     }
 
@@ -198,7 +194,7 @@ class _QuizViewState extends State<QuizView> {
       return SituazioniSocialiView(
         pagina: pagina,
         risposteDate: risposteCorrenti,
-        onChanged: (nuovaLista) => setState(() => _risposteQuiz[_currentIndex] = nuovaLista),
+        onChanged: updateAnswers,      
       );
     }
 
@@ -206,9 +202,7 @@ class _QuizViewState extends State<QuizView> {
       return PassoFalsoView(
         pagina: pagina,
         risposteDate: risposteCorrenti,
-        onChanged: (nuovaLista) {
-          setState(() => _risposteQuiz[_currentIndex] = nuovaLista);
-        },
+        onChanged: updateAnswers,
       );
     }
     return const Text("Tipo di domanda non supportato");
@@ -216,8 +210,11 @@ class _QuizViewState extends State<QuizView> {
 
   //DIALOG CONFERMA CONSEGNA
   void _mostraConfermaConsegna(BuildContext context) {
-    // 1. Controlliamo se c'è qualche risposta mancante
-    bool incompleto = _risposteQuiz.values.any((lista) => lista.contains(""));
+    // 1. Correzione controllo incompleto: 
+    // Dobbiamo verificare se dentro le mappe c'è qualche "risposta" vuota
+    bool incompleto = _risposteQuiz.values.any(
+      (lista) => lista.any((mappa) => mappa["risposta"] == "")
+    );
 
     if (incompleto) {
       showDialog(
@@ -229,17 +226,14 @@ class _QuizViewState extends State<QuizView> {
             actions: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
-                onPressed: () {
-                  Navigator.pop(context); // Chiude solo il dialog di avviso
-                  // NON chiamiamo onConsegna qui, così l'utente può finire il quiz
-                },
+                onPressed: () => Navigator.pop(context),
                 child: const Text("HO CAPITO", style: TextStyle(color: Colors.white)),
               ),
             ],
           );
         },
       );
-      return; // Blocca l'esecuzione: non arriva al dialog di conferma
+      return; 
     }
 
     // 2. Se è completo, mostriamo il dialog di conferma reale
@@ -257,16 +251,16 @@ class _QuizViewState extends State<QuizView> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               onPressed: () async {
-                // Chiamiamo il manager per valutare i dati
+                // Chiamiamo il manager passando direttamente la mappa con tempi e distanze
                 QuizResult risultato = await QuizManager.valutaQuiz(
                   widget.quiz, 
                   _risposteQuiz, 
                 );
 
                 Navigator.pop(context); // Chiude il dialog
-                FocusScope.of(context).unfocus(); // Chiude tastiera
+                FocusScope.of(context).unfocus(); // Chiude la tastiera
                 
-                // Invia il risultato al MapScreen (che ora sbloccherà il livello +1)
+                // Invia il risultato finale
                 widget.onConsegna(risultato);
               },
               child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
@@ -277,7 +271,7 @@ class _QuizViewState extends State<QuizView> {
     );
   }
 
-
+/*
   Widget _buildNavArrow({
     required IconData icon,
     VoidCallback? onPressed,
@@ -287,6 +281,6 @@ class _QuizViewState extends State<QuizView> {
       color: onPressed == null ? Colors.grey[400] : Colors.blueGrey[700],
       onPressed: onPressed,
     );
-  }
+  }*/
 }
 

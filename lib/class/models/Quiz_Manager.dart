@@ -12,15 +12,25 @@ import 'package:gioco_demo/class/models/Quiz_Results.dart';
 
 class QuizManager {
   
-  static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<String>> risposteUtente) async {
+static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dynamic>>> risposteUtente) async {
     int corretteTotali = 0;
     int domandeTotali = 0;
     List<Map<String, dynamic>> dettaglioPagine = [];
 
     for (int i = 0; i < quiz.pagine.length; i++) {
       var pagina = quiz.pagine[i];
-      List<String> risposteDellaPagina = risposteUtente[i] ?? [];
       
+      // 2. ESTRAZIONE DATI: Recuperiamo la lista di mappe per la pagina corrente
+      List<Map<String, dynamic>> datiPagina = risposteUtente[i] ?? [];
+      
+      // Estraiamo solo le stringhe per le funzioni di calcolo esistenti (calcolaEyesTask, etc.)
+      List<String> risposteDellaPagina = datiPagina.map((e) => e['risposta'].toString()).toList();
+      
+      // Prendiamo il tempo di reazione
+      int tempoReazione = datiPagina.isNotEmpty ? datiPagina.first['tempo_reazione'] : 0;
+      // distanza mouse
+      double distanza = datiPagina.isNotEmpty ? datiPagina.first['distanza_mouse'] : 0.0;
+
       EsitoPagina esito;
 
       // --- IL CENTRALINO (Routing della logica) ---
@@ -40,14 +50,15 @@ class QuizManager {
         esito = calcolaSituazioniSociali(pagina, risposteDellaPagina);
       }
       else {
-        // Fallback per quiz non ancora mappati
         esito = _valutaGenerica(pagina, risposteDellaPagina);
       }
 
-      // Costruiamo il dettaglio pagina per il JSON
+      // 3. AGGIUNTO AL JSON: Inseriamo il tempo di reazione nel dettaglio della pagina
       dettaglioPagine.add({
         'pagina_index': i,
         'paginaSuperata': esito.paginaSuperata,
+        'tempo_reazione_ms': tempoReazione,
+        'distanza_mouse_px': distanza,
       });
 
       corretteTotali += esito.esitiDomande.where((e) => e).length;
