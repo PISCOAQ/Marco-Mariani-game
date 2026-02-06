@@ -2,7 +2,7 @@ name: Build and Push Docker Image to GHCR
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     # Pubblica anche quando crei un tag semver (es. v1.0.0)
     tags: [ 'v*.*.*' ]
 
