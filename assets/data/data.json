@@ -12,32 +12,13 @@
                 "sections": [
                     {
                         "before": "aaaa",
-                        "bold": "Che ne pensi di questo A",
+                        "bold": "bbb",
                         "after": "aaaaa",
                         "answers": [
-                            "A",
-                            "B",
-                            "C",
-                            "D"
-                        ],
-                        "correctIndexes": [
-                            0
-                        ]
-                    }
-                ]
-            },
-            {
-                "sid": "73845420-25d4-45bf-b529-00e741639a9c",
-                "sections": [
-                    {
-                        "before": "aaaa",
-                        "bold": "Che ne pensi di questo B",
-                        "after": "aaaaa",
-                        "answers": [
-                            "A",
-                            "B",
-                            "C",
-                            "D"
+                            "a",
+                            "b",
+                            "c",
+                            "d"
                         ],
                         "correctIndexes": [
                             1, 2, 3

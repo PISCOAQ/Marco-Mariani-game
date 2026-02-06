@@ -57,6 +57,7 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
       dettaglioPagine.add({
         'pagina_index': i,
         'paginaSuperata': esito.paginaSuperata,
+        'punteggioCanonico': esito.punteggioCanonicoPagina,
         'tempo_reazione_ms': tempoReazione,
         'distanza_mouse_px': distanza,
       });

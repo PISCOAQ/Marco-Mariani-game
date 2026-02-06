@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gioco_demo/class/logic/mouse_tracker.dart';
+import 'package:gioco_demo/class/logic/valutazione_quiz/mouse_tracker.dart';
 import 'package:gioco_demo/class/logic/valutazione_quiz/tempo_reazione.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Manager.dart';
