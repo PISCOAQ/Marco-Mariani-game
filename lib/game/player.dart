@@ -3,9 +3,9 @@ import 'package:flame/collisions.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart';
 import 'package:gioco_demo/class/models/ClothingItem.dart';
-import 'package:gioco_demo/class/models/PlayerState.dart';
 import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/avatarConfig.dart';
+import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/services/Avatar_loader.dart';
 import 'package:gioco_demo/game/chest.dart';
 
@@ -17,7 +17,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
 
   int currentFloor = 1; // Di default iniziamo a terra
 
-  final PlayerState playerState;
+  final Utente utente;
 
   late final AvatarConfig avatarConfig;
 
@@ -39,7 +39,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   final Map<String, SpriteAnimation?> animations = {};
   final Map<String, String?> currentLayerColor = {};
 
-  Player({required this.avatarIndex, required Vector2 position, required this.playerState})
+  Player({required this.avatarIndex, required Vector2 position, required this.utente})
       : super(position: position, size: Vector2(64, 64), anchor: Anchor.center);
 
   @override
@@ -197,7 +197,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   }
 
   Future<void> _applyEquippedItems() async {
-    for (final entry in playerState.equippedItems.entries) {
+    for (final entry in utente.lookAttuale.entries) {
       final category = entry.key;
       final color = entry.value;
 

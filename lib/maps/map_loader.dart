@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import '../game/wall.dart';
 
 Future<TiledComponent> loadMap(FlameGame game) async {
-  final map = await TiledComponent.load('game_map.tmx', Vector2.all(32));
+  final map = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
 
   final collisionLayer = map.tileMap.getLayer<ObjectGroup>('collisioni');
   if (collisionLayer != null) {

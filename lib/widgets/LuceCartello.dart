@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:gioco_demo/class/models/Levelmanager.dart';
+import 'package:gioco_demo/game/MyGame.dart';
 
-class BaglioreCartello extends PositionComponent with HasGameRef {
+class BaglioreCartello extends PositionComponent with HasGameRef<MyGame> {
   final int levelId;
   final List<Vector2>? punti;
 
@@ -23,7 +23,7 @@ class BaglioreCartello extends PositionComponent with HasGameRef {
   @override
   void render(Canvas canvas) {
     // Ritorno alla logica lineare standard
-    if (levelId != LevelManager.currentLevel - 1) return;
+    if (levelId != game.utente.Livello_Attuale - 1) return;
 
     double t = DateTime.now().millisecondsSinceEpoch / 1000; 
     double pulse = 0.4 + (math.sin(t * 2.6) * 0.4); 

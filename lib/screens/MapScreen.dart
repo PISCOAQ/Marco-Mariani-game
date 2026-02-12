@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:gioco_demo/class/models/Levelmanager.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
@@ -113,7 +112,7 @@ class _MapScreenState extends State<MapScreen> {
     final risultato = await ActivityLoader.carica();
     if (risultato == null) return;
 
-    if (LevelManager.currentLevel > levelId) {
+    if (_myGame.utente.Livello_Attuale > levelId) {
       _mostraMessaggioAvviso("Sfida già completata!");
       return;
     }
@@ -197,7 +196,7 @@ class _MapScreenState extends State<MapScreen> {
         _isResultPopupActive = true; 
 
         if (esito.superato) {
-          _myGame.playerState.addCoins(esito.moneteGuadagnate);
+          _myGame.utente.monete += esito.moneteGuadagnate;
           
           // --- LOGICA LINEARE PULITA ---
           if (_levelInCorso != null) {
@@ -227,6 +226,7 @@ void _handleResultContinue() {
 
   @override
 Widget build(BuildContext context) {
+  
   return Scaffold(
     body: Stack(
       children: [
@@ -292,7 +292,8 @@ Widget build(BuildContext context) {
                 const SizedBox(width: 12), // Spazio preciso tra pulsante e monete
 
                 // POI IL WIDGET MONETE
-                Moneywidget(walletNotifier: _myGame.playerState.coins),
+                if (!_isLoadingVisible) 
+                  Moneywidget(walletNotifier: _myGame.utente.moneteNotifier),
               ],
             ),
           ),
@@ -306,7 +307,7 @@ Widget build(BuildContext context) {
                 _mostraSentieri = nuovoStato;
               });
               // Comunichiamo al gioco di aggiornare la visibilità dei layer
-              _myGame.aggiornaPercorsi(LevelManager.currentLevel, mostrare: nuovoStato);
+              _myGame.aggiornaPercorsi(_myGame.utente.Livello_Attuale, mostrare: nuovoStato);
             },
             onExit: _toggleGuide,
           ), 

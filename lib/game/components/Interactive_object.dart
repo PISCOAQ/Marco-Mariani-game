@@ -2,14 +2,14 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:gioco_demo/class/models/Levelmanager.dart';
 import 'package:gioco_demo/game/player.dart';
+import 'package:gioco_demo/game/MyGame.dart'; 
 
 typedef ShowQuizCallback = void Function();
 
-class InteractiveObject extends PositionComponent with CollisionCallbacks {
+class InteractiveObject extends PositionComponent with CollisionCallbacks, HasGameRef<MyGame> {
   final ShowQuizCallback onTrigger;
-  final String spritePath; // Nome del file icona
+  final String spritePath; 
   final int levelId;
 
   late SpriteComponent indicator;
@@ -32,22 +32,17 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
   Future<void> onLoad() async {
     super.onLoad();
 
-    // 1. HITBOX (Invariata)
     add(RectangleHitbox(isSolid: false));
 
-    // 2. CARICAMENTO ICONA PNG
     final sprite = await Sprite.load(spritePath);
     
     indicator = SpriteComponent(
       sprite: sprite,
-      size: Vector2(20, 20), // Dimensione dell'icona
+      size: Vector2(20, 20),
       anchor: Anchor.center,
-      // Posizionata a metà larghezza dell'oggetto e 12 pixel sopra
       position: Vector2(size.x / 2, -12), 
     );
-    
 
-    // 3. EFFETTO MOVIMENTO
     indicator.add(
       MoveEffect.by(
         Vector2(0, -8),
@@ -60,11 +55,11 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
       ),
     );
 
-    if (LevelManager.currentLevel > levelId) {
-    indicator.opacity = 0.0;
-  } else if (LevelManager.currentLevel == levelId) {
-    indicator.opacity = 1.0;
-  }
+    if (game.utente.Livello_Attuale > levelId) {
+      indicator.opacity = 0.0;
+    } else {
+      indicator.opacity = 1.0;
+    }
 
     add(indicator);
   }
@@ -73,27 +68,23 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks {
   void update(double dt) {
     super.update(dt);
 
-    // LOGICA: Nascondi SOLO se il livello è passato
-  if (LevelManager.currentLevel > levelId) {
-    // Il giocatore ha superato questo livello -> Nascondi l'icona
-    if (indicator.opacity != 0.0) indicator.opacity = 0.0;
-  } else {
-    // Il giocatore è a questo livello o deve ancora arrivarci -> Mostra l'icona
-    if (indicator.opacity != 1.0) indicator.opacity = 1.0;
-  }
+    // --- LOGICA AGGIORNATA ---
+    // Controlliamo costantemente se l'icona deve sparire perché il livello è stato superato
+    if (game.utente.Livello_Attuale > levelId) {
+      if (indicator.opacity != 0.0) indicator.opacity = 0.0;
+    } else {
+      if (indicator.opacity != 1.0) indicator.opacity = 1.0;
+    }
   }
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Player && _canTrigger) {
-      //if(LevelManager.currentLevel == levelId){
-        _canTrigger = false;
-        onTrigger();
-       // print('okay puoi accedere alle interazioni');
-      //} else{
-        //print('NON puoi accedere alle interazioni');
-      //}
+      // Opzionale: puoi aggiungere qui un controllo se vuoi che l'interazione 
+      // avvenga solo se il livello attuale è ESATTAMENTE quello dell'oggetto
+      _canTrigger = false;
+      onTrigger();
     }
   }
 
