@@ -12,12 +12,12 @@
     State<ChestPage> createState() => _ChestPageState();
   }
 
+
+
   class _ChestPageState extends State<ChestPage> {
-    final Map<String, String?> selectedColors = {};
+    final Map<String, String?> selectedStyles = {};
     String activeCategory = 'shirts';
     late int _totalSelectedPrice = 0;
-
-  
 
     @override
     void initState() {
@@ -147,10 +147,14 @@
                   ),
                   itemCount: layerOptions[activeCategory]!.keys.length,
                   itemBuilder: (context, index) {
-                    String colorName = layerOptions[activeCategory]!.keys.elementAt(index);
-                    bool isSelected = (selectedColors[activeCategory] ?? widget.game.player.currentLayerColor[activeCategory]) == colorName;
-                    return _buildItemCard(activeCategory, colorName, isSelected, layerOptions);
-                  },
+                      // Prendiamo l'ID dello stile (es: "v1", "tipo_1", "red")
+                      String styleId = layerOptions[activeCategory]!.keys.elementAt(index);                   
+                      // Controlliamo se è selezionato usando lo styleId
+                      bool isSelected = (selectedStyles[activeCategory] ?? 
+                                        widget.game.utente.lookAttuale[activeCategory]) == styleId;
+                      
+                      return _buildItemCard(activeCategory, styleId, isSelected, layerOptions);
+                    },
                 ),
               ),
             ],
@@ -199,7 +203,7 @@
         
         onTap: () {
           setState(() {
-            selectedColors[category] = colorName;
+            selectedStyles[category] = colorName;
           });
         _updateTotalSelectedPrice(layerOptions);
         },
@@ -283,7 +287,7 @@
 
               // Calcolo costi
               for (final layer in layers) {
-                final color = selectedColors[layer];
+                final color = selectedStyles[layer];
                 if (color == null) continue;
                 if (!utente.possiedeArticolo(layer, color)) {
                   costoTotale += layerOptions[layer]![color]!.price;
@@ -302,7 +306,7 @@
               utente.monete -= costoTotale;
 
               for (final layer in layers) {
-                final color = selectedColors[layer];
+                final color = selectedStyles[layer];
                 if (color == null) continue;
 
                 // Aggiungiamo all'inventario se nuovo
@@ -330,7 +334,7 @@
 
   void _updateTotalSelectedPrice(Map<String, Map<String, ClothingItem>> layerOptions) {
     int total = 0;
-    selectedColors.forEach((layer, itemId) {
+    selectedStyles.forEach((layer, itemId) {
       if (itemId != null && !widget.game.utente.possiedeArticolo(layer, itemId)) {
         total += layerOptions[layer]![itemId]!.price;
       }
@@ -340,7 +344,7 @@
 
 
     Widget _buildLayerImage(String layer, dynamic player, Map<String, Map<String, ClothingItem>> options) {
-      final color = selectedColors[layer] ?? player.currentLayerColor[layer];
+      final color = selectedStyles[layer] ?? player.currentLayerColor[layer];
       
       // Se il colore è null o NON esiste nelle opzioni di questo specifico avatar
       if (color == null || options[layer] == null || options[layer]![color] == null) {

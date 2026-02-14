@@ -2,35 +2,30 @@
   "avatars": {
     "1": {
       "bodyPath": "../avatars/MaleAvatar_spritesheet.png",
-
       "shirts": {
-        "red":   { "path": "../avatars/shirt_red.png",   "price": 50 },
-        "blue":  { "path": "../avatars/shirt_blue.png",  "price": 55 },
-        "grey":  { "path": "../avatars/shirt_grey.png",  "price": 45 },
-        "black": { "path": "../avatars/shirt_black.png", "price": 60 }
+        "casual_red":   { "path": "../avatars/shirt_red.png",   "price": 50 },
+        "urban_blue":   { "path": "../avatars/shirt_blue.png",  "price": 55 },
+        "basic_grey":   { "path": "../avatars/shirt_grey.png",  "price": 45 },
+        "dark_hoodie":  { "path": "../avatars/shirt_black.png", "price": 60 }
       },
-
       "pants": {
-        "blue":   { "path": "../avatars/pants_blue.png",   "price": 70 },
-        "black":  { "path": "../avatars/pants_black.png",  "price": 75 },
-        "badge":  { "path": "../avatars/pants_badge.png",  "price": 90 },
-        "purple": { "path": "../avatars/pants_purple.png", "price": 65 }
+        "jeans_blue":   { "path": "../avatars/pants_blue.png",   "price": 70 },
+        "cargo_black":  { "path": "../avatars/pants_black.png",  "price": 75 },
+        "suit_classic": { "path": "../avatars/pants_badge.png",  "price": 90 },
+        "sport_purple": { "path": "../avatars/pants_purple.png", "price": 65 }
       },
-
       "shoes": {
-        "brown":   { "path": "../avatars/shoes_brown.png", "price": 40 },
-        "black":  { "path": "../avatars/shoes_black.png", "price": 50 },
-        "green":  { "path": "../avatars/shoes_green.png", "price": 60 },
-        "white": { "path": "../avatars/shoes_white.png", "price": 55 }
+        "boots_brown":  { "path": "../avatars/shoes_brown.png", "price": 40 },
+        "sneakers_blk": { "path": "../avatars/shoes_black.png", "price": 50 },
+        "sport_green":  { "path": "../avatars/shoes_green.png", "price": 60 },
+        "casual_white": { "path": "../avatars/shoes_white.png", "price": 55 }
       },
-
       "hair": {
-        "yellow":   { "path": "../avatars/hair_yellow.png", "price": 30 },
-        "black":  { "path": "../avatars/hair_black.png",  "price": 35 },
-        "brown":  { "path": "../avatars/hair_brown.png",  "price": 40 },
-        "grey": { "path": "../avatars/hair_grey.png",   "price": 45 }
+        "short_yellow": { "path": "../avatars/hair_yellow.png", "price": 30 },
+        "mohawk_black": { "path": "../avatars/hair_black.png",  "price": 35 },
+        "long_brown":   { "path": "../avatars/hair_brown.png",  "price": 40 },
+        "undercut_grey":{ "path": "../avatars/hair_grey.png",   "price": 45 }
       },
-
       "rows": {
         "back": 8,
         "left": 9,
@@ -38,44 +33,37 @@
         "right": 11,
         "idle": 10
       },
-
       "timings": {
         "walk": 0.1,
         "idle": 1.0
       }
     },
-
     "2": {
       "bodyPath": "../avatars/FemaleAvatar_spritesheet.png",
-
       "shirts": {
-        "red":   { "path": "../avatars/Fshirt_white.png", "price": 50 },
-        "blue":  { "path": "../avatars/Fshirt_blue.png",  "price": 55 },
-        "grey":  { "path": "../avatars/Fshirt_pink.png",  "price": 45 },
-        "black": { "path": "../avatars/Fshirt_black.png", "price": 60 }
+        "top_white":    { "path": "../avatars/Fshirt_white.png", "price": 50 },
+        "tshirt_blue":  { "path": "../avatars/Fshirt_blue.png",  "price": 55 },
+        "blouse_pink":  { "path": "../avatars/Fshirt_pink.png",  "price": 45 },
+        "casual_black": { "path": "../avatars/Fshirt_black.png", "price": 60 }
       },
-
       "pants": {
-        "blue":   { "path": "../avatars/Fpants_pink.png",   "price": 70 },
-        "black":  { "path": "../avatars/Fpants_black.png",  "price": 75 },
-        "badge":  { "path": "../avatars/Fpants_white.png",  "price": 90 },
-        "purple": { "path": "../avatars/Fpants_purple.png", "price": 65 }
+        "leggins_pink": { "path": "../avatars/Fpants_pink.png",   "price": 70 },
+        "denim_black":  { "path": "../avatars/Fpants_black.png",  "price": 75 },
+        "trousers_wht": { "path": "../avatars/Fpants_white.png",  "price": 90 },
+        "yoga_purple":  { "path": "../avatars/Fpants_purple.png", "price": 65 }
       },
-
       "shoes": {
-        "blue":   { "path": "../avatars/Fshoes_brown.png", "price": 40 },
-        "black":  { "path": "../avatars/Fshoes_black.png", "price": 50 },
-        "badge":  { "path": "../avatars/Fshoes_white.png", "price": 60 },
-        "purple": { "path": "../avatars/Fshoes_purple.png", "price": 55 }
+        "flat_brown":   { "path": "../avatars/Fshoes_brown.png", "price": 40 },
+        "boots_black":  { "path": "../avatars/Fshoes_black.png", "price": 50 },
+        "heels_white":  { "path": "../avatars/Fshoes_white.png", "price": 60 },
+        "sneakers_purp":{ "path": "../avatars/Fshoes_purple.png", "price": 55 }
       },
-
       "hair": {
-        "blue":   { "path": "../avatars/Fhair_1.png", "price": 30 },
-        "black":  { "path": "../avatars/Fhair_2.png", "price": 35 },
-        "badge":  { "path": "../avatars/Fhair_3.png", "price": 40 },
-        "purple": { "path": "../avatars/Fhair_4.png", "price": 45 }
+        "bob_cut":      { "path": "../avatars/Fhair_1.png", "price": 30 },
+        "pigtails":     { "path": "../avatars/Fhair_2.png", "price": 35 },
+        "bun_style":    { "path": "../avatars/Fhair_3.png", "price": 40 },
+        "long_straight":{ "path": "../avatars/Fhair_4.png", "price": 45 }
       },
-
       "rows": {
         "back": 8,
         "left": 9,
@@ -83,7 +71,6 @@
         "right": 11,
         "idle": 10
       },
-
       "timings": {
         "walk": 0.1,
         "idle": 1.0

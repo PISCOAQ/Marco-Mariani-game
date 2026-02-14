@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
+import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/game/MyGame.dart';
@@ -15,8 +16,8 @@ import 'package:gioco_demo/widgets/quizNotification.dart';
 import 'package:gioco_demo/widgets/riepilogoNotification.dart';
 
 class MapScreen extends StatefulWidget {
-  final int avatarIndex;
-  const MapScreen({super.key, required this.avatarIndex});
+  final Utente utente;
+  const MapScreen({super.key, required this.utente});
   
 
   @override
@@ -50,7 +51,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _myGame = MyGame(
-      avatarIndex: widget.avatarIndex,
+      utente: widget.utente,
       onShowPopup: _showPopup, 
       onShowChestPopup: _showChestPage,
       onLevelUnlocked: () {

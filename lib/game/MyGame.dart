@@ -21,24 +21,21 @@ typedef LevelUnlockedCallback = void Function();
 typedef ProgressCallback = void Function(double progress);
 
 class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents {
-  // L'unica fonte di verità
-  late Utente utente;
+  final Utente utente;
+  final ShowActivityCallback onShowPopup;
+  final ShowChestCallback onShowChestPopup;
+  final LevelUnlockedCallback onLevelUnlocked;
+  final ProgressCallback onProgress;
+  final List<GateComponent> _activeGates = [];
 
   late Player player;
   late TiledComponent mapComponent;
   late TiledComponent ponteComponent;
 
-  final int avatarIndex;
-  final ShowActivityCallback onShowPopup;
-  final ShowChestCallback onShowChestPopup;
-  final LevelUnlockedCallback onLevelUnlocked;
-  final ProgressCallback onProgress;
-
-  final List<GateComponent> _activeGates = [];
   bool _sentieriVisibili = true;
 
   MyGame({
-    required this.avatarIndex,
+    required this.utente,
     required this.onShowPopup,
     required this.onShowChestPopup,
     required this.onLevelUnlocked,
@@ -49,28 +46,6 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   Future<void> onLoad() async {
     onProgress(0.1);
     await super.onLoad();
-
-    // 1. INIZIALIZZAZIONE DATI UTENTE
-    // Quando collegherai il DB, questo oggetto verrà riempito con i dati del server
-    utente = Utente(
-      PosizioneX: 400,
-      PosizioneY: 900,
-      Monete: 50,
-      Livello_Attuale: 1, 
-      inventarioIniziale: {
-        'shirts': ['red'],
-        'pants': ['blue'],
-        'hair': ['black'],
-        'shoes': ['brown'],
-      },
-      lookIniziale: {
-        'shirts': 'red',
-        'pants': 'blue',
-        'hair': 'black',
-        'shoes': 'brown',
-      },
-    );
-
 
     // 3. CARICAMENTO MAPPE
     mapComponent = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
@@ -159,7 +134,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     }
 
     player = Player(
-      avatarIndex: avatarIndex,
+      avatarIndex: utente.tipoAvatar,
       position: Vector2(utente.PosizioneX, utente.PosizioneY),
       utente: utente,
     );
@@ -184,6 +159,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     camera.viewfinder.zoom = 2.0;
     camera.follow(player);
 
+    await Future.delayed(const Duration(milliseconds: 300));
     onProgress(1.0);
   }
 

@@ -1,27 +1,27 @@
 class ClothingItem {
   final String id;        // shirt_red
   final String category;  // shirt, pants, hair, shoes
-  final String color;     // red, blue...
+  final String style;     // tipo_1, tipo_2, ...
   final String path;      // asset path
   final int price;        // prezzo
 
   ClothingItem({
     required this.id,
     required this.category,
-    required this.color,
+    required this.style,
     required this.path,
     required this.price,
   });
 
   factory ClothingItem.fromJson(
     String category,
-    String color,
+    String style,
     Map<String, dynamic> json,
   ) {
     return ClothingItem(
-      id: '${category}_$color',
+      id: '${category}_$style',
       category: category,
-      color: color,
+      style: style,
       path: json['path'],
       price: json['price'],
     );

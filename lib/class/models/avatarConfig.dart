@@ -54,17 +54,14 @@ class AvatarConfig {
   }
 
 
-  static Map<String, ClothingItem> _parseCategory(
-    String category,
-    Map<String, dynamic> json,
-  ) {
-    return json.map((color, data) {
-      return MapEntry(
-        color,
-        ClothingItem.fromJson(category, color, data),
-      );
-    });
-  }
+static Map<String, ClothingItem> _parseCategory(String category, Map<String, dynamic> json) {
+  return json.map((styleKey, data) { // styleKey al posto di color
+    return MapEntry(
+      styleKey,
+      ClothingItem.fromJson(category, styleKey, data),
+    );
+  });
+}
 
 
 
