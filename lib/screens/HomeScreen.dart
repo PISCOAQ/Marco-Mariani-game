@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/utente.dart';
+import 'package:gioco_demo/class/services/db_service.dart'; 
 import 'package:gioco_demo/screens/MapScreen.dart';
 import 'package:gioco_demo/widgets/AvatarSelector.dart';
 import 'package:gioco_demo/widgets/StartButton.dart';
-import 'package:gioco_demo/widgets/codeSelector.dart'; 
-
+import 'package:gioco_demo/widgets/codeSelector.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,29 +15,24 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool showAvatarSelector = false;
-  int? selectedAvatar; // Stato per l'avatar selezionato
+  int? selectedAvatar;
   bool showCodeInput = false;
-  String userCode = ""; //qui viene salvato il CODICE GIOCATORE
+  String userCode = "";
 
+  final ApiService _apiService = ApiService();
+  bool isLoading = false;
+  Utente? currentUser;
 
-  // LOGICA: Mostra l'overlay quando si preme Start
-  void _onStartPressed() {
-    setState(() {
-      showCodeInput = true;
-    });
-  }
-
-
-  // Aggiungi questa funzione dentro _HomeScreenState
+  // Gestione vestiti di default se il DB è vuoto
   Map<String, String> _getAbitiDefault(int avatarId) {
-    if (avatarId == 2) { // Esempio: Femmina
+    if (avatarId == 2) { // Femmina
       return {
         'shirts': 'top_white',
         'pants': 'leggins_pink',
         'hair': 'bob_cut',
         'shoes': 'flat_brown',
       };
-    } else { // Esempio: Maschio (id 1)
+    } else { // Maschio
       return {
         'shirts': 'casual_red',
         'pants': 'jeans_blue',
@@ -47,84 +42,124 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Utente? currentUser; 
+  // Posizione avatar per ogni livello
+  static const Map<int, Offset> _spawnPoints = {
+    1: Offset(400.0, 900.0),   
+    2: Offset(820.0, 730.0),  
+    3: Offset(890.0, 550.0),  
+    4: Offset(750.0, 215.0),
+    5: Offset(375.0, 260.0),
+  };
 
-  void _onCodeConfirmed(String code) {
-    setState(() {
-      userCode = code;
-      showCodeInput = false;
 
-      if (code == "GIOCATORE1") {
-        // Recuperiamo gli abiti corretti per l'avatar 1 (Maschio)
-        final abiti = _getAbitiDefault(1); 
-        
-        currentUser = Utente(
-            tipoAvatar: 1,
-            PosizioneX: 400,
-            PosizioneY: 900,
-            Monete: 200,
-            Livello_Attuale: 5,
+
+  void _onStartPressed() {
+    setState(() => showCodeInput = true);
+  }
+
+  // 1. FASE LOGIN: Ricezione dati dal database
+  void _onCodeConfirmed(String code) async {
+    setState(() => isLoading = true);
+
+    try {
+      final datiDb = await _apiService.getDatiUtente(code);
+
+      if (!mounted) return;
+
+      setState(() {
+        userCode = code;
+        showCodeInput = false;
+        isLoading = false;
+
+        if (datiDb['tipoAvatar'] == null) {
+          showAvatarSelector = true;
+        } else {
+          // 1. Recuperiamo il livello attuale dal DB
+          int livello = datiDb['Livello_Attuale'] ?? 1;
+
+          // 2. Determiniamo la posizione corretta in base al livello
+          // Se per qualche motivo il livello non è in mappa, usiamo il livello 1 come fallback
+          Offset posizioneLivello = _spawnPoints[livello] ?? _spawnPoints[1]!;
+
+          currentUser = Utente(
+            codiceGioco: userCode,
+            tipoAvatar: datiDb['tipoAvatar'],
+            // AGGIORNATO: Usiamo la posizione legata al livello
+            PosizioneX: posizioneLivello.dx,
+            PosizioneY: posizioneLivello.dy,
+            Monete: datiDb['moneteNotifier'] ?? 0,
+            Livello_Attuale: livello,
+            lookIniziale: Map<String, String>.from(datiDb['lookAttuale'] ?? {}),
+            inventarioIniziale: (datiDb['inventario'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(key, List<String>.from(value)),
+            ) ?? {},
+          );
+          _goToMap();
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Codice gioco non valido o errore di rete")),
+      );
+    }
+  }
+
+  // 2. FASE CREAZIONE: Salvataggio primo avatar
+void _onConfirmPressed() async {
+    if (selectedAvatar != null) {
+      setState(() => isLoading = true);
+      final abiti = _getAbitiDefault(selectedAvatar!);
+
+      final datiIniziali = {
+        "tipoAvatar": selectedAvatar,
+        "moneteNotifier": 50,
+        "Livello_Attuale": 1,
+        "lookAttuale": abiti,
+        "PosizioneX": 400.0,
+        "PosizioneY": 900.0,
+        "inventario": abiti.map((k, v) => MapEntry(k, [v])),
+      };
+
+      try {
+        // Usiamo userCode che abbiamo salvato prima
+        await _apiService.updateProgressi(userCode, datiIniziali);
+
+        if (!mounted) return;
+
+        setState(() {
+          // AGGIORNATO: Passiamo il codice anche qui
+          currentUser = Utente(
+            codiceGioco: userCode, 
+            tipoAvatar: selectedAvatar!,
+            PosizioneX: 400.0,
+            PosizioneY: 900.0,
+            Monete: 50,
+            Livello_Attuale: 1,
             lookIniziale: abiti,
             inventarioIniziale: abiti.map((k, v) => MapEntry(k, [v])),
-        );
+          );
+          isLoading = false;
+        });
         _goToMap();
-      } else {
-        showAvatarSelector = true;
-      }
-    });
-  }
-
-  void _onConfirmPressed() {
-    if (selectedAvatar != null) {
-      // Generiamo gli abiti di default in base alla scelta dell'AvatarSelector
-      final abiti = _getAbitiDefault(selectedAvatar!); 
-      
-      setState(() {
-        currentUser = Utente(
-          tipoAvatar: selectedAvatar!,
-          PosizioneX: 400,
-          PosizioneY: 900,
-          Monete: 50,
-          Livello_Attuale: 1,
-          lookIniziale: abiti,
-          inventarioIniziale: abiti.map((k, v) => MapEntry(k, [v])),
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Errore salvataggio: $e")),
         );
-      });
-      _goToMap();
+      }
     }
   }
 
-  // Funzione di supporto per non ripetere il codice di navigazione
   void _goToMap() {
     if (currentUser != null) {
-      Navigator.push(
+      Navigator.pushReplacement( // Replacement evita di tornare indietro al login
         context,
-        MaterialPageRoute(
-          builder: (context) => MapScreen(
-            utente: currentUser!, // Passo l'intero oggetto qui
-          ),
-        ),
+        MaterialPageRoute(builder: (context) => MapScreen(utente: currentUser!)),
       );
     }
-  }
-
-
-
-  // LOGICA: Gestisce la selezione dell'avatar
-  void _onAvatarSelected(int index) {
-    setState(() {
-      selectedAvatar = index;
-    });
-  }
-  
-
-  void _onBack(){
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(),
-        ),
-      );
   }
 
   @override
@@ -132,33 +167,34 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Sfondo Immobile
           Positioned.fill(
             child: Image.asset(
-              '/images/home.png',
+              'assets/images/home.png', // Assicurati che il percorso sia corretto nel pubspec.yaml
               fit: BoxFit.cover,
             ),
           ),
 
-          // 2. Pulsante Start (Visibile solo se AvatarSelector NON è mostrato)
           if (!showCodeInput && !showAvatarSelector)
             Center(child: StartButton(onPressed: _onStartPressed)),
 
-          // Inserimento Codice
           if (showCodeInput)
             CodeSelector(
               onConfirm: _onCodeConfirmed,
               onBack: () => setState(() => showCodeInput = false),
             ),
 
-          // Overlay di Selezione Avatar (Visibile solo se showAvatarSelector è TRUE)
           if (showAvatarSelector)
-            Avatarselector(
+            Avatarselector( // Assicurati che il widget si chiami esattamente così
               selectedAvatar: selectedAvatar,
-              onAvatarSelected: _onAvatarSelected,
+              onAvatarSelected: (index) => setState(() => selectedAvatar = index),
               onConfirm: _onConfirmPressed,
-              onBack: _onBack,
-              // Nota: qui potresti voler aggiungere un pulsante 'Chiudi' per tornare alla Home
+              onBack: () => setState(() => showAvatarSelector = false),
+            ),
+
+          if (isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(child: CircularProgressIndicator(color: Colors.white)),
             ),
         ],
       ),

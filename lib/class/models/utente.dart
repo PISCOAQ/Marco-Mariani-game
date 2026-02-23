@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Utente {
+  String codiceGioco;
   int tipoAvatar;  //1-Maschio , 2-Femmina
   int Livello_Attuale;
   double PosizioneX;
@@ -8,11 +9,11 @@ class Utente {
   Map<String, String> lookAttuale;  // Look attuale: {'shirts': 'red', 'pants': 'denim'}
   Map<String, List<String>> inventario;   // Inventario: {'shirts': ['red', 'blue'], 'pants': ['denim']}
   
-  
   final ValueNotifier<int> moneteNotifier;
 
 
   Utente({
+    required this.codiceGioco,
     required this.tipoAvatar,
     required this.Livello_Attuale,
     required this.PosizioneX,

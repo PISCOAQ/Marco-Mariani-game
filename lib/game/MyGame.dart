@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/gateComponent.dart';
 import 'package:gioco_demo/class/models/utente.dart';
+import 'package:gioco_demo/class/repository/utente_repository.dart';
+import 'package:gioco_demo/class/services/db_service.dart';
 import 'package:gioco_demo/game/chest.dart';
 import 'package:gioco_demo/game/components/Interactive_object.dart';
 import 'package:gioco_demo/widgets/LuceCartello.dart';
@@ -27,6 +29,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   final LevelUnlockedCallback onLevelUnlocked;
   final ProgressCallback onProgress;
   final List<GateComponent> _activeGates = [];
+  late final UtenteRepository repository;
 
   late Player player;
   late TiledComponent mapComponent;
@@ -40,14 +43,18 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     required this.onShowChestPopup,
     required this.onLevelUnlocked,
     required this.onProgress,
-  });
+  }){
+    // Inizializziamo il repository nel costruttore
+    repository = UtenteRepository(utente);
+  }
+  
 
   @override
   Future<void> onLoad() async {
     onProgress(0.1);
     await super.onLoad();
 
-    // 3. CARICAMENTO MAPPE
+    // 1. CARICAMENTO MAPPE
     mapComponent = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
     mapComponent.priority = 0;
     world.add(mapComponent);
@@ -165,24 +172,28 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
 
   // --- METODI LOGICI ---
 
-  void unlockLevel(String levelId) {
-    final int? nuovoLivello = int.tryParse(levelId);
-    if (nuovoLivello != null && nuovoLivello > utente.Livello_Attuale) {
-      // Aggiorna l'oggetto utente
-      utente.Livello_Attuale = nuovoLivello;
-
-      // Rimuovi i cancelli ora superati
+void unlockLevel(String levelId) {
+    final int? livelloRichiesto = int.tryParse(levelId);
+    
+    if (livelloRichiesto != null) {
+      // Il repository aggiorna il DB e l'oggetto 'utente' locale.
+      repository.aggiornaLivello(livelloRichiesto);
+      // Rimuoviamo dalla scena tutti i cancelli con ID minore o uguale al livello attuale dell'utente.
       _activeGates.removeWhere((gate) {
-        int idCancello = int.tryParse(gate.gateId) ?? 0;
+        int idCancello = int.tryParse(gate.gateId) ?? 999;
+        
+        // Se l'utente ha raggiunto il livello del cancello (o lo ha superato), 
+        // il cancello deve sparire.
         if (idCancello <= utente.Livello_Attuale) {
-          gate.removeFromParent();
-          return true;
+          gate.removeFromParent(); // Rimuove fisicamente il componente dal gioco
+          return true; // Rimuove il riferimento dalla lista _activeGates
         }
         return false;
       });
-
-      // Aggiorna i percorsi luminosi sulla mappa
+      // Mostra i percorsi grafici corrispondenti al livello attuale.
       aggiornaPercorsi(utente.Livello_Attuale);
+      
+      // Trigger per l'animazione di Level Up nella UI
       onLevelUnlocked();
     }
   }

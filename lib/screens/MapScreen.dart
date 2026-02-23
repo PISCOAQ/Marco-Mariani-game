@@ -197,12 +197,15 @@ class _MapScreenState extends State<MapScreen> {
         _isResultPopupActive = true; 
 
         if (esito.superato) {
-          _myGame.utente.monete += esito.moneteGuadagnate;
+          // 1. AGGIORNAMENTO MONETE (Tramite Repo per il DB)
+          _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
           
-          // --- LOGICA LINEARE PULITA ---
           if (_levelInCorso != null) {
-            // Sblocca semplicemente il livello successivo a quello appena fatto
             int livelloDaSbloccare = _levelInCorso! + 1;
+
+            // 2. AGGIORNAMENTO LIVELLO (Tramite Repo per il DB)
+            // Questo aggiorna il DB e sblocca il livello graficamente nel gioco
+            _myGame.repository.aggiornaLivello(livelloDaSbloccare);
             _myGame.unlockLevel(livelloDaSbloccare.toString());
           }
         }

@@ -285,16 +285,17 @@
               int costoTotale = 0;
               final utente = widget.game.utente;
 
-              // Calcolo costi
+              // 1. Logica di calcolo (rimane nella UI come desideri)
               for (final layer in layers) {
                 final color = selectedStyles[layer];
                 if (color == null) continue;
+
                 if (!utente.possiedeArticolo(layer, color)) {
                   costoTotale += layerOptions[layer]![color]!.price;
                 }
               }
 
-              // 1. Controllo Monete
+              // Controllo monete
               if (utente.monete < costoTotale) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Monete insufficienti!")),
@@ -302,23 +303,26 @@
                 return;
               }
 
-              // 2. Transazione e Aggiornamento Utente
-              utente.monete -= costoTotale;
+              // 2. USO DEL REPOSITORY (Il Ponte)
+              // Scaliamo le monete (aggiorna locale + DB)
+              if (costoTotale > 0) {
+                widget.game.repository.aggiungiMonete(-costoTotale); 
+              }
 
+              // Aggiorniamo l'inventario e il look per ogni categoria
               for (final layer in layers) {
                 final color = selectedStyles[layer];
                 if (color == null) continue;
 
-                // Aggiungiamo all'inventario se nuovo
+                // Se è un nuovo acquisto, aggiungiamo all'inventario (aggiorna locale + DB)
                 if (!utente.possiedeArticolo(layer, color)) {
-                  if (!utente.inventario.containsKey(layer)) utente.inventario[layer] = [];
-                  utente.inventario[layer]!.add(color);
+                  widget.game.repository.aggiungiAInventario(layer, color);
                 }
 
-                // Salviamo il look indossato nell'oggetto Utente
-                utente.lookAttuale[layer] = color;
+                // Aggiorniamo il look attuale (aggiorna locale + DB)
+                widget.game.repository.aggiornaLook({...utente.lookAttuale, layer: color});
 
-                // Aggiorniamo visivamente il player nel gioco
+                // Aggiornamento grafico del player
                 await widget.game.player.changeLayer(layer, layerOptions[layer]!, color);
               }
 
