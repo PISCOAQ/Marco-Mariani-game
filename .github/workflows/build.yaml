@@ -110,10 +110,6 @@ jobs:
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
         run: |
-          # Ensure namespace exists
-          kubectl get namespace "${K8S_NAMESPACE}" >/dev/null 2>&1 || \
-            kubectl create namespace "${K8S_NAMESPACE}"
-
           # Deploy using the OCI chart (HELM_CHART_URL), base values.yaml from this repo,
           # and override image repository & tag from this workflow.
           helm upgrade --install marco-mariani-game "${HELM_CHART_URL}" \
