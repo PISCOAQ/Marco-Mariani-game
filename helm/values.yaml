@@ -2,6 +2,6 @@ image:
   repository: ghcr.io/piscoaq/marco-mariani-game
   tag: main
 httpRoute:
-  enabled: true
+  enabled: false
   hostnames:
   - mmgame.polyglot-edu.com
