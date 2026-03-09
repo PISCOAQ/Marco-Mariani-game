@@ -61,10 +61,66 @@ jobs:
     runs-on:
       group: k8s
       labels: github-arc-runner
-    # needs: build-and-push
+    needs: build-and-push
+    env:
+      REGISTRY: ${{ env.REGISTRY }}
+      IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      # Use the current ref (branch or tag) as the image tag,
+      # which matches one of the tags pushed in build-and-push.
+      IMAGE_TAG: ${{ github.ref_name }}
+      # OCI Helm chart location and version (configured as GitHub Variables)
+      HELM_CHART_URL: ${{ vars.HELM_CHART_URL }}
+      HELM_CHART_VERSION: ${{ vars.HELM_CHART_VERSION }}
     steps:
-      - name: Hello World
-        run: echo "Hello World"
-
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Configure kubeconfig with GitHub ARC in-cluster info
+        env:
+          # Organization-level Kubernetes token secret
+          K8S_TOKEN: ${{ secrets.K8S_TOKEN }}
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
+        run: |
+          # Use in-cluster environment provided by the ARC runner
+          SERVER="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+          NAMESPACE="${K8S_NAMESPACE}"
+          CA_CERT_PATH="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+          mkdir -p "$HOME/.kube"
+          cat <<EOF > "$HOME/.kube/config"
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: cluster
+            cluster:
+              server: ${SERVER}
+              certificate-authority: ${CA_CERT_PATH}
+          contexts:
+          - name: cluster-context
+            context:
+              cluster: cluster
+              namespace: ${NAMESPACE}
+              user: deploy-user
+          current-context: cluster-context
+          users:
+          - name: deploy-user
+            user:
+              token: ${K8S_TOKEN}
+          EOF
+
+      - name: Deploy application with Helm
+        env:
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
+        run: |
+          # Ensure namespace exists
+          kubectl get namespace "${K8S_NAMESPACE}" >/dev/null 2>&1 || \
+            kubectl create namespace "${K8S_NAMESPACE}"
+
+          # Deploy using the OCI chart (HELM_CHART_URL), base values.yaml from this repo,
+          # and override image repository & tag from this workflow.
+          helm upgrade --install marco-mariani-game "${HELM_CHART_URL}" \
+            --version "${HELM_CHART_VERSION}" \
+            --namespace "${K8S_NAMESPACE}" \
+            --values ./helm/values.yaml \
+            --set image.repository="${REGISTRY}/${IMAGE_NAME}" \
+            --set image.tag="${IMAGE_TAG}"
