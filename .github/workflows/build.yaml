@@ -16,8 +16,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      # Normalized image repository (first image from metadata-action JSON array)
-      image_repository: ${{ fromJSON(steps.meta.outputs.images)[0] }}
+      # Normalized image repository from docker/metadata-action (plain string, e.g. ghcr.io/org/repo)
+      image_repository: ${{ steps.meta.outputs.images }}
     
     # Permessi necessari per scrivere nel registry di GitHub
     permissions:
