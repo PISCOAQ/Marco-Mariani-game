@@ -70,7 +70,7 @@ jobs:
       # which matches one of the tags pushed in build-and-push.
       IMAGE_TAG: ${{ github.ref_name }}
       # Normalized image repository coming from build-and-push (docker/metadata-action)
-      IMAGE_REPOSITORY: ${{ needs.build-and-push.outputs.image_repository }}
+      IMAGE_REPOSITORY: ghcr.io/piscoaq/marco-mariani-game
       # OCI Helm chart location and version (configured as GitHub Variables)
       HELM_CHART_URL: ${{ vars.HELM_CHART_URL }}
       HELM_CHART_VERSION: ${{ vars.HELM_CHART_VERSION }}
