@@ -63,8 +63,6 @@ jobs:
       labels: github-arc-runner
     needs: build-and-push
     env:
-      REGISTRY: ${{ env.REGISTRY }}
-      IMAGE_NAME: ${{ env.IMAGE_NAME }}
       # Use the current ref (branch or tag) as the image tag,
       # which matches one of the tags pushed in build-and-push.
       IMAGE_TAG: ${{ github.ref_name }}
