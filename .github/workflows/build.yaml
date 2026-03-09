@@ -59,6 +59,7 @@ jobs:
 
   deploy-k8s:
     runs-on:
+      group: k8s
       labels: github-arc-runner
     # needs: build-and-push
     steps:
