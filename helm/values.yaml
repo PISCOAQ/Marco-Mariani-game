@@ -10,9 +10,6 @@ httpRoute:
 volumeMounts:
   - name: tmp
     mountPath: /tmp
-  # Writable dirs for nginx when root filesystem is read-only
-  - name: nginx-conf-d
-    mountPath: /etc/nginx/conf.d
   - name: nginx-cache
     mountPath: /var/cache/nginx
   - name: nginx-run
@@ -21,9 +18,10 @@ volumeMounts:
 volumes:
   - name: tmp
     emptyDir: {}
-  - name: nginx-conf-d
-    emptyDir: {}
   - name: nginx-cache
     emptyDir: {}
   - name: nginx-run
     emptyDir: {}
+
+securityContext:
+  readOnlyRootFilesystem: false
