@@ -25,3 +25,6 @@ volumes:
 
 securityContext:
   readOnlyRootFilesystem: false
+
+service:
+  port: 8080

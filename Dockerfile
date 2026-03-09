@@ -12,13 +12,19 @@ COPY . .
 # Compile the Dart script to native executable
 RUN flutter build web --release
 
-# Use NGINX as web server, lightweigh runtime image
-FROM ghcr.io/nginx/nginx-unprivileged:1.29.5-alpine AS runtime  
+# Use NGINX as web server, lightweight runtime image
+FROM ghcr.io/nginx/nginx-unprivileged:1.29.5-alpine AS runtime
 
 # Set working directory
 WORKDIR /usr/share/nginx/html
 
-# Copy only the compiled binary from the build stage
+# Copy only the compiled web output from the build stage
 COPY --from=build /app/build/web .
 
-COPY ./assets assets
+# nginx-unprivileged runs as UID 101; root-owned files are unreadable. Fix ownership.
+USER root
+RUN chown -R 101:101 /usr/share/nginx/html
+USER 101
+
+# Extra assets from host (Flutter build already bundles pubspec assets into build/web)
+COPY --chown=101:101 ./assets ./assets
