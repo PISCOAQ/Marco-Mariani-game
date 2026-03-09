@@ -56,3 +56,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-k8s:
+    runs-on: arc-runner
+    needs: build-and-push
+    steps:
+      - name: Hello World
+        run: echo "Hello World"
+        
+      - name: Checkout repository
+        uses: actions/checkout@v4
