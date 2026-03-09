@@ -58,7 +58,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy-k8s:
-    runs-on: github-arc-runner
+    runs-on: github-arc-runner-cd727
     # needs: build-and-push
     steps:
       - name: Hello World
