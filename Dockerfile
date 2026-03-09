@@ -13,7 +13,7 @@ COPY . .
 RUN flutter build web --release
 
 # Use NGINX as web server, lightweigh runtime image
-FROM nginx:stable-alpine3.23-slim AS runtime  
+FROM ghcr.io/nginx/nginx-unprivileged:1.29.5-alpine AS runtime  
 
 # Set working directory
 WORKDIR /usr/share/nginx/html
