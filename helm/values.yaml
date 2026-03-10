@@ -1,0 +1,39 @@
+image:
+  repository: ghcr.io/piscoaq/marco-mariani-game
+  tag: main
+  pullPolicy: Always
+httpRoute:
+  enabled: false
+  hostnames:
+  - mmgame.polyglot-edu.com
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: nginx-cache
+    mountPath: /var/cache/nginx
+  - name: nginx-run
+    mountPath: /var/run
+
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: nginx-cache
+    emptyDir: {}
+  - name: nginx-run
+    emptyDir: {}
+
+securityContext:
+  readOnlyRootFilesystem: false
+
+service:
+  port: 8080
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
