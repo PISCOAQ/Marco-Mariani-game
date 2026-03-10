@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:gioco_demo/class/models/Domanda.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ActivityLoader {
-  static const String _path = '/data/data.json';
+  static final String _path = dotenv.env['BACKEND_PATH']!;
 
   static Future<Quiz> carica() async {
     final String response = await rootBundle.loadString(_path);

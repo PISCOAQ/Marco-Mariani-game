@@ -8,12 +8,11 @@ import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/gateComponent.dart';
 import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/repository/utente_repository.dart';
-import 'package:gioco_demo/class/services/db_service.dart';
-import 'package:gioco_demo/game/chest.dart';
+import 'package:gioco_demo/game/components/chest.dart';
 import 'package:gioco_demo/game/components/Interactive_object.dart';
 import 'package:gioco_demo/widgets/LuceCartello.dart';
-import 'player.dart';
-import 'wall.dart';
+import 'components/player.dart';
+import 'components/wall.dart';
 import 'package:tiled/tiled.dart' as tiled;
 
 // Definizione callback

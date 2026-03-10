@@ -1,39 +1,70 @@
 {
-    "_id": "e3215bd0-c55c-46de-b633-9e66b72d4c62",
-    "type": "socialSituationsNode",
-    "title": "Situazioni sociali",
-    "description": "aaaaa",
+    "_id": "ac54fb05-190c-48d2-96b7-b40d0a3a314d",
+    "type": "TeoriaDellaMenteNode",
+    "title": "Teoria Della Mente",
+    "description": "ndjcbrhcbq",
     "difficulty": 1,
     "platform": "WebApp",
     "data": {
-        "items": [
+        "quiz": [
             {
-                "sid": "73845420-25d4-45bf-b529-00e741639a9c",
-                "sections": [
+                "qid": "276a9910-dfc1-40ff-9397-8749bf714817",
+                "narration": "Daniele e Luca un giorno vedono la signora Verdi che esce dal parrucchiere. Fa un po’ ridere perché il parrucchiere le ha tagliato i capelli troppo corti. Daniele dice a Luca: “Dev’essere stata in un combattimento con una falciatrice!”",
+                "questions": [
                     {
-                        "before": "aaaa",
-                        "bold": "bbb",
-                        "after": "aaaaa",
+                        "question": "È vero quello che dice Daniele?",
                         "answers": [
-                            "a",
-                            "b",
-                            "c",
-                            "d"
+                            "Si",
+                            "No"
                         ],
-                        "correctIndexes": [
-                            1, 2, 3
-                        ]
+                        "correctIndex": 1
+                    },
+                    {
+                        "question": "Perché Daniele dice questo?",
+                        "answers": [
+                            "Ha fatto una battuta",
+                            "Ha visto la signora Verdi lottare con una falciatrice",
+                            "Si è confuso",
+                            "Non lo so",
+                            "A Daniele piacciono le falciatrici"
+                        ],
+                        "correctIndex": 0
+                    }
+                ]
+            },
+            {
+                "qid": "276a9910-dfc1-40ff-9397-8749bf714817",
+                "narration": "Daniele e Luca un giorno vedono la signora Verdi che esce dal parrucchiere. Fa un po’ ridere perché il parrucchiere le ha tagliato i capelli troppo corti. Daniele dice a Luca: “Dev’essere stata in un combattimento con una falciatrice!”",
+                "questions": [
+                    {
+                        "question": "È vero quello che dice Daniele?",
+                        "answers": [
+                            "Si",
+                            "No"
+                        ],
+                        "correctIndex": 1
+                    },
+                    {
+                        "question": "Perché Daniele dice questo?",
+                        "answers": [
+                            "Ha fatto una battuta",
+                            "Ha visto la signora Verdi lottare con una falciatrice",
+                            "Si è confuso",
+                            "Non lo so",
+                            "A Daniele piacciono le falciatrici"
+                        ],
+                        "correctIndex": 1
                     }
                 ]
             }
         ]
     },
     "reactFlow": {
-        "id": "e3215bd0-c55c-46de-b633-9e66b72d4c62",
-        "type": "socialSituationsNode",
+        "id": "ac54fb05-190c-48d2-96b7-b40d0a3a314d",
+        "type": "TeoriaDellaMenteNode",
         "position": {
-            "x": 915,
-            "y": 225
+            "x": 690,
+            "y": 210
         },
         "width": 129,
         "height": 46,

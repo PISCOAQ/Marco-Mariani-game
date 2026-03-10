@@ -2,7 +2,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:gioco_demo/game/player.dart';
+import 'package:gioco_demo/game/components/player.dart';
 import 'package:gioco_demo/game/MyGame.dart'; 
 
 typedef ShowQuizCallback = void Function();

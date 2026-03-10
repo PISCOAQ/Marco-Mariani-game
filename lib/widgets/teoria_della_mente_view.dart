@@ -68,20 +68,36 @@ class TeoriaMenteView extends StatelessWidget {
   }
 
   // Widget per le domande a scelta multipla
-  Widget _buildOpzioniChiuse(int idx, List<String> opzioni, String selezionata) {
-    return Wrap(
+Widget _buildOpzioniChiuse(int idx, List<String> opzioni, String selezionata) {
+  // 1. Troviamo la lunghezza della parola più lunga in questa lista
+  int maxLen = opzioni.fold(0, (max, e) => e.length > max ? e.length : max);
+
+  // 2. Determiniamo la larghezza in base al contenuto:
+  // Se le risposte sono brevi (tipo SI/NO), usiamo 140, altrimenti 220
+  double btnWidth = maxLen <= 3 ? 140 : 220;
+  // Anche l'altezza può essere leggermente ridotta per i SI/NO (es. 65 invece di 80)
+  double btnHeight = maxLen <= 3 ? 65 : 80;
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Wrap(
       alignment: WrapAlignment.center,
-      spacing: 15,
-      runSpacing: 10,
+      spacing: 16,
+      runSpacing: 16,
       children: opzioni.asMap().entries.map((entry) {
         int optIdx = entry.key;
         String optTesto = entry.value;
-        
-        // Salviamo l'indice come stringa per coerenza con il loader degli indici
-        return _buildBtn(optTesto, selezionata == optIdx.toString(), () => _updatePart(idx, optIdx.toString()));
+        return _buildBtn(
+          optTesto, 
+          selezionata == optIdx.toString(), 
+          () => _updatePart(idx, optIdx.toString()),
+          width: btnWidth,   // Passiamo la larghezza calcolata
+          height: btnHeight, // Passiamo l'altezza calcolata
+        );
       }).toList(),
-    );
-  }
+    ),
+  );
+}
 
   // Widget per le domande a risposta aperta
   Widget _buildCampoAperto(int idx, String testo) {
@@ -124,21 +140,30 @@ class TeoriaMenteView extends StatelessWidget {
     );
   }
 
-  Widget _buildBtn(String testo, bool selected, VoidCallback onTap) {
-    return SizedBox(
-      width: 140,
-      height: 55,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: selected ? Colors.blue[700] : Colors.white,
-          foregroundColor: selected ? Colors.white : Colors.black87,
-          elevation: selected ? 2 : 0,
-          side: BorderSide(color: selected ? Colors.blue[900]! : Colors.grey[400]!),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        onPressed: onTap,
-        child: Text(testo.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
+Widget _buildBtn(String testo, bool selected, VoidCallback onTap, {double width = 220, double height = 80}) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      fixedSize: Size(width, height), // Ora le dimensioni sono dinamiche
+      backgroundColor: selected ? Colors.blue[700] : Colors.white,
+      foregroundColor: selected ? Colors.white : Colors.black87,
+      elevation: selected ? 4 : 1,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      side: BorderSide(
+        color: selected ? Colors.blue[900]! : Colors.grey[300]!,
+        width: 2,
       ),
-    );
-  }
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    onPressed: onTap,
+    child: Text(
+      testo.toUpperCase(),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: width < 150 ? 16 : 14, // Se il tasto è piccolo, il font può essere un filo più grande
+        height: 1.1,
+      ),
+    ),
+  );
+}
 }

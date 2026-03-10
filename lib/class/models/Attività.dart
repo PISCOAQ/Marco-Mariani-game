@@ -1,6 +1,5 @@
 import 'package:gioco_demo/class/models/Domanda.dart';
 
-
 abstract class Pagina{
   final List<Domanda> lista_domande;
 
@@ -59,8 +58,6 @@ class PassoFalso extends Pagina {
     required this.narrazione,
   });
 }
-
-
 
 
 //Definizione di Quiz/Esercitazione come un insieme di pagine

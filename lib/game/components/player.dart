@@ -7,7 +7,7 @@ import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/avatarConfig.dart';
 import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/services/Avatar_loader.dart';
-import 'package:gioco_demo/game/chest.dart';
+import 'package:gioco_demo/game/components/chest.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRef {
   Vector2 velocity = Vector2.zero();

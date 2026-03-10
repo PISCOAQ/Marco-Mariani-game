@@ -271,16 +271,5 @@ Widget build(BuildContext context) {
     );
   }
 
-/*
-  Widget _buildNavArrow({
-    required IconData icon,
-    VoidCallback? onPressed,
-  }) {
-    return IconButton(
-      icon: Icon(icon, size: 30),
-      color: onPressed == null ? Colors.grey[400] : Colors.blueGrey[700],
-      onPressed: onPressed,
-    );
-  }*/
 }
 

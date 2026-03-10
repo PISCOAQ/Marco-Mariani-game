@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart'; 
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:gioco_demo/game/player.dart';
+import 'package:gioco_demo/game/components/player.dart';
 
 class Chest extends SpriteGroupComponent<bool> with CollisionCallbacks, HasGameRef {
   bool isOpen = false;

@@ -102,7 +102,7 @@ Widget _buildNavigationFooter() {
           ),
         ),
 
-        // TASTO AVANTI / CONSEGNA (Sempre visibile)
+        // TASTO AVANTI / CONSEGNA 
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             // Colore: Verde se attivo, Grigio se disabilitato

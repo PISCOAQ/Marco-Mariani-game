@@ -1,28 +1,30 @@
 import 'package:gioco_demo/class/logic/valutazione_quiz/esito_pagina.dart';
-import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
+import 'package:gioco_demo/class/models/Attività.dart';
 
-EsitoPagina calcolaTeoriaDellaMente(TeoriaDellaMente pagina, List<String> risposte) {
+EsitoPagina calcolaTeoriaDellaMente(TeoriaDellaMente pagina, List<String> risposteUtente) {
   List<bool> esiti = [];
 
   for (int i = 0; i < pagina.lista_domande.length; i++) {
-    var domanda = pagina.lista_domande[i];
-    String rispostaUtente = (risposte.length > i ? risposte[i] : "").trim().toLowerCase();
+    final domanda = pagina.lista_domande[i];
+
+    int rispostaIndex = -1;
+    if (risposteUtente.length > i) {
+      rispostaIndex = int.tryParse(risposteUtente[i]) ?? -1;
+    }
 
     bool corretta = false;
-    if (domanda.risposte_corrette != null) {
-      corretta = domanda.risposte_corrette!
-          .map((r) => r.toString().trim().toLowerCase())
-          .contains(rispostaUtente);
+
+    if (domanda.correct_index != null) {
+      corretta = domanda.correct_index!.contains(rispostaIndex);
     }
+
     esiti.add(corretta);
   }
 
-  // REGOLA: La pagina è superata SOLO SE tutte le domande sono true
-  // Se anche solo una è false, every() restituirà false.
-  bool tuttoCorretto = esiti.isNotEmpty && esiti.every((e) => e == true);
+  bool tuttoCorretto = esiti.isNotEmpty && esiti.every((e) => e);
 
   return EsitoPagina(
     esitiDomande: esiti,
-    paginaSuperata: tuttoCorretto, 
+    paginaSuperata: tuttoCorretto,
   );
-}
+} 

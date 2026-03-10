@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flame/components.dart';
-import '../game/wall.dart';
+import '../components/wall.dart';
 
 Future<TiledComponent> loadMap(FlameGame game) async {
   final map = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
