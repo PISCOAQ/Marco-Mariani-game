@@ -1,5 +1,7 @@
 FROM instrumentisto/flutter:3.38 AS build
 
+ARG API_URL
+
 WORKDIR /app
 
 # Copy pubspec files and resolve dependencies
@@ -10,7 +12,7 @@ RUN flutter pub get
 COPY . .
 
 # Compile the Dart script to native executable
-RUN flutter build web --release
+RUN flutter build web --release --dart-define=API_URL=${API_URL}
 
 # Use NGINX as web server, lightweight runtime image
 FROM ghcr.io/nginx/nginx-unprivileged:1.29.5-alpine AS runtime
