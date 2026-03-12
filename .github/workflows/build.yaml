@@ -58,7 +58,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            "API_URL=http://api-for-game-http-app:3000"
+            "API_URL=https://api-game.polyglot-edu.com"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
