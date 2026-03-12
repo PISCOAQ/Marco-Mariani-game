@@ -7,6 +7,10 @@ httpRoute:
   hostnames:
   - mmgame.polyglot-edu.com
 
+env:
+  - name: API_URL
+    value: https://api-game.polyglot-edu.com
+
 volumeMounts:
   - name: tmp
     mountPath: /tmp

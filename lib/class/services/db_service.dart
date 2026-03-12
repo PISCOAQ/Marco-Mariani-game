@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Se testi su PC/Web: localhost. Se testi su emulatore Android: 10.0.2.2
-  static const String baseUrl = "http://localhost:3000";
+  static const String baseUrl = dotenv.env['API_URL'] ?? "http://localhost:3000";
 
   Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
     // Usiamo la rotta che ha funzionato nel browser
