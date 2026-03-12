@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   // Se testi su PC/Web: localhost. Se testi su emulatore Android: 10.0.2.2
-  static final String baseUrl = String.fromEnvironment('API_URL', defaultValue: dotenv.env['API_URL'] ?? "http://localhost:3000");
+  static final String baseUrl = dotenv.env['API_URL'] ?? "http://localhost:3000";
 
   Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
     // Usiamo la rotta che ha funzionato nel browser
