@@ -6,10 +6,6 @@ image:
 httpRoute:
   enabled: false
 
-env:  
-  - name: API_URL
-    value: https://api-game.polyglot-edu.com
-    
 volumeMounts:
   - name: tmp
     mountPath: /tmp
