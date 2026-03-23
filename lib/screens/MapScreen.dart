@@ -329,6 +329,7 @@ Widget build(BuildContext context) {
             onExit: _closePage,
             attivita: _attivitaCaricata,
             tentativoAttuale: _tentativiQuiz[_attivitaCaricata.titolo] ?? 1,
+            codiceGioco: widget.utente.codiceGioco,
           ),
         
         if (_isResultPopupActive && _ultimoRisultato != null)

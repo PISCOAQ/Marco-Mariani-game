@@ -7,12 +7,14 @@ class PageOverlay extends StatefulWidget {
   final Function(dynamic esitoQuiz) onExit;
   final dynamic attivita;
   final int tentativoAttuale;
+  final String codiceGioco;
 
   const PageOverlay({
     super.key,
     required this.onExit,
     required this.attivita,
     required this.tentativoAttuale,
+    required this.codiceGioco
   });
 
   @override
@@ -133,6 +135,7 @@ Widget _buildNavigationFooter() {
         key: _quizKey,
         quiz: widget.attivita,
         tentativoQuiz: widget.tentativoAttuale,
+        codiceGioco: widget.codiceGioco,
         onStatusChanged: _updateCompletionStatus,
         onPageChanged: _forceRefresh, // <--- PASSIAMO IL REFRESH QUI
         onConsegna: (QuizResult esito) => widget.onExit(esito),

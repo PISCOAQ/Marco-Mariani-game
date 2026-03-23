@@ -7,11 +7,13 @@ class PageOverlayEsercitazioni extends StatelessWidget {
   final Function(dynamic esitoQuiz) onExit;
   final dynamic attivita; // Riceve l'oggetto Quiz o Esercitazione
   final int tentativoAttuale;
+  final String codiceGioco;
 
   const PageOverlayEsercitazioni({super.key, 
     required this.onExit, 
     required this.attivita,
     required this.tentativoAttuale,
+    required this.codiceGioco
     });
 
   @override
@@ -62,6 +64,7 @@ class PageOverlayEsercitazioni extends StatelessWidget {
       return QuizView(
         quiz: attivita, 
         tentativoQuiz: tentativoAttuale, 
+        codiceGioco: codiceGioco,
         onConsegna: (QuizResult esito){
           onExit(esito);
         }

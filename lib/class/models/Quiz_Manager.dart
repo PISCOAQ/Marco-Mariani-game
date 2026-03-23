@@ -8,11 +8,12 @@ import 'package:gioco_demo/class/logic/valutazione_quiz/Valuta_TeoriaMente.dart'
 import 'package:gioco_demo/class/logic/valutazione_quiz/esito_pagina.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
+import 'package:gioco_demo/class/services/db_service.dart';
 
 
 class QuizManager {
   
-static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dynamic>>> risposteUtente) async {
+static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dynamic>>> risposteUtente, String codiceGioco) async {
     int corretteTotali = 0;
     int domandeTotali = 0;
     List<Map<String, dynamic>> dettaglioPagine = [];
@@ -76,7 +77,7 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
       dettaglioPagine: dettaglioPagine,
     );
 
-    _scaricaJsonWeb(risultato);
+    _inviaRisultatiAllApi(risultato, codiceGioco);
     return risultato;
   }
 
@@ -101,21 +102,20 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
     return (corrette * valorePerDomanda).toInt();
   }
 
-  static void _scaricaJsonWeb(QuizResult res) {
+  static Future<void> _inviaRisultatiAllApi(QuizResult res, String codiceGioco) async {
     try {
-      // Creiamo una mappa temporanea per aggiungere l'ID utente solo nel JSON
-      Map<String, dynamic> jsonOut = res.toJson();
+      // Trasformiamo l'oggetto QuizResult in una mappa JSON
+      Map<String, dynamic> datiJson = res.toJson();
 
-      final encoder = JsonEncoder.withIndent('  ');
-      final jsonString = encoder.convert(jsonOut);
-      final blob = html.Blob([jsonString], 'application/json');
-      final url = html.Url.createObjectUrlFromBlob(blob);
+      print("Tentativo di invio risultati per: $codiceGioco");
+
+      // Usiamo il servizio che abbiamo corretto prima (quello senza /api)
+      // ATTENZIONE: Assicurati di aver importato 'ApiService' in cima al file!
+      await ApiService().updateProgressi(codiceGioco, datiJson);
       
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute("download", "Risultato_${res.titoloQuiz.replaceAll(' ', '_')}.json")
-        ..click();
-      
-      html.Url.revokeObjectUrl(url);
-    } catch (e) { print("Errore download: $e"); }
+      print("✅ Risultati salvati correttamente sul server di Davide!");
+    } catch (e) {
+      print("❌ Errore durante l'invio all'API: $e");
+    }
   }
 }

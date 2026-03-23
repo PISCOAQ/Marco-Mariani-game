@@ -13,6 +13,7 @@ import 'attribuzione_emozioni_view.dart';
 class QuizView extends StatefulWidget {
   final dynamic quiz;
   final int tentativoQuiz;
+  final String codiceGioco;
   final Function(QuizResult esitoQuiz) onConsegna;
   final Function(bool isComplete)? onStatusChanged;
   final VoidCallback? onPageChanged; 
@@ -21,6 +22,7 @@ class QuizView extends StatefulWidget {
     super.key,
     required this.quiz,
     required this.tentativoQuiz,
+    required this.codiceGioco,
     required this.onConsegna,
     this.onStatusChanged,
     this.onPageChanged, 
@@ -255,6 +257,7 @@ Widget build(BuildContext context) {
                 QuizResult risultato = await QuizManager.valutaQuiz(
                   widget.quiz, 
                   _risposteQuiz, 
+                  widget.codiceGioco
                 );
 
                 Navigator.pop(context); // Chiude il dialog
