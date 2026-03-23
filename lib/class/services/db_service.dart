@@ -6,8 +6,8 @@ class ApiService {
   static const String baseUrl = "http://localhost:3000";
 
   Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
-    // Usiamo la rotta che ha funzionato nel browser
-    final url = Uri.parse('$baseUrl/bambino/$codiceGioco');
+    
+    final url = Uri.parse('$baseUrl/utente/$codiceGioco');
     
     try {
       final response = await http.get(url);
@@ -32,7 +32,7 @@ class ApiService {
 
   // Metodo per salvare i progressi quando il bambino gioca
   Future<void> updateProgressi(String codiceGioco, Map<String, dynamic> progressi) async {
-    final url = Uri.parse('$baseUrl/bambini/$codiceGioco/progressi');
+    final url = Uri.parse('$baseUrl/utenti/$codiceGioco/progressi');
     
     try {
       await http.patch(
