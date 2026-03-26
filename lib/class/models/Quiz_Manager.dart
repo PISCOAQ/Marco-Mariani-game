@@ -8,7 +8,7 @@ import 'package:gioco_demo/class/logic/valutazione_quiz/Valuta_TeoriaMente.dart'
 import 'package:gioco_demo/class/logic/valutazione_quiz/esito_pagina.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
-import 'package:gioco_demo/class/services/db_service.dart';
+import 'package:gioco_demo/class/services/API_service.dart';
 
 
 class QuizManager {
@@ -104,18 +104,16 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
 
   static Future<void> _inviaRisultatiAllApi(QuizResult res, String codiceGioco) async {
     try {
-      // Trasformiamo l'oggetto QuizResult in una mappa JSON
-      Map<String, dynamic> datiJson = res.toJson();
-
-      print("Tentativo di invio risultati per: $codiceGioco");
-
-      // Usiamo il servizio che abbiamo corretto prima (quello senza /api)
-      // ATTENZIONE: Assicurati di aver importato 'ApiService' in cima al file!
-      await ApiService().updateProgressi(codiceGioco, datiJson);
+      // Passiamo il codiceGioco al toJson
+      Map<String, dynamic> datiJson = res.toJson(codiceGioco);
       
-      print("✅ Risultati salvati correttamente sul server di Davide!");
+      print("Payload inviato a Jacopo: ${jsonEncode(datiJson)}"); 
+
+      await ApiService().uploadDatiJson(codiceGioco, datiJson);
+      
+      print("✅ Risultati salvati correttamente!");
     } catch (e) {
-      print("❌ Errore durante l'invio all'API: $e");
+      print("❌ Errore: $e");
     }
   }
 }

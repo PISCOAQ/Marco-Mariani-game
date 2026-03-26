@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/utente.dart';
-import 'package:gioco_demo/class/services/db_service.dart'; 
+import 'package:gioco_demo/class/services/API_service.dart'; 
 import 'package:gioco_demo/screens/MapScreen.dart';
 import 'package:gioco_demo/widgets/AvatarSelector.dart';
 import 'package:gioco_demo/widgets/StartButton.dart';
@@ -18,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int? selectedAvatar;
   bool showCodeInput = false;
   String userCode = "";
+  String? idPercorso;
 
   final ApiService _apiService = ApiService();
   bool isLoading = false;
@@ -63,13 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final datiDb = await _apiService.getDatiUtente(code);
-
+      final id = await _apiService.getPercorsoIdAssegnato(code);
       if (!mounted) return;
 
       setState(() {
         userCode = code;
         showCodeInput = false;
         isLoading = false;
+        idPercorso = id;
 
         if (datiDb['tipoAvatar'] == null) {
           showAvatarSelector = true;
@@ -89,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             PosizioneY: posizioneLivello.dy,
             Monete: datiDb['moneteNotifier'] ?? 0,
             Livello_Attuale: livello,
+            idPercorso: id,
             lookIniziale: Map<String, String>.from(datiDb['lookAttuale'] ?? {}),
             inventarioIniziale: (datiDb['inventario'] as Map<String, dynamic>?)?.map(
               (key, value) => MapEntry(key, List<String>.from(value)),
@@ -136,6 +139,7 @@ void _onConfirmPressed() async {
             PosizioneX: 400.0,
             PosizioneY: 900.0,
             Monete: 50,
+            idPercorso: idPercorso ?? "ID_NON_DISPONIBILE",
             Livello_Attuale: 1,
             lookIniziale: abiti,
             inventarioIniziale: abiti.map((k, v) => MapEntry(k, [v])),

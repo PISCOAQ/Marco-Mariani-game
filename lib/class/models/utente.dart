@@ -8,7 +8,7 @@ class Utente {
   double PosizioneY;
   Map<String, String> lookAttuale;  // Look attuale: {'shirts': 'red', 'pants': 'denim'}
   Map<String, List<String>> inventario;   // Inventario: {'shirts': ['red', 'blue'], 'pants': ['denim']}
-  
+  String idPercorso;
   final ValueNotifier<int> moneteNotifier;
 
 
@@ -18,6 +18,7 @@ class Utente {
     required this.Livello_Attuale,
     required this.PosizioneX,
     required this.PosizioneY,
+    required this.idPercorso,
     int Monete = 0,
     Map<String, List<String>>? inventarioIniziale,
     Map<String, String>? lookIniziale,

@@ -196,10 +196,10 @@ class _MapScreenState extends State<MapScreen> {
         _ultimoRisultato = esito;
         _isResultPopupActive = true; 
 
+        // 1. AGGIORNAMENTO MONETE (Tramite Repo per il DB)
+        _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
+
         if (esito.superato) {
-          // 1. AGGIORNAMENTO MONETE (Tramite Repo per il DB)
-          _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
-          
           if (_levelInCorso != null) {
             int livelloDaSbloccare = _levelInCorso! + 1;
 

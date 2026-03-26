@@ -1,4 +1,4 @@
-import 'package:gioco_demo/class/services/db_service.dart';
+import 'package:gioco_demo/class/services/API_service.dart';
 import '../models/utente.dart';
 
 class UtenteRepository {
