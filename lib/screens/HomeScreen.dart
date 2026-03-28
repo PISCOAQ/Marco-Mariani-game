@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gioco_demo/class/models/Percorso.dart';
 import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/services/API_service.dart'; 
 import 'package:gioco_demo/screens/MapScreen.dart';
 import 'package:gioco_demo/widgets/AvatarSelector.dart';
+import 'package:gioco_demo/widgets/PercorsoSelector.dart';
 import 'package:gioco_demo/widgets/StartButton.dart';
 import 'package:gioco_demo/widgets/codeSelector.dart';
 
@@ -14,11 +16,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool showAvatarSelector = false;
-  int? selectedAvatar;
   bool showCodeInput = false;
+  bool showPercorsoSelector = false;
+  bool showAvatarSelector = false;
+  Percorso? selectedPercorso; 
+  int? selectedAvatar;
   String userCode = "";
   String? idPercorso;
+
+  List<Percorso> _percorsi = [];
 
   final ApiService _apiService = ApiService();
   bool isLoading = false;
@@ -28,30 +34,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, String> _getAbitiDefault(int avatarId) {
     if (avatarId == 2) { // Femmina
       return {
-        'shirts': 'top_white',
-        'pants': 'leggins_pink',
-        'hair': 'bob_cut',
-        'shoes': 'flat_brown',
+        'shirts': 'top_white', 'pants': 'leggins_pink', 'hair': 'bob_cut', 'shoes': 'flat_brown',
       };
     } else { // Maschio
       return {
-        'shirts': 'casual_red',
-        'pants': 'jeans_blue',
-        'hair': 'short_yellow',
-        'shoes': 'boots_brown',
+        'shirts': 'casual_red', 'pants': 'jeans_blue', 'hair': 'short_yellow', 'shoes': 'boots_brown',
       };
     }
   }
 
   // Posizione avatar per ogni livello
-  static const Map<int, Offset> _spawnPoints = {
+  static const Map<int, Offset> _positions = {
     1: Offset(400.0, 900.0),   
     2: Offset(820.0, 730.0),  
     3: Offset(890.0, 550.0),  
     4: Offset(750.0, 215.0),
     5: Offset(375.0, 260.0),
   };
-
 
 
   void _onStartPressed() {
@@ -64,41 +63,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final datiDb = await _apiService.getDatiUtente(code);
-      final id = await _apiService.getPercorsoIdAssegnato(code);
       if (!mounted) return;
 
       setState(() {
         userCode = code;
         showCodeInput = false;
         isLoading = false;
-        idPercorso = id;
 
-        if (datiDb['tipoAvatar'] == null) {
-          showAvatarSelector = true;
-        } else {
-          // 1. Recuperiamo il livello attuale dal DB
-          int livello = datiDb['Livello_Attuale'] ?? 1;
+        // Passiamo tutto al Factory Constructor: pensa lui a monete, livelli e posizioni
+        currentUser = Utente.fromMap(code, datiDb, _positions);
+        _percorsi = currentUser!.percorsiAssegnati;
 
-          // 2. Determiniamo la posizione corretta in base al livello
-          // Se per qualche motivo il livello non è in mappa, usiamo il livello 1 come fallback
-          Offset posizioneLivello = _spawnPoints[livello] ?? _spawnPoints[1]!;
-
-          currentUser = Utente(
-            codiceGioco: userCode,
-            tipoAvatar: datiDb['tipoAvatar'],
-            // AGGIORNATO: Usiamo la posizione legata al livello
-            PosizioneX: posizioneLivello.dx,
-            PosizioneY: posizioneLivello.dy,
-            Monete: datiDb['moneteNotifier'] ?? 0,
-            Livello_Attuale: livello,
-            idPercorso: id,
-            lookIniziale: Map<String, String>.from(datiDb['lookAttuale'] ?? {}),
-            inventarioIniziale: (datiDb['inventario'] as Map<String, dynamic>?)?.map(
-              (key, value) => MapEntry(key, List<String>.from(value)),
-            ) ?? {},
-          );
-          _goToMap();
-        }
+        // 3. MOSTRA IL SELETTORE PERCORSI
+        showPercorsoSelector = true;
       });
     } catch (e) {
       if (!mounted) return;
@@ -111,42 +88,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 2. FASE CREAZIONE: Salvataggio primo avatar
 void _onConfirmPressed() async {
-    if (selectedAvatar != null) {
-      setState(() => isLoading = true);
-      final abiti = _getAbitiDefault(selectedAvatar!);
+  if (selectedAvatar != null) {
+    setState(() => isLoading = true);
+    final abiti = _getAbitiDefault(selectedAvatar!);
 
-      final datiIniziali = {
-        "tipoAvatar": selectedAvatar,
-        "moneteNotifier": 50,
-        "Livello_Attuale": 1,
-        "lookAttuale": abiti,
-        "PosizioneX": 400.0,
-        "PosizioneY": 900.0,
-        "inventario": abiti.map((k, v) => MapEntry(k, [v])),
-      };
+    try {
+      // Salvataggio sul DB
+      await _apiService.updateProgressi(userCode, {
+          "tipoAvatar": selectedAvatar,
+          "lookAttuale": abiti,
+          "inventario": abiti.map((k, v) => MapEntry(k, [v])),
+          "Livello_Attuale": currentUser!.Livello_Attuale, 
+          "moneteNotifier": currentUser!.monete,
+      });
 
-      try {
-        // Usiamo userCode che abbiamo salvato prima
-        await _apiService.updateProgressi(userCode, datiIniziali);
+      setState(() {
+        // Aggiorniamo l'utente finale
+        currentUser!.tipoAvatar = selectedAvatar!;
+        currentUser!.lookAttuale = abiti;
+        isLoading = false;
+      });
+      
+      _goToMap();
 
-        if (!mounted) return;
-
-        setState(() {
-          // AGGIORNATO: Passiamo il codice anche qui
-          currentUser = Utente(
-            codiceGioco: userCode, 
-            tipoAvatar: selectedAvatar!,
-            PosizioneX: 400.0,
-            PosizioneY: 900.0,
-            Monete: 50,
-            idPercorso: idPercorso ?? "ID_NON_DISPONIBILE",
-            Livello_Attuale: 1,
-            lookIniziale: abiti,
-            inventarioIniziale: abiti.map((k, v) => MapEntry(k, [v])),
-          );
-          isLoading = false;
-        });
-        _goToMap();
       } catch (e) {
         if (!mounted) return;
         setState(() => isLoading = false);
@@ -154,6 +118,22 @@ void _onConfirmPressed() async {
           SnackBar(content: Text("Errore salvataggio: $e")),
         );
       }
+    }
+  }
+
+  void _onPercorsoConfirmed() {
+    if (selectedPercorso != null) {
+      setState(() {
+        currentUser!.percorsoAttivo = selectedPercorso;
+        showPercorsoSelector = false;
+
+        // Se non ha l'avatar, mostra il selettore avatar, altrimenti vai alla mappa
+        if (currentUser!.tipoAvatar == null) {
+          showAvatarSelector = true;
+        } else {
+          _goToMap();
+        }
+      });
     }
   }
 
@@ -178,13 +158,22 @@ void _onConfirmPressed() async {
             ),
           ),
 
-          if (!showCodeInput && !showAvatarSelector)
+          if (!showCodeInput && !showPercorsoSelector && !showAvatarSelector)
             Center(child: StartButton(onPressed: _onStartPressed)),
 
           if (showCodeInput)
             CodeSelector(
               onConfirm: _onCodeConfirmed,
               onBack: () => setState(() => showCodeInput = false),
+            ),
+
+          if (showPercorsoSelector)
+            PercorsoSelector(
+              listaPercorsi: _percorsi,
+              selectedPercorso: selectedPercorso, 
+              onPercorsoSelected: (p) => setState(() => selectedPercorso = p),
+              onConfirm: _onPercorsoConfirmed,
+              onBack: () => setState(() => showPercorsoSelector = false),
             ),
 
           if (showAvatarSelector)

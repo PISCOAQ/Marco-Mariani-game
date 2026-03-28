@@ -70,7 +70,7 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
     QuizResult risultato = QuizResult(
       idQuiz: quiz.id ?? "ID_MANCANTE",
       titoloQuiz: quiz.titolo,
-      superato: corretteTotali >= (domandeTotali * 0.6),
+      superato: _verificaSuperamento(corretteTotali, quiz.condizione, quiz.valore),
       moneteGuadagnate: _calcolaMonete(corretteTotali, domandeTotali),
       corrette: corretteTotali,
       totali: domandeTotali,
@@ -116,4 +116,16 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
       print("❌ Errore: $e");
     }
   }
+
+  static bool _verificaSuperamento(int corrette, String operatore, int soglia) {
+  switch (operatore) {
+    case '==': return corrette == soglia;
+    case '>=': return corrette >= soglia;
+    case '>':  return corrette > soglia;
+    case '<=': return corrette <= soglia;
+    case '<':  return corrette < soglia;
+    case '!=': return corrette != soglia;
+    default:   return corrette >= soglia; // Fallback sicuro
+  }
+}
 }

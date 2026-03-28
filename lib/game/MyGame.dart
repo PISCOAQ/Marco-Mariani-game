@@ -140,7 +140,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     }
 
     player = Player(
-      avatarIndex: utente.tipoAvatar,
+      avatarIndex: utente.tipoAvatar!,
       position: Vector2(utente.PosizioneX, utente.PosizioneY),
       utente: utente,
     );

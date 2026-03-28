@@ -7,7 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ActivityLoader {
   static final String _path = dotenv.env['BACKEND_PATH']!;
 
-  static Future<Quiz> carica() async {
+  static Future<Quiz> caric() async {
     final String response = await rootBundle.loadString(_path);
     final Map<String, dynamic> data = json.decode(response);
 
@@ -15,12 +15,34 @@ class ActivityLoader {
     return _costruisciQuiz(data);
   }
 
+  // NUOVO METODO: Prende il JSON che PolyGloTManager ha già scaricato
+  static Quiz fromPolyGloT(Map<String, dynamic> data) {
+    return _costruisciQuiz(data);
+  }
+
   static Quiz _costruisciQuiz(Map<String, dynamic> data) {
     final String type = data["type"] ?? "";
     final String id = data["_id"] ?? "";
     final String titolo = data["title"] ?? "Quiz";
-    
+
     List<Pagina> listaPagine = [];
+
+    //Estrazione condizione
+    String operatoreSoglia = ">="; //default
+    int valoreSoglia = 1; //default -> 1 risposta corretta 
+    String idCondizioneSoddisfatta = "";
+
+    if(data['validation'] != null && (data['validation'] as List).isNotEmpty){
+      idCondizioneSoddisfatta = data['validation'][0]['id'] ?? "";
+      var primaValidazione = data['validation'][0];
+      operatoreSoglia = primaValidazione['operator'] ?? ">=";
+      var t = primaValidazione['threshold'];
+      if(t != null){
+        valoreSoglia = (t is int) ? t : int.tryParse(t.toString()) ?? 1;
+      }
+    }
+    
+    
 
     switch (type) {
       case 'EmotionAttributionTestNode':
@@ -147,6 +169,9 @@ class ActivityLoader {
       id: id,
       titolo: titolo,
       pagine: listaPagine,
+      condizione: operatoreSoglia,
+      valore: valoreSoglia,
+      idCondizioneSoddisfatta: idCondizioneSoddisfatta,
     );
   }
 }

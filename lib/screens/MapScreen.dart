@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/class/models/utente.dart';
+import 'package:gioco_demo/class/services/API_service.dart';
 import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
+import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/widgets/ChestPage.dart';
 import 'package:gioco_demo/widgets/GameNotification.dart';
@@ -26,6 +28,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final MyGame _myGame; 
+  late final ApiService _apiService;
   bool _isPageActive = false; 
   bool _isChestPage = false;
   String? _messaggioNotifica;
@@ -34,6 +37,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _mostraSentieri = true;
   int? _levelInCorso;
   final Map<String, int> _tentativiQuiz = {};
+
+  late final PolyglotService _polyglotService;
 
   bool _isResultPopupActive = false;
   QuizResult? _ultimoRisultato;
@@ -50,6 +55,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    _apiService = ApiService();
+    
+    // 1. Inizializziamo il servizio (i parametri sono già preimpostati nella classe)
+    _polyglotService = PolyglotService();
+    _inizializzaPolyglot();
+
     _myGame = MyGame(
       utente: widget.utente,
       onShowPopup: _showPopup, 
@@ -76,6 +87,39 @@ class _MapScreenState extends State<MapScreen> {
         });
         },
     );  
+  }
+
+  void _inizializzaPolyglot() async {
+    final percorso = widget.utente.percorsoAttivo;
+    if (percorso == null) return;
+
+    String? idDaUsare;
+
+    if (percorso.ctxId == null || percorso.ctxId!.isEmpty) {
+      // 1. Chiedo a Polyglot un nuovo ID
+      idDaUsare = await _polyglotService.firstCall(percorso.flowId);
+      
+      if (idDaUsare != null) {
+        // 2. LO SALVO NEL DB SUBITO (Usando la tua funzione di ApiService)
+        // Assicurati di avere un'istanza di ApiService disponibile (es. _apiService)
+        await _apiService.updateCtxId(
+          widget.utente.codiceGioco, 
+          percorso.flowId, // o l'ID del percorso corretto
+          idDaUsare,
+        );
+        
+        // 3. Aggiorno anche l'oggetto in locale così l'app lo "vede" subito
+        percorso.ctxId = idDaUsare;
+      }
+    } else {
+      // Caso ripresa: l'ID c'è già nel DB
+      idDaUsare = percorso.ctxId;
+    }
+
+    // 4. Avvio il quiz con l'ID (nuovo o vecchio)
+    if (idDaUsare != null) {
+      await _polyglotService.actualCall(idDaUsare);
+    }
   }
 
   @override
@@ -110,8 +154,17 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showPopup(String tipo, int levelId) async {
-    final risultato = await ActivityLoader.carica();
-    if (risultato == null) return;
+    //final risultato = await ActivityLoader.carica(); funzione vecchia json in locale
+
+    final jsonGrezzo = _polyglotService.lastRawResponse;
+
+    if (jsonGrezzo == null) {
+    _mostraMessaggioAvviso("Dati non ancora pronti o errore di rete.");
+    return;
+    }
+
+    // Usiamo il tuo loader modificato per accettare la Map
+    final risultato = ActivityLoader.fromPolyGloT(jsonGrezzo);
 
     if (_myGame.utente.Livello_Attuale > levelId) {
       _mostraMessaggioAvviso("Sfida già completata!");
@@ -186,25 +239,32 @@ class _MapScreenState extends State<MapScreen> {
     _gameFocusNode.requestFocus(); // Torna al gioco
   }
 
-  void _closePage(dynamic esito) { 
+  void _closePage(dynamic esito) {
     setState(() {
       _isPageActive = false;
-      _myGame.resetInput(); 
+      _myGame.resetInput();
       _myGame.resumeEngine();
 
       if (esito is QuizResult) {
         _ultimoRisultato = esito;
-        _isResultPopupActive = true; 
+        _isResultPopupActive = true;
 
-        // 1. AGGIORNAMENTO MONETE (Tramite Repo per il DB)
         _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
 
         if (esito.superato) {
           if (_levelInCorso != null) {
             int livelloDaSbloccare = _levelInCorso! + 1;
+            if(_attivitaCaricata is Quiz){
+              final quiz = _attivitaCaricata as Quiz;
+              final ctxId = widget.utente.percorsoAttivo!.ctxId!; // Recuperiamo l'ID corrente
 
-            // 2. AGGIORNAMENTO LIVELLO (Tramite Repo per il DB)
-            // Questo aggiorna il DB e sblocca il livello graficamente nel gioco
+              _polyglotService.nextCall([quiz.idCondizioneSoddisfatta]).then((_) {
+                // Passiamo l'id corrente anche ad actualCall per scaricare il nuovo nodo
+                _polyglotService.actualCall(ctxId);
+              });
+            }
+
+            // Aggiornamento locale (DB e Mappa)
             _myGame.repository.aggiornaLivello(livelloDaSbloccare);
             _myGame.unlockLevel(livelloDaSbloccare.toString());
           }

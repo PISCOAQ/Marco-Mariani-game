@@ -4,30 +4,31 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class ApiService {
-  // Se testi su PC/Web: localhost. Se testi su emulatore Android: 10.0.2.2
   static final String baseUrl = dotenv.env['API_URL'] ?? "http://localhost:3000";
 
-  Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
-    
-    final url = Uri.parse('$baseUrl/utente/$codiceGioco');
-    
-    try {
-      final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+  Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
+    // 1. Prendiamo i dati base (avatar, monete, posizione)
+    final urlDati = Uri.parse('$baseUrl/utente/$codiceGioco');
+    // 2. Prendiamo i percorsi dalla rotta dedicata
+    final urlPercorsi = Uri.parse('$baseUrl/utenti/$codiceGioco/percorsi');
+
+    try {
+      final resDati = await http.get(urlDati);
+      final resPercorsi = await http.get(urlPercorsi);
+
+      if (resDati.statusCode == 200 && resPercorsi.statusCode == 200) {
+        final Map<String, dynamic> dati = json.decode(resDati.body);
+        final List<dynamic> percorsi = json.decode(resPercorsi.body);
+
+        // Uniamo i dati: mettiamo la lista dei percorsi dentro l'oggetto dati
+        dati['percorsiAssegnati'] = percorsi;
         
-        // Verifichiamo che i dati fondamentali ci siano
-        if (data == null) throw Exception('Risposta vuota dal server');
-        
-        return data; 
-      } else if (response.statusCode == 404) {
-        throw Exception('Codice gioco non trovato');
+        return dati;
       } else {
-        throw Exception('Errore server: ${response.statusCode}');
+        throw Exception('Errore nel recupero dati combinati');
       }
     } catch (e) {
-      print("Errore API Service: $e");
       rethrow;
     }
   }
@@ -98,6 +99,43 @@ class ApiService {
       print("❌ Errore critico getPercorsoIdAssegnato: $e");
       // Lanciamo l'errore per non dover restituire null
       rethrow; 
+    }
+  }
+
+  // Metodo per aggiornare il ctxId di un percorso specifico nel DB
+  Future<void> updateCtxId(
+    String codiceGioco,
+    String percorsoId,
+    String ctxId,
+  ) async {
+
+    print("--- DEBUG UPDATE CTX ---");
+  print("Codice Gioco: $codiceGioco");
+  print("Percorso ID (FlowID): $percorsoId");
+  print("Context ID (ctxId): $ctxId");
+
+
+    final url = Uri.parse('$baseUrl/utenti/$codiceGioco/ctx'); // Verifica il path col tuo amico, nell'API sembra puntare qui
+print("Chiamata a URL: $url");
+    try {
+      final response = await http.patch(
+        // Usiamo PATCH o POST in base a come è registrata la rotta
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'percorsoId': percorsoId, 'ctxId': ctxId}),
+      );
+
+      print("--- RISPOSTA SERVER ---");
+    print("Status Code: ${response.statusCode}");
+    print("Body Risposta: ${response.body}");
+
+      if (response.statusCode == 200) {
+        print("✅ ctxId aggiornato nel DB per il percorso $percorsoId");
+      } else {
+        print("⚠️ Errore aggiornamento ctxId: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Errore connessione updateCtxId: $e");
     }
   }
 }

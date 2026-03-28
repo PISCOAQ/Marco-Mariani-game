@@ -30,7 +30,7 @@ class QuizResult {
       double mediaReazione = dettaglioPagine.isNotEmpty ? sommaTempi / dettaglioPagine.length : 0;
 
       return {
-        'codiceGioco': codice,      // <--- AGGIUNTO: Obbligatorio per il controller di Jacopo
+        'codiceGioco': codice,     
         'testId': idQuiz,
         'nomeTest': titoloQuiz,
         'tipoTest': 'pre',          // Jacopo accetta solo 'pre' o 'post'

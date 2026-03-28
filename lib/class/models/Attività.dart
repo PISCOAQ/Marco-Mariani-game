@@ -66,11 +66,17 @@ class Quiz {
   final String id;
   final String titolo;
   final List<Pagina> pagine;
+  final String condizione;
+  final int valore;
+  final String idCondizioneSoddisfatta;
 
   Quiz({
     required this.id,
     required this.titolo,
     required this.pagine,
+    required this.condizione,
+    required this.valore,
+    required this.idCondizioneSoddisfatta
   });
 }
 
