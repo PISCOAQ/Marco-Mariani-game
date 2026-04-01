@@ -166,7 +166,7 @@ class _MapScreenState extends State<MapScreen> {
     // Usiamo il tuo loader modificato per accettare la Map
     final risultato = ActivityLoader.fromPolyGloT(jsonGrezzo);
 
-    if (_myGame.utente.Livello_Attuale > levelId) {
+    if (_myGame.utente.percorsoAttivo!.Livello_Attuale > levelId) {
       _mostraMessaggioAvviso("Sfida già completata!");
       return;
     }
@@ -371,7 +371,7 @@ Widget build(BuildContext context) {
                 _mostraSentieri = nuovoStato;
               });
               // Comunichiamo al gioco di aggiornare la visibilità dei layer
-              _myGame.aggiornaPercorsi(_myGame.utente.Livello_Attuale, mostrare: nuovoStato);
+              _myGame.aggiornaPercorsi(_myGame.utente.percorsoAttivo!.Livello_Attuale, mostrare: nuovoStato);
             },
             onExit: _toggleGuide,
           ), 

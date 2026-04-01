@@ -63,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final datiDb = await _apiService.getDatiUtente(code);
+      print("Dati DB: $datiDb");
       if (!mounted) return;
 
       setState(() {
@@ -95,11 +96,14 @@ void _onConfirmPressed() async {
     try {
       // Salvataggio sul DB
       await _apiService.updateProgressi(userCode, {
+          "percorsoId": currentUser!.percorsoAttivo!.flowId, // <--- OBBLIGATORIO
           "tipoAvatar": selectedAvatar,
           "lookAttuale": abiti,
           "inventario": abiti.map((k, v) => MapEntry(k, [v])),
-          "Livello_Attuale": currentUser!.Livello_Attuale, 
           "moneteNotifier": currentUser!.monete,
+          "Livello_Attuale": currentUser!.percorsoAttivo!.Livello_Attuale,
+          "PosizioneX": currentUser!.percorsoAttivo!.PosizioneX,
+          "PosizioneY": currentUser!.percorsoAttivo!.PosizioneY,
       });
 
       setState(() {
@@ -121,21 +125,29 @@ void _onConfirmPressed() async {
     }
   }
 
-  void _onPercorsoConfirmed() {
-    if (selectedPercorso != null) {
-      setState(() {
-        currentUser!.percorsoAttivo = selectedPercorso;
-        showPercorsoSelector = false;
+void _onPercorsoConfirmed() {
+  if (selectedPercorso != null) {
+    setState(() {
+      currentUser!.percorsoAttivo = selectedPercorso;
 
-        // Se non ha l'avatar, mostra il selettore avatar, altrimenti vai alla mappa
-        if (currentUser!.tipoAvatar == null) {
-          showAvatarSelector = true;
-        } else {
-          _goToMap();
-        }
-      });
-    }
+      final livello = selectedPercorso!.Livello_Attuale;
+      final pos = _positions[livello];
+
+      if (pos != null) {
+        selectedPercorso!.PosizioneX = pos.dx;
+        selectedPercorso!.PosizioneY = pos.dy;
+      }
+
+      showPercorsoSelector = false;
+
+      if (currentUser!.tipoAvatar == null) {
+        showAvatarSelector = true;
+      } else {
+        _goToMap();
+      }
+    });
   }
+}
 
   void _goToMap() {
     if (currentUser != null) {

@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class ApiService {
-  static final String baseUrl = dotenv.env['API_URL'] ?? "http://localhost:3000";
+  static final String baseUrl =dotenv.env['API_URL'] ?? "http://localhost:3000";
 
 
   Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {
@@ -36,15 +36,20 @@ class ApiService {
   // Metodo per salvare i progressi quando il bambino gioca
   Future<void> updateProgressi(String codiceGioco, Map<String, dynamic> progressi) async {
     final url = Uri.parse('$baseUrl/utenti/$codiceGioco/progressi');
-    
+
+    print("Body inviato: ${jsonEncode(progressi)}");
+
     try {
-      await http.patch(
+      final response = await http.patch(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(progressi),
       );
+
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.body}");
     } catch (e) {
-      print("Errore salvataggio: $e");
+      print("Errore: $e");
     }
   }
 

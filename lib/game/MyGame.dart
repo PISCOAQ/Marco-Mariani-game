@@ -128,7 +128,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
       final int levelId = int.tryParse(levelIdStr) ?? 1;
 
       // Se il livello del cancello è già stato sbloccato, non aggiungerlo
-      if (levelId <= utente.Livello_Attuale) continue;
+      if (levelId <= utente.percorsoAttivo!.Livello_Attuale) continue;
 
       final gate = GateComponent(
         position: Vector2(obj.x, obj.y),
@@ -141,7 +141,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
 
     player = Player(
       avatarIndex: utente.tipoAvatar!,
-      position: Vector2(utente.PosizioneX, utente.PosizioneY),
+      position: Vector2(utente.percorsoAttivo!.PosizioneX, utente.percorsoAttivo!.PosizioneY),
       utente: utente,
     );
     world.add(player);
@@ -159,7 +159,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
     }
 
     // 9. SINCRONIZZAZIONE PERCORSI LUMINOSI
-    aggiornaPercorsi(utente.Livello_Attuale);
+    aggiornaPercorsi(utente.percorsoAttivo!.Livello_Attuale);
 
     // 10. CAMERA
     camera.viewfinder.zoom = 2.0;
@@ -183,14 +183,14 @@ void unlockLevel(String levelId) {
         
         // Se l'utente ha raggiunto il livello del cancello (o lo ha superato), 
         // il cancello deve sparire.
-        if (idCancello <= utente.Livello_Attuale) {
+        if (idCancello <= utente.percorsoAttivo!.Livello_Attuale) {
           gate.removeFromParent(); // Rimuove fisicamente il componente dal gioco
           return true; // Rimuove il riferimento dalla lista _activeGates
         }
         return false;
       });
       // Mostra i percorsi grafici corrispondenti al livello attuale.
-      aggiornaPercorsi(utente.Livello_Attuale);
+      aggiornaPercorsi(utente.percorsoAttivo!.Livello_Attuale);
       
       // Trigger per l'animazione di Level Up nella UI
       onLevelUnlocked();

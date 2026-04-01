@@ -23,7 +23,7 @@ class BaglioreCartello extends PositionComponent with HasGameRef<MyGame> {
   @override
   void render(Canvas canvas) {
     // Ritorno alla logica lineare standard
-    if (levelId != game.utente.Livello_Attuale - 1) return;
+    if (levelId != game.utente.percorsoAttivo!.Livello_Attuale - 1) return;
 
     double t = DateTime.now().millisecondsSinceEpoch / 1000; 
     double pulse = 0.4 + (math.sin(t * 2.6) * 0.4); 

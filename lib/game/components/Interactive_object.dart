@@ -55,7 +55,7 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks, HasGa
       ),
     );
 
-    if (game.utente.Livello_Attuale > levelId) {
+    if (game.utente.percorsoAttivo!.Livello_Attuale > levelId) {
       indicator.opacity = 0.0;
     } else {
       indicator.opacity = 1.0;
@@ -70,7 +70,7 @@ class InteractiveObject extends PositionComponent with CollisionCallbacks, HasGa
 
     // --- LOGICA AGGIORNATA ---
     // Controlliamo costantemente se l'icona deve sparire perché il livello è stato superato
-    if (game.utente.Livello_Attuale > levelId) {
+    if (game.utente.percorsoAttivo!.Livello_Attuale > levelId) {
       if (indicator.opacity != 0.0) indicator.opacity = 0.0;
     } else {
       if (indicator.opacity != 1.0) indicator.opacity = 1.0;
