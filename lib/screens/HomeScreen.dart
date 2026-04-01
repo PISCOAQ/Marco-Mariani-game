@@ -102,8 +102,6 @@ void _onConfirmPressed() async {
           "inventario": abiti.map((k, v) => MapEntry(k, [v])),
           "moneteNotifier": currentUser!.monete,
           "Livello_Attuale": currentUser!.percorsoAttivo!.Livello_Attuale,
-          "PosizioneX": currentUser!.percorsoAttivo!.PosizioneX,
-          "PosizioneY": currentUser!.percorsoAttivo!.PosizioneY,
       });
 
       setState(() {
@@ -125,29 +123,21 @@ void _onConfirmPressed() async {
     }
   }
 
-void _onPercorsoConfirmed() {
-  if (selectedPercorso != null) {
-    setState(() {
-      currentUser!.percorsoAttivo = selectedPercorso;
+  void _onPercorsoConfirmed() {
+    if (selectedPercorso != null) {
+      setState(() {
+        currentUser!.percorsoAttivo = selectedPercorso;
 
-      final livello = selectedPercorso!.Livello_Attuale;
-      final pos = _positions[livello];
+        showPercorsoSelector = false;
 
-      if (pos != null) {
-        selectedPercorso!.PosizioneX = pos.dx;
-        selectedPercorso!.PosizioneY = pos.dy;
-      }
-
-      showPercorsoSelector = false;
-
-      if (currentUser!.tipoAvatar == null) {
-        showAvatarSelector = true;
-      } else {
-        _goToMap();
-      }
-    });
+        if (currentUser!.tipoAvatar == null) {
+          showAvatarSelector = true;
+        } else {
+          _goToMap();
+        }
+      });
+    }
   }
-}
 
   void _goToMap() {
     if (currentUser != null) {

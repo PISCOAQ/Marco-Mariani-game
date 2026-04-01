@@ -29,8 +29,6 @@ class UtenteRepository {
       // Inviamo i dati piatti come vuole il nuovo backend
       _sync({
         "Livello_Attuale": nuovoLivello,
-        "PosizioneX": utente.percorsoAttivo!.PosizioneX,
-        "PosizioneY": utente.percorsoAttivo!.PosizioneY,
       });
     }
   }
@@ -40,18 +38,6 @@ class UtenteRepository {
     // Usiamo .value perché il tuo modello usa ValueNotifier
     utente.moneteNotifier.value += quantita; 
     _sync({"moneteNotifier": utente.moneteNotifier.value});
-  }
-
-  // --- AGGIORNAMENTO POSIZIONE ---
-  void salvaPosizione(double x, double y) {
-    if (utente.percorsoAttivo == null) return;
-    utente.percorsoAttivo!.PosizioneX = x;
-    utente.percorsoAttivo!.PosizioneY = y;
-
-    _sync({
-      "PosizioneX": x,
-      "PosizioneY": y,
-    });
   }
 
   // --- AGGIORNAMENTO INVENTARIO ---

@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class ApiService {
-  static final String baseUrl =dotenv.env['API_URL'] ?? "http://localhost:3000";
+  static final String baseUrl ="http://localhost:3000";
 
 
   Future<Map<String, dynamic>> getDatiUtente(String codiceGioco) async {

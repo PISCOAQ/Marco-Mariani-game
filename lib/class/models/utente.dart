@@ -33,10 +33,12 @@ class Utente {
         .map((p) => Percorso.fromMap(p))
         .toList();
 
+    int monete = data['moneteNotifier'];
+    if(monete == 0) monete = 50; //valore di default
     return Utente(
       codiceGioco: code,
       tipoAvatar: data['tipoAvatar'],
-      Monete: data['moneteNotifier'] ?? 0,
+      Monete: monete,
       lookIniziale: Map<String, String>.from(data['lookAttuale'] ?? {}),
       inventarioIniziale: Map<String, List<String>>.from(
         (data['inventario'] ?? {}).map(

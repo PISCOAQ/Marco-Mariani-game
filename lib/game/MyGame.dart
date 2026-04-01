@@ -8,6 +8,7 @@ import 'package:gioco_demo/class/models/SensorLevel.dart';
 import 'package:gioco_demo/class/models/gateComponent.dart';
 import 'package:gioco_demo/class/models/utente.dart';
 import 'package:gioco_demo/class/repository/utente_repository.dart';
+import 'package:gioco_demo/class/services/position_loader.dart';
 import 'package:gioco_demo/game/components/chest.dart';
 import 'package:gioco_demo/game/components/Interactive_object.dart';
 import 'package:gioco_demo/widgets/LuceCartello.dart';
@@ -29,6 +30,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   final ProgressCallback onProgress;
   final List<GateComponent> _activeGates = [];
   late final UtenteRepository repository;
+  final PositionService _positionService = PositionService();
 
   late Player player;
   late TiledComponent mapComponent;
@@ -52,6 +54,8 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   Future<void> onLoad() async {
     onProgress(0.1);
     await super.onLoad();
+
+    await _positionService.loadFile();
 
     // 1. CARICAMENTO MAPPE
     mapComponent = await TiledComponent.load('game_map_Copia.tmx', Vector2.all(32));
@@ -139,9 +143,16 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
       world.add(gate);
     }
 
+
+    //7. creazione e posizionamento AVATAR
+    final int livelloCorrente = utente.percorsoAttivo!.Livello_Attuale;
+    print(_positionService.getCoord(livelloCorrente, 'x'));
     player = Player(
       avatarIndex: utente.tipoAvatar!,
-      position: Vector2(utente.percorsoAttivo!.PosizioneX, utente.percorsoAttivo!.PosizioneY),
+      position: Vector2(
+        _positionService.getCoord(livelloCorrente, 'x'), 
+        _positionService.getCoord(livelloCorrente, 'y')
+      ),
       utente: utente,
     );
     world.add(player);
