@@ -121,6 +121,14 @@ class ActivityLoader {
         for (var item in items) {
           final List<dynamic> sections = item['sections'] ?? [];
           for (var s in sections) {
+            // 1. Estraiamo i testi delle risposte correttamente dal JSON annidato
+            final List<dynamic> answersRaw = s['answers'] ?? [];
+            List<String> opzioni = answersRaw.map((a) => a['text'].toString()).toList();
+
+            // 2. Estraiamo gli indici corretti in modo sicuro
+            final List<dynamic> correctIdxRaw = s['correctIndexes'] ?? [];
+            List<int> correctIndices = correctIdxRaw.map((e) => int.parse(e.toString())).toList();
+
             listaPagine.add(SituazioniSociali(
               narrazione_before: s['before'],
               bold: s['bold'] ?? "",
@@ -128,8 +136,9 @@ class ActivityLoader {
               lista_domande: [
                 Domanda(
                   testo: "Scegli l'opzione corretta:",
-                  opzioni: List<String>.from(s['answers'] ?? []),
-                  correct_index: List<int>.from(s['correctIndexes'] ?? []), // Logica indici (lista)
+                  opzioni: opzioni,
+                  // ATTENZIONE: se la tua classe Domanda vuole un int singolo, usa correctIndices.first
+                  correct_index: correctIndices, 
                   risposte_corrette: null,
                 )
               ],

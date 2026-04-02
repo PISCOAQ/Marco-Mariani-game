@@ -249,25 +249,24 @@ class _MapScreenState extends State<MapScreen> {
         _ultimoRisultato = esito;
         _isResultPopupActive = true;
 
+        // 1. Diamo le monete (Logica esistente)
         _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
 
-        if (esito.superato) {
-          if (_levelInCorso != null) {
-            int livelloDaSbloccare = _levelInCorso! + 1;
-            if(_attivitaCaricata is Quiz){
-              final quiz = _attivitaCaricata as Quiz;
-              final ctxId = widget.utente.percorsoAttivo!.ctxId!; // Recuperiamo l'ID corrente
+        // 2. Se il quiz è superato, sblocchiamo il livello sulla mappa
+        if (esito.superato && _levelInCorso != null) {
+          int livelloDaSbloccare = _levelInCorso! + 1;
+          _myGame.repository.aggiornaLivello(livelloDaSbloccare);
+          _myGame.unlockLevel(livelloDaSbloccare.toString());
+        }
 
-              _polyglotService.nextCall([quiz.idCondizioneSoddisfatta]).then((_) {
-                // Passiamo l'id corrente anche ad actualCall per scaricare il nuovo nodo
-                _polyglotService.actualCall(ctxId);
-              });
-            }
-
-            // Aggiornamento locale (DB e Mappa)
-            _myGame.repository.aggiornaLivello(livelloDaSbloccare);
-            _myGame.unlockLevel(livelloDaSbloccare.toString());
-          }
+        // 3. IL SEGRETO: Aggiorniamo i dati di Polyglot per il PROSSIMO nodo
+        // Facciamo l'actualCall qui, così quando l'utente clicca sul prossimo
+        // livello, i dati nel Service sono già quelli nuovi.
+        final ctxId = widget.utente.percorsoAttivo!.ctxId;
+        if (ctxId != null) {
+          _polyglotService.actualCall(ctxId).then((_) {
+            print("✅ Dati del prossimo nodo scaricati con successo!");
+          });
         }
       }
     });
@@ -389,6 +388,7 @@ Widget build(BuildContext context) {
             onExit: _closePage,
             attivita: _attivitaCaricata,
             tentativoAttuale: _tentativiQuiz[_attivitaCaricata.titolo] ?? 1,
+            polyglotService: _polyglotService,
             codiceGioco: widget.utente.codiceGioco,
           ),
         

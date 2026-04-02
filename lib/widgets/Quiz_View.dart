@@ -4,6 +4,7 @@ import 'package:gioco_demo/class/logic/valutazione_quiz/tempo_reazione.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Manager.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
+import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/widgets/eyes_task_view.dart';
 import 'package:gioco_demo/widgets/passo_falso_view.dart';
 import 'package:gioco_demo/widgets/situazioni_sociali_view.dart';
@@ -17,12 +18,14 @@ class QuizView extends StatefulWidget {
   final Function(QuizResult esitoQuiz) onConsegna;
   final Function(bool isComplete)? onStatusChanged;
   final VoidCallback? onPageChanged; 
+  final PolyglotService polyService;
 
   const QuizView({
     super.key,
     required this.quiz,
     required this.tentativoQuiz,
     required this.codiceGioco,
+    required this.polyService,
     required this.onConsegna,
     this.onStatusChanged,
     this.onPageChanged, 
@@ -253,17 +256,30 @@ Widget build(BuildContext context) {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               onPressed: () async {
-                // Chiamiamo il manager passando direttamente la mappa con tempi e distanze
+                // 1. Calcoli il risultato (GIÀ PRESENTE)
                 QuizResult risultato = await QuizManager.valutaQuiz(
                   widget.quiz, 
                   _risposteQuiz, 
                   widget.codiceGioco
                 );
 
-                Navigator.pop(context); // Chiude il dialog
-                FocusScope.of(context).unfocus(); // Chiude la tastiera
+                // --- AGGIUNTA POLYGLOT DA QUI ---
+                // 2. Recuperiamo le regole che PolyglotService ha scaricato all'inizio
+                final regole = widget.polyService.lastRawResponse?['validation'];
                 
-                // Invia il risultato finale
+                // 3. Troviamo l'ID della freccia corrispondente al punteggio ottenuto
+                String? idStrada = QuizManager.identificaRegolaSoddisfatta(risultato.corrette, regole);
+                
+                // 4. Inviamo l'ID a Polyglot per far avanzare il grafo
+                if (idStrada != null) {
+                  await widget.polyService.nextCall([idStrada]);
+                } else {
+                  await widget.polyService.nextCall([]); // Manda vuoto se non ci sono match
+                }
+                // --- FINE AGGIUNTA ---
+
+                Navigator.pop(context); 
+                FocusScope.of(context).unfocus(); 
                 widget.onConsegna(risultato);
               },
               child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),

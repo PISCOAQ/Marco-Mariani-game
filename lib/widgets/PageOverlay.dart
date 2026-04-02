@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
+import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/widgets/Quiz_View.dart';
 
 class PageOverlay extends StatefulWidget {
@@ -8,13 +9,15 @@ class PageOverlay extends StatefulWidget {
   final dynamic attivita;
   final int tentativoAttuale;
   final String codiceGioco;
+  final PolyglotService polyglotService;
 
   const PageOverlay({
     super.key,
     required this.onExit,
     required this.attivita,
     required this.tentativoAttuale,
-    required this.codiceGioco
+    required this.codiceGioco,
+    required this.polyglotService
   });
 
   @override
@@ -136,6 +139,7 @@ Widget _buildNavigationFooter() {
         quiz: widget.attivita,
         tentativoQuiz: widget.tentativoAttuale,
         codiceGioco: widget.codiceGioco,
+        polyService: widget.polyglotService,
         onStatusChanged: _updateCompletionStatus,
         onPageChanged: _forceRefresh, // <--- PASSIAMO IL REFRESH QUI
         onConsegna: (QuizResult esito) => widget.onExit(esito),

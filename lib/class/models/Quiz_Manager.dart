@@ -128,4 +128,29 @@ static Future<QuizResult> valutaQuiz(dynamic quiz, Map<int, List<Map<String, dyn
     default:   return corrette >= soglia; // Fallback sicuro
   }
 }
+
+
+static String? identificaRegolaSoddisfatta(int punteggio, List<dynamic>? regole) {
+    if (regole == null || regole.isEmpty) return null;
+
+    for (var regola in regole) {
+      final data = regola['data'];
+      if (data == null) continue;
+
+      final String op = data['operator'];
+      final int soglia = (data['threshold'] as num).toInt();
+
+      bool soddisfatta = false;
+      switch (op) {
+        case '==': soddisfatta = (punteggio == soglia); break;
+        case '<=': soddisfatta = (punteggio <= soglia); break;
+        case '>=': soddisfatta = (punteggio >= soglia); break;
+        case '<':  soddisfatta = (punteggio < soglia); break;
+        case '>':  soddisfatta = (punteggio > soglia); break;
+      }
+
+      if (soddisfatta) return regola['id']; 
+    }
+    return null;
+  }
 }

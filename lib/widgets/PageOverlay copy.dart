@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
+import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/widgets/Quiz_View.dart';
 
 class PageOverlayEsercitazioni extends StatelessWidget {
@@ -8,12 +9,14 @@ class PageOverlayEsercitazioni extends StatelessWidget {
   final dynamic attivita; // Riceve l'oggetto Quiz o Esercitazione
   final int tentativoAttuale;
   final String codiceGioco;
+  final PolyglotService polyglotService;
 
   const PageOverlayEsercitazioni({super.key, 
     required this.onExit, 
     required this.attivita,
     required this.tentativoAttuale,
-    required this.codiceGioco
+    required this.codiceGioco,
+    required this.polyglotService,
     });
 
   @override
@@ -65,6 +68,7 @@ class PageOverlayEsercitazioni extends StatelessWidget {
         quiz: attivita, 
         tentativoQuiz: tentativoAttuale, 
         codiceGioco: codiceGioco,
+        polyService: polyglotService,
         onConsegna: (QuizResult esito){
           onExit(esito);
         }
