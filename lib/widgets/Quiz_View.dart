@@ -42,6 +42,8 @@ class QuizViewState extends State<QuizView> {
   final MouseTracker _mouseTracker = MouseTracker();
 
   final Map<int, List<Map<String, dynamic>>> _risposteQuiz = {};
+
+  bool _isLoading = false;
   
 
   @override
@@ -242,53 +244,77 @@ Widget build(BuildContext context) {
     }
 
     // 2. Se è completo, mostriamo il dialog di conferma reale
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Conferma Consegna"),
-          content: const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              onPressed: () async {
-                // 1. Calcoli il risultato (GIÀ PRESENTE)
-                QuizResult risultato = await QuizManager.valutaQuiz(
-                  widget.quiz, 
-                  _risposteQuiz, 
-                  widget.codiceGioco
-                );
+   showDialog(
+    context: context,
+    barrierDismissible: !_isLoading, // Impedisce di chiudere il dialog se sta caricando
+    builder: (BuildContext context) {
+      // Lo StatefulBuilder serve per aggiornare la UI dentro il dialog
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Conferma Consegna"),
+            content: _isLoading 
+              ? const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 15),
+                    Text("Invio risultati in corso..."),
+                  ],
+                )
+              : const Text("Sei sicuro di voler consegnare il quiz? Non potrai più modificare le tue risposte."),
+            actions: _isLoading 
+              ? [] // Nascondi i tasti durante il caricamento
+              : [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("ANNULLA", style: TextStyle(color: Colors.grey)),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    onPressed: () async {
+                      // 1. Attiva il caricamento
+                      setDialogState(() => _isLoading = true);
 
-                // --- AGGIUNTA POLYGLOT DA QUI ---
-                // 2. Recuperiamo le regole che PolyglotService ha scaricato all'inizio
-                final regole = widget.polyService.lastRawResponse?['validation'];
-                
-                // 3. Troviamo l'ID della freccia corrispondente al punteggio ottenuto
-                String? idStrada = QuizManager.identificaRegolaSoddisfatta(risultato.corrette, regole);
-                
-                // 4. Inviamo l'ID a Polyglot per far avanzare il grafo
-                if (idStrada != null) {
-                  await widget.polyService.nextCall([idStrada]);
-                } else {
-                  await widget.polyService.nextCall([]); // Manda vuoto se non ci sono match
-                }
-                // --- FINE AGGIUNTA ---
+                      try {
+                        // 2. Esegui i calcoli
+                        QuizResult risultato = await QuizManager.valutaQuiz(
+                          widget.quiz, 
+                          _risposteQuiz, 
+                          widget.codiceGioco
+                        );
 
-                Navigator.pop(context); 
-                FocusScope.of(context).unfocus(); 
-                widget.onConsegna(risultato);
-              },
-              child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
+                        // 3. Gestione Polyglot
+                        final regole = widget.polyService.lastRawResponse?['validation'];
+                        String? idStrada = QuizManager.identificaRegolaSoddisfatta(risultato.corrette, regole);
+                        
+                        if (idStrada != null) {
+                          await widget.polyService.nextCall([idStrada]);
+                        } else {
+                          await widget.polyService.nextCall([]);
+                        }
+
+                        // 4. Chiudi e procedi
+                        if (context.mounted) {
+                          Navigator.pop(context); // Chiude il Dialog
+                          widget.onConsegna(risultato);
+                        }
+                      } catch (e) {
+                        // Gestione errore: ripristina i tasti per riprovare
+                        setDialogState(() => _isLoading = false);
+                        print("Errore durante l'invio: $e");
+                      } finally {
+                        _isLoading = false; // Reset per utilizzi futuri
+                      }
+                    },
+                    child: const Text("CONSEGNA", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+          );
+        },
+      );
+    },
+  );
   }
-
 }
 

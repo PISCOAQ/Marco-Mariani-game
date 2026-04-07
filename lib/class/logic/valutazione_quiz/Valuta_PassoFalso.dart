@@ -6,18 +6,26 @@ EsitoPagina calcolaPassoFalso(PassoFalso pagina, List<String> risposte) {
 
   for (int i = 0; i < pagina.lista_domande.length; i++) {
     var domanda = pagina.lista_domande[i];
-    String rispostaUtente = (risposte.length > i ? risposte[i] : "").trim().toLowerCase();
+    String rispostaUtente = (risposte.length > i ? risposte[i] : "").trim();
 
     bool corretta = false;
-    if (domanda.risposte_corrette != null) {
+
+    // Controllo basato su correct_index (indici 0, 1, 2...)
+    if (domanda.correct_index != null && domanda.correct_index!.isNotEmpty) {
+      // Le risposte salvate dalla UI sono solitamente stringhe dell'indice "0", "1"
+      // Quindi confrontiamo la stringa passata con l'indice nel modello
+      corretta = domanda.correct_index!.any((idx) => idx.toString() == rispostaUtente);
+    } 
+    // Fallback se invece usassi risposte testuali
+    else if (domanda.risposte_corrette != null) {
       corretta = domanda.risposte_corrette!
           .map((r) => r.toString().trim().toLowerCase())
-          .contains(rispostaUtente);
+          .contains(rispostaUtente.toLowerCase());
     }
+
     esiti.add(corretta);
   }
 
-  // REGOLA: Pagina superata solo se TUTTE le risposte sono corrette
   bool tuttoCorretto = esiti.isNotEmpty && esiti.every((e) => e == true);
 
   return EsitoPagina(
