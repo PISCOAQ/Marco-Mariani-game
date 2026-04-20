@@ -119,31 +119,33 @@ class ActivityLoader {
       case 'socialSituationsNode':
         final List<dynamic> items = data['data']['items'] ?? [];
         for (var item in items) {
-          final List<dynamic> sections = item['sections'] ?? [];
-          for (var s in sections) {
-            // 1. Estraiamo i testi delle risposte correttamente dal JSON annidato
-            final List<dynamic> answersRaw = s['answers'] ?? [];
-            List<String> opzioni = answersRaw.map((a) => a['text'].toString()).toList();
+          final List<dynamic> sectionsRaw = item['sections'] ?? [];
+          
+          List<SezioneSociale> sezioniDellaPagina = [];
+          List<Domanda> domandeDellaPagina = [];
 
-            // 2. Estraiamo gli indici corretti in modo sicuro
-            final List<dynamic> correctIdxRaw = s['correctIndexes'] ?? [];
-            List<int> correctIndices = correctIdxRaw.map((e) => int.parse(e.toString())).toList();
+          for (var s in sectionsRaw) {
+            // Creiamo la domanda per questa sezione
+            Domanda d = Domanda(
+              testo: "Scegli l'opzione corretta:",
+              opzioni: (s['answers'] as List).map((a) => a['text'].toString()).toList(),
+              correct_index: List<int>.from(s['correctIndexes'] ?? []),
+            );
 
-            listaPagine.add(SituazioniSociali(
-              narrazione_before: s['before'],
+            domandeDellaPagina.add(d);
+            sezioniDellaPagina.add(SezioneSociale(
+              before: s['before'],
               bold: s['bold'] ?? "",
-              narrazione_after: s['after'],
-              lista_domande: [
-                Domanda(
-                  testo: "Scegli l'opzione corretta:",
-                  opzioni: opzioni,
-                  // ATTENZIONE: se la tua classe Domanda vuole un int singolo, usa correctIndices.first
-                  correct_index: correctIndices, 
-                  risposte_corrette: null,
-                )
-              ],
+              after: s['after'],
+              domanda: d,
             ));
           }
+
+          // AGGIUNGIAMO UNA SOLA PAGINA PER OGNI ITEM
+          listaPagine.add(SituazioniSociali(
+            sezioni: sezioniDellaPagina,
+            lista_domande: domandeDellaPagina,
+          ));
         }
         break;
 

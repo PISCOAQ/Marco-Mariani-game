@@ -8,6 +8,7 @@ import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/game/MyGame.dart';
 import 'package:gioco_demo/widgets/ChestPage.dart';
+import 'package:gioco_demo/widgets/End_GameNotification.dart';
 import 'package:gioco_demo/widgets/GameNotification.dart';
 import 'package:gioco_demo/widgets/Gameloading_screen.dart';
 import 'package:gioco_demo/widgets/MoneyWidget.dart';
@@ -35,6 +36,7 @@ class _MapScreenState extends State<MapScreen> {
   dynamic _attivitaCaricata;
   bool _isGuideOpen = false;
   bool _mostraSentieri = true;
+  bool _isEndGameActive = false;
   int? _levelInCorso;
   final Map<String, int> _tentativiQuiz = {};
 
@@ -248,24 +250,29 @@ class _MapScreenState extends State<MapScreen> {
       if (esito is QuizResult) {
         _ultimoRisultato = esito;
         _isResultPopupActive = true;
-
+        
+        
         // 1. Diamo le monete (Logica esistente)
         _myGame.repository.aggiungiMonete(esito.moneteGuadagnate);
 
         // 2. Se il quiz è superato, sblocchiamo il livello sulla mappa
-        if (esito.superato && _levelInCorso != null) {
-          int livelloDaSbloccare = _levelInCorso! + 1;
-          _myGame.repository.aggiornaLivello(livelloDaSbloccare);
-          _myGame.unlockLevel(livelloDaSbloccare.toString());
-        }
+        if(esito.isQuizFinale != true){
+          if (esito.superato && _levelInCorso != null) {
+            int livelloDaSbloccare = _levelInCorso! + 1;
+            _myGame.repository.aggiornaLivello(livelloDaSbloccare);
+            _myGame.unlockLevel(livelloDaSbloccare.toString());
+          }
 
-        // 3. IL SEGRETO: Aggiorniamo i dati di Polyglot per il PROSSIMO nodo
-        // Facciamo l'actualCall qui, così quando l'utente clicca sul prossimo
-        // livello, i dati nel Service sono già quelli nuovi.
-        final ctxId = widget.utente.percorsoAttivo!.ctxId;
-        if (ctxId != null) {
-          _polyglotService.actualCall(ctxId).then((_) {
-            print("✅ Dati del prossimo nodo scaricati con successo!");
+          // Facciamo l'actualCall qui, così quando l'utente clicca sul prossimo livello, i dati nel Service sono già quelli nuovi.
+          final ctxId = widget.utente.percorsoAttivo!.ctxId;
+          if (ctxId != null) {
+            _polyglotService.actualCall(ctxId).then((_) {
+              print("✅ Dati del prossimo nodo scaricati con successo!");
+            });
+          }
+        }else{
+          setState(() {
+            _isEndGameActive = true;
           });
         }
       }
@@ -392,7 +399,7 @@ Widget build(BuildContext context) {
             codiceGioco: widget.utente.codiceGioco,
           ),
         
-        if (_isResultPopupActive && _ultimoRisultato != null)
+        if (_isResultPopupActive && _ultimoRisultato != null && _isEndGameActive != true)
           Container(
             color: Colors.black45, // Oscuriamo leggermente lo sfondo per focalizzare l'attenzione
             child: RiepilogoNotification(
@@ -408,6 +415,27 @@ Widget build(BuildContext context) {
             game: _myGame,
             onExit: _CloseChestPage,
           ),
+        
+
+        if (_isEndGameActive)
+        Container(
+          color: Colors.black45,
+          child: EndGamenotification(
+            game: _myGame,
+            onClose: () {
+              // 1. Fermiamo il motore di gioco per sicurezza
+              _myGame.pauseEngine();
+              _myGame.detach(); 
+
+              // 2. Torniamo alla Home rimuovendo tutte le rotte precedenti
+              // Sostituisci '/' con il nome della tua rotta home o con il widget della Home
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/', // La rotta definita nel tuo MaterialApp
+                (route) => false, // Questo rimuove TUTTE le pagine dallo stack
+              );
+            },
+          ),
+        ),
 
         // 6. L'ANIMAZIONE DI LIVELLO (DEVE ESSERE L'ULTIMA PER STARE SOPRA)
         ValueListenableBuilder<bool>(

@@ -5,7 +5,7 @@ import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/widgets/Quiz_View.dart';
 
 class PageOverlayEsercitazioni extends StatelessWidget {
-  final Function(dynamic esitoQuiz) onExit;
+  final Function(dynamic esitoQuiz, {bool isEndGame}) onExit;
   final dynamic attivita; // Riceve l'oggetto Quiz o Esercitazione
   final int tentativoAttuale;
   final String codiceGioco;

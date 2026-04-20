@@ -5,6 +5,7 @@ import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/models/Quiz_Manager.dart';
 import 'package:gioco_demo/class/models/Quiz_Results.dart';
 import 'package:gioco_demo/class/services/Polyglot_service.dart';
+import 'package:gioco_demo/widgets/End_GameNotification.dart';
 import 'package:gioco_demo/widgets/eyes_task_view.dart';
 import 'package:gioco_demo/widgets/passo_falso_view.dart';
 import 'package:gioco_demo/widgets/situazioni_sociali_view.dart';
@@ -287,11 +288,11 @@ Widget build(BuildContext context) {
                         // 3. Gestione Polyglot
                         final regole = widget.polyService.lastRawResponse?['validation'];
                         String? idStrada = QuizManager.identificaRegolaSoddisfatta(risultato.corrette, regole);
-                        
+                        print(idStrada);
                         if (idStrada != null) {
                           await widget.polyService.nextCall([idStrada]);
                         } else {
-                          await widget.polyService.nextCall([]);
+                          risultato.isQuizFinale = true;
                         }
 
                         // 4. Chiudi e procedi

@@ -36,18 +36,22 @@ class TeoriaDellaMente extends Pagina {
   });
 }
 
-
 class SituazioniSociali extends Pagina {
-  final String? narrazione_before;
-  final String bold;
-  final String? narrazione_after;
+  final List<SezioneSociale> sezioni;
 
   SituazioniSociali({
-    required super.lista_domande,
-    required this.narrazione_before,
-    required this.bold,
-    required this.narrazione_after,
-  });
+    required this.sezioni,
+    required List<Domanda> lista_domande,
+  }) : super(lista_domande: lista_domande);
+}
+
+class SezioneSociale {
+  final String? before;
+  final String bold;
+  final String? after;
+  final Domanda domanda;
+
+  SezioneSociale({this.before, required this.bold, this.after, required this.domanda});
 }
 
 class PassoFalso extends Pagina {

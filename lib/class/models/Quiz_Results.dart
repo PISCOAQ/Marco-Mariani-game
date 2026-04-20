@@ -6,6 +6,7 @@ class QuizResult {
   final int totali;   // Totale assoluto
   final int moneteGuadagnate;
   final List<Map<String, dynamic>> dettaglioPagine;
+  bool? isQuizFinale = false;
 
   QuizResult({
       required this.idQuiz,
@@ -15,6 +16,7 @@ class QuizResult {
       required this.totali,
       required this.moneteGuadagnate,
       required this.dettaglioPagine,
+      this.isQuizFinale,
     });
 
     // Aggiungiamo 'codice' come parametro alla funzione
