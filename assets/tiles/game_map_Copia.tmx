@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="73" nextobjectid="514">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="38" height="38" tilewidth="32" tileheight="32" infinite="0" nextlayerid="74" nextobjectid="518">
  <tileset firstgid="1" name="TX Tileset Grass" tilewidth="32" tileheight="32" tilecount="64" columns="8">
   <image source="../images/TX Tileset Grass.png" width="256" height="256"/>
  </tileset>
@@ -962,6 +962,18 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
   </layer>
+  <objectgroup id="73" name="collisioni_ponte">
+   <object id="514" x="719.909" y="379" width="31.6364" height="13.2727">
+    <properties>
+     <property name="attivo" type="bool" value="true"/>
+    </properties>
+   </object>
+   <object id="515" x="704.182" y="321.636" width="64" height="5.27273">
+    <properties>
+     <property name="attivo" type="bool" value="true"/>
+    </properties>
+   </object>
+  </objectgroup>
   <objectgroup id="43" name="collisioni">
    <object id="334" x="258.667" y="801.5" width="547.833" height="52.6667"/>
    <object id="335" x="800.045" y="817.181" width="6.54545" height="77.5909"/>

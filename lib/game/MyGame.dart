@@ -35,6 +35,7 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   late Player player;
   late TiledComponent mapComponent;
   late TiledComponent ponteComponent;
+  final List<Wall> _bridgeCollisions = [];
 
   bool _sentieriVisibili = true;
 
@@ -75,7 +76,15 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
       }
     }
 
-    // 4. COLLISIONI (Muri)
+    // Cerca il layer specifico "collisioni_ponte"
+    for (final obj in _getObjects('collisioni_ponte')) {
+      final bridgeWall = Wall(Vector2(obj.x, obj.y), Vector2(obj.width, obj.height));
+      bridgeWall.priority = 20;
+      _bridgeCollisions.add(bridgeWall);
+      world.add(bridgeWall);
+    }
+
+    //COLLISIONI (Muri)
     for (final obj in _getObjects('collisioni')) {
       world.add(Wall(Vector2(obj.x, obj.y), Vector2(obj.width, obj.height)));
     }
@@ -181,8 +190,21 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   }
 
   // --- METODI LOGICI ---
+  @override
+  void update(double dt) {
+    super.update(dt);
 
-void unlockLevel(String levelId) {
+    // DEBUG: Controlliamo se il gioco sa che siamo sul ponte
+    print("Piano attuale: ${player.currentFloor}"); 
+
+    bool deveEssereSolido = player.currentFloor == 2;
+
+    for (var muroPonte in _bridgeCollisions) {
+      muroPonte.setCollisionActive(deveEssereSolido);
+    }
+  }
+
+  void unlockLevel(String levelId) {
     final int? livelloRichiesto = int.tryParse(levelId);
     
     if (livelloRichiesto != null) {

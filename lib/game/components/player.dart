@@ -15,7 +15,7 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   final Set<LogicalKeyboardKey> _keysPressed = {};
   late Vector2 lastDelta;
 
-  int currentFloor = 1; // Di default iniziamo a terra
+  late int currentFloor; 
 
   final Utente utente;
 
@@ -40,7 +40,11 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   final Map<String, String?> currentLayerColor = {};
 
   Player({required this.avatarIndex, required Vector2 position, required this.utente})
-      : super(position: position, size: Vector2(64, 64), anchor: Anchor.center);
+      : super(position: position, size: Vector2(64, 64), anchor: Anchor.center) {
+    
+    // Inizializziamo il piano in base al livello attuale salvato nel DB/Utente
+    currentFloor = utente.percorsoAttivo?.Livello_Attuale ?? 1;
+  }
 
   @override
   Future<void> onLoad() async {
