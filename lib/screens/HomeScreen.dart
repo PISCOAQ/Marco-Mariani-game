@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final datiDb = await _apiService.getDatiUtente(code);
-      print("Dati DB: $datiDb");
+      //print("Dati DB: $datiDb");  mostra tutti i dati di tutti i percorsi
       if (!mounted) return;
 
       setState(() {

@@ -194,9 +194,6 @@ class MyGame extends FlameGame with HasCollisionDetection, HasKeyboardHandlerCom
   void update(double dt) {
     super.update(dt);
 
-    // DEBUG: Controlliamo se il gioco sa che siamo sul ponte
-    print("Piano attuale: ${player.currentFloor}"); 
-
     bool deveEssereSolido = player.currentFloor == 2;
 
     for (var muroPonte in _bridgeCollisions) {

@@ -53,6 +53,31 @@ class ApiService {
     }
   }
 
+  // Metodo per segnare un percorso come completato nel DB
+  Future<void> updateStatoPercorso(String codiceGioco, String percorsoId, bool stato) async {
+    // Usiamo la rotta "progressi" che hai già nel router
+    final url = Uri.parse('$baseUrl/utenti/$codiceGioco/progressi');
+    
+    try {
+      final response = await http.patch(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'percorsoId': percorsoId, // Serve al backend per trovare il percorso nell'array
+          'Completato': stato   
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print("✅ Stato percorso aggiornato con successo!");
+      } else {
+        print("⚠️ Errore aggiornamento: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Errore connessione updateStatoPercorso: $e");
+    }
+  }
+
 
   // Questa versione invia il JSON tecnico con i dati del quiz
   Future<void> uploadDatiJson(String codiceGioco, Map<String, dynamic> progressi) async {
@@ -115,13 +140,13 @@ class ApiService {
   ) async {
 
     print("--- DEBUG UPDATE CTX ---");
-  print("Codice Gioco: $codiceGioco");
-  print("Percorso ID (FlowID): $percorsoId");
-  print("Context ID (ctxId): $ctxId");
+    print("Codice Gioco: $codiceGioco");
+    print("Percorso ID (FlowID): $percorsoId");
+    print("Context ID (ctxId): $ctxId");
 
 
-    final url = Uri.parse('$baseUrl/utenti/$codiceGioco/ctx'); // Verifica il path col tuo amico, nell'API sembra puntare qui
-print("Chiamata a URL: $url");
+    final url = Uri.parse('$baseUrl/utenti/$codiceGioco/ctx'); 
+    print("Chiamata a URL: $url");
     try {
       final response = await http.patch(
         // Usiamo PATCH o POST in base a come è registrata la rotta

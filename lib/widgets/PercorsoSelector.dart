@@ -18,10 +18,33 @@ class PercorsoSelector extends StatelessWidget {
   });
 
   Widget _buildPercorsoTile(BuildContext context, Percorso percorso) {
-    final isSelected = selectedPercorso == percorso;
+    final bool isCompletato = percorso.stato;
+    final bool isSelected = selectedPercorso == percorso;
 
+    Color backgroundColor;
+    Color borderColor;
+    Color textColor;
+
+    if (isCompletato) {
+      // STATO: PERCORSO FINITO (Oscurato)
+      backgroundColor = Colors.black.withOpacity(0.4);
+      borderColor = Colors.white.withOpacity(0.2);;
+      textColor = Colors.white.withOpacity(0.5);
+    } else if (isSelected) {
+      // STATO: SELEZIONATO (Giallo)
+      backgroundColor = Colors.yellowAccent.withOpacity(0.3);
+      borderColor = Colors.yellowAccent;
+      textColor = Colors.white;
+    } else {
+      // STATO: DISPONIBILE MA NON SELEZIONATO (Bianco standard)
+      backgroundColor = Colors.white.withOpacity(0.1);
+      borderColor = Colors.white.withOpacity(0.5);
+      textColor = Colors.white;
+    }
+    
     return GestureDetector(
-      onTap: () => onPercorsoSelected(percorso),
+      // Se è completato non succede nulla, altrimenti si seleziona
+      onTap: isCompletato ? null : () => onPercorsoSelected(percorso),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         child: AnimatedContainer(
@@ -30,13 +53,12 @@ class PercorsoSelector extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: isSelected
-                ? Colors.yellowAccent.withOpacity(0.3)
-                : Colors.white.withOpacity(0.1),
-            border: isSelected
-                ? Border.all(color: Colors.yellowAccent, width: 4)
-                : Border.all(color: Colors.white.withOpacity(0.5), width: 1),
-            boxShadow: isSelected
+            color: backgroundColor,
+            border: Border.all(
+              color: borderColor, 
+              width: isSelected && !isCompletato ? 4 : 1,
+            ),
+            boxShadow: isSelected && !isCompletato
                 ? [
                     BoxShadow(
                       color: Colors.yellowAccent.withOpacity(0.5),
@@ -51,11 +73,11 @@ class PercorsoSelector extends StatelessWidget {
               percorso.nomePercorso,
               textAlign: TextAlign.center,
               style: TextStyle(
-                // Rimuoviamo il condizionale isSelected ? Colors.yellowAccent : Colors.white
-                color: Colors.white, 
+                color: textColor,
                 fontSize: 22,
-                // Manteniamo il grassetto extra se selezionato per dare comunque un feedback visivo
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                // Mettiamo la sbarra solo se è completato
+                decoration: isCompletato ? TextDecoration.lineThrough : null,
               ),
             ),
           ),

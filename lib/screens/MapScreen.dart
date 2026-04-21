@@ -267,12 +267,18 @@ class _MapScreenState extends State<MapScreen> {
           final ctxId = widget.utente.percorsoAttivo!.ctxId;
           if (ctxId != null) {
             _polyglotService.actualCall(ctxId).then((_) {
-              print("✅ Dati del prossimo nodo scaricati con successo!");
             });
           }
         }else{
           setState(() {
             _isEndGameActive = true;
+            _myGame.pauseEngine();
+            _apiService.updateStatoPercorso(
+              widget.utente.codiceGioco, 
+              _myGame.utente.percorsoAttivo!.flowId, 
+              true
+            );
+            
           });
         }
       }
@@ -423,14 +429,12 @@ Widget build(BuildContext context) {
           child: EndGamenotification(
             game: _myGame,
             onClose: () {
-              // 1. Fermiamo il motore di gioco per sicurezza
-              _myGame.pauseEngine();
               _myGame.detach(); 
 
               // 2. Torniamo alla Home rimuovendo tutte le rotte precedenti
               // Sostituisci '/' con il nome della tua rotta home o con il widget della Home
               Navigator.of(context).pushNamedAndRemoveUntil(
-                '/', // La rotta definita nel tuo MaterialApp
+                '/', // La rotta definita nel MaterialApp
                 (route) => false, // Questo rimuove TUTTE le pagine dallo stack
               );
             },
