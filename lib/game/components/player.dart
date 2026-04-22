@@ -13,17 +13,13 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   Vector2 velocity = Vector2.zero();
   final double speed = 110;
   final Set<LogicalKeyboardKey> _keysPressed = {};
+  Vector2 touchDirection = Vector2.zero();
   late Vector2 lastDelta;
-
   late int currentFloor; 
-
   final Utente utente;
-
   late final AvatarConfig avatarConfig;
-
   // Animazioni Corpo
   late SpriteAnimation walkRightAnimation, walkLeftAnimation, walkBackAnimation, walkAnimation, idleAnimation, walk;
-
   final int avatarIndex;
 
   Map<String, String?> currentLayers = {
@@ -111,12 +107,16 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
   @override
   void update(double dt) {
     super.update(dt);
-
+    
+    // Tastiera
     velocity.setZero();
-    if (_keysPressed.contains(LogicalKeyboardKey.arrowUp)) velocity.y = -1;
-    if (_keysPressed.contains(LogicalKeyboardKey.arrowDown)) velocity.y = 1;
-    if (_keysPressed.contains(LogicalKeyboardKey.arrowLeft)) velocity.x = -1;
-    if (_keysPressed.contains(LogicalKeyboardKey.arrowRight)) velocity.x = 1;
+    if (_keysPressed.contains(LogicalKeyboardKey.arrowUp)) velocity.y -= 1;
+    if (_keysPressed.contains(LogicalKeyboardKey.arrowDown)) velocity.y += 1;
+    if (_keysPressed.contains(LogicalKeyboardKey.arrowLeft)) velocity.x -= 1;
+    if (_keysPressed.contains(LogicalKeyboardKey.arrowRight)) velocity.x += 1;
+
+    // Touch 
+    velocity.add(touchDirection);
 
     if (velocity.length != 0) {
       velocity.normalize();
@@ -130,18 +130,27 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks, HasGameRe
       String suffix;
       SpriteAnimation? bodyAnim;
 
-      if (velocity.x < 0) {
-        suffix = 'left';
-        bodyAnim = walkLeftAnimation;
-      } else if (velocity.x > 0) {
-        suffix = 'right';
-        bodyAnim = walkRightAnimation;
-      } else if (velocity.y < 0) {
-        suffix = 'back';
-        bodyAnim = walkBackAnimation;
+      final absX = velocity.x.abs();
+      final absY = velocity.y.abs();
+
+      if (absX >= absY) {
+        // ORIZZONTALE vince anche in caso di parità
+        if (velocity.x > 0) {
+          suffix = 'right';
+          bodyAnim = walkRightAnimation;
+        } else {
+          suffix = 'left';
+          bodyAnim = walkLeftAnimation;
+        }
       } else {
-        suffix = 'front';
-        bodyAnim = walkAnimation;
+        // VERTICALE
+        if (velocity.y < 0) {
+          suffix = 'back';
+          bodyAnim = walkBackAnimation;
+        } else {
+          suffix = 'front';
+          bodyAnim = walkAnimation;
+        }
       }
 
       // Aggiorna corpo principale

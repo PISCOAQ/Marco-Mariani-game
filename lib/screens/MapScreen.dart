@@ -7,6 +7,7 @@ import 'package:gioco_demo/class/services/Activity_loader.dart';
 import 'package:gioco_demo/class/models/Attivit%C3%A0.dart';
 import 'package:gioco_demo/class/services/Polyglot_service.dart';
 import 'package:gioco_demo/game/MyGame.dart';
+import 'package:gioco_demo/game/input/virtualJoystick.dart';
 import 'package:gioco_demo/widgets/ChestPage.dart';
 import 'package:gioco_demo/widgets/End_GameNotification.dart';
 import 'package:gioco_demo/widgets/GameNotification.dart';
@@ -291,18 +292,18 @@ class _MapScreenState extends State<MapScreen> {
   }
 
 
-void _handleResultContinue() {
-  setState(() {
-    _isResultPopupActive = false;
-    _ultimoRisultato = null;
-  });
-}
-
-
+  void _handleResultContinue() {
+    setState(() {
+      _isResultPopupActive = false;
+      _ultimoRisultato = null;
+    });
+  }
 
   @override
 Widget build(BuildContext context) {
-  
+
+  bool isTouchDevice = MediaQuery.of(context).size.shortestSide < 600;
+
   return Scaffold(
     body: Stack(
       children: [
@@ -316,6 +317,16 @@ Widget build(BuildContext context) {
           },
         ),
 
+        if (isTouchDevice)
+          Positioned(
+            bottom: 30,
+            right: 30,
+            child: VirtualJoystick(
+              onDirectionChanged: (dir) {
+                _myGame.player.touchDirection = dir;
+              },
+            ),
+          ),
 
         Align(
           alignment: Alignment.topRight,
